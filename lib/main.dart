@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:paybis_com_shifts/screens/change_user_screen.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
-import 'package:paybis_com_shifts/screens/registration_screen.dart';
+import 'package:paybis_com_shifts/screens/register_user_screen.dart';
+import 'package:paybis_com_shifts/screens/settings_screen.dart';
 import 'package:paybis_com_shifts/screens/shifts_screen.dart';
 import 'package:paybis_com_shifts/screens/welcome_screen.dart';
 
@@ -21,6 +23,8 @@ class PBShifts extends StatelessWidget {
         ShiftScreen.id: (context) => ShiftScreen(),
         PersonalPanelScreen.id: (context) => PersonalPanelScreen(),
         ChangesLogScreen.id: (context) => ChangesLogScreen(),
+        SettingsScreen.id: (context) => SettingsScreen(),
+        ChangeUserScreen.id: (context) => ChangeUserScreen(),
       },
     );
   }

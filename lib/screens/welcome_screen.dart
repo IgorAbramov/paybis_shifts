@@ -1,9 +1,12 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:paybis_com_shifts/controller/db_controller.dart';
+import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/ui_parts/rounded_button.dart';
 
-import 'registration_screen.dart';
+final dbController = DBController();
+List<Employee> listWithEmployees = List<Employee>();
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'welcome_screen';
@@ -20,6 +23,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void initState() {
     super.initState();
+    dbController.getUsers(listWithEmployees);
     controller = AnimationController(
       duration: Duration(seconds: 1),
       vsync: this,
@@ -44,6 +48,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Hero(
                   tag: 'logo',
@@ -74,14 +80,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 Navigator.pushNamed(context, LoginScreen.id);
               },
             ),
-            RoundedButton(
-              color: Colors.blueAccent,
-              title: 'Register',
-              onPressed: () {
-                //Go to login screen.
-                Navigator.pushNamed(context, RegistrationScreen.id);
-              },
-            ),
+//            RoundedButton(
+//              color: Colors.blueAccent,
+//              title: 'Register',
+//              onPressed: () {
+//                //Go to login screen.
+//                Navigator.pushNamed(context, RegistrationScreen.id);
+//              },
+//            ),
           ],
         ),
       ),

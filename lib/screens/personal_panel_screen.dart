@@ -15,6 +15,9 @@ class _PersonalPanelScreenState extends State<PersonalPanelScreen> {
   int nightShiftsCountThisMonth = 0;
   int morningShiftsCountThisMonth = 0;
   int eveningShiftsCountThisMonth = 0;
+  double nightShiftHoursCountThisMonth = 0;
+  double morningShiftHoursCountThisMonth = 0;
+  double eveningShiftHoursCountThisMonth = 0;
   double salary = 0;
 
   void getAllPersonalData() {
@@ -52,7 +55,7 @@ class _PersonalPanelScreenState extends State<PersonalPanelScreen> {
           children: <Widget>[
             RichText(
               text: TextSpan(
-                text: 'Amount of shifts (0$selectedMonth.19): ',
+                text: 'Amount of shifts ($selectedMonth.19): ',
                 style: kPersonalPageDataTextStyle,
                 children: <TextSpan>[
                   TextSpan(
@@ -63,17 +66,17 @@ class _PersonalPanelScreenState extends State<PersonalPanelScreen> {
               ),
             ),
             Text(
-                'Amount of night shifts (0$selectedMonth.19): $nightShiftsCountThisMonth',
+                'Amount of night shifts ($selectedMonth.19): $nightShiftsCountThisMonth',
                 style: kPersonalPageDataTextStyle),
             Text(
-                'Amount of morning shifts (0$selectedMonth.19): $morningShiftsCountThisMonth',
+                'Amount of morning shifts ($selectedMonth.19): $morningShiftsCountThisMonth',
                 style: kPersonalPageDataTextStyle),
             Text(
-                'Amount of evening shifts (0$selectedMonth.19): $eveningShiftsCountThisMonth',
+                'Amount of evening shifts ($selectedMonth.19): $eveningShiftsCountThisMonth',
                 style: kPersonalPageDataTextStyle),
             RichText(
               text: TextSpan(
-                text: 'Salary (0$selectedMonth.19): ',
+                text: 'Salary ($selectedMonth.19): ',
                 style: kPersonalPageDataTextStyle,
                 children: <TextSpan>[
                   TextSpan(
@@ -208,10 +211,36 @@ class _PersonalPanelScreenState extends State<PersonalPanelScreen> {
     }
   }
 
+  calculateAmountOfHoursEveningShifts() {}
+
   calculateSalaryThisMonth() {
-    salary = ((eveningShiftsCountThisMonth + morningShiftsCountThisMonth) *
-            8 *
-            employee.salaryRegular) +
-        (nightShiftsCountThisMonth * 8 * employee.salaryNight);
+    print('printing position...');
+    print(employee.position);
+    if (employee.position == kJuniorSupport) {
+      salary = ((eveningShiftsCountThisMonth + morningShiftsCountThisMonth) *
+              8 *
+              kJuniorSupportSalary[0]) +
+          (nightShiftsCountThisMonth * 8 * kJuniorSupportSalary[1]);
+    } else if (employee.position == kMiddleSupport) {
+      salary = ((eveningShiftsCountThisMonth + morningShiftsCountThisMonth) *
+              8 *
+              kMiddleSupportSalary[0]) +
+          (nightShiftsCountThisMonth * 8 * kMiddleSupportSalary[1]);
+    } else if (employee.position == kSeniorSupport) {
+      salary = ((eveningShiftsCountThisMonth + morningShiftsCountThisMonth) *
+              8 *
+              kSeniorSupportSalary[0]) +
+          (nightShiftsCountThisMonth * 8 * kSeniorSupportSalary[1]);
+    } else if (employee.position == kAMLCertifiedSupport) {
+      salary = ((eveningShiftsCountThisMonth + morningShiftsCountThisMonth) *
+              8 *
+              kAMLCertifiedSupportSalary[0]) +
+          (nightShiftsCountThisMonth * 8 * kAMLCertifiedSupportSalary[1]);
+    } else if (employee.position == kTeamLeadSupport) {
+      salary = ((eveningShiftsCountThisMonth + morningShiftsCountThisMonth) *
+              8 *
+              kTeamLeadSupportSalary[0]) +
+          (nightShiftsCountThisMonth * 8 * kTeamLeadSupportSalary[1]);
+    }
   }
 }

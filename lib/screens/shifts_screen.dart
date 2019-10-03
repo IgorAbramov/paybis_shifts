@@ -1,3 +1,4 @@
+import 'dart:core';
 import 'dart:math';
 import 'dart:ui';
 
@@ -6,27 +7,33 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:paybis_com_shifts/constants.dart';
-import 'package:paybis_com_shifts/controller/db_controller.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
+import 'package:paybis_com_shifts/screens/welcome_screen.dart';
 
 import 'changes_log_screen.dart';
 import 'personal_panel_screen.dart';
+import 'settings_screen.dart';
 
 //TODO implement ability to show holidays
 //TODO Implement push notifications when shift is being changed or removed
 //TODO Implement the ability for employees to mark shifts in the future they are not able to attend
 //TODO Create calendar page with Vacations and Sick days for employees
-
-final _fireStore = Firestore.instance;
 FirebaseUser loggedInUser;
 DocumentSnapshot _currentDocument;
+String shiftDocIDContainer1ForShiftExchange;
+String shiftDocIDContainer2ForShiftExchange;
+int shiftNumberContainer1ForShiftExchange;
+int shiftNumberContainer2ForShiftExchange;
+String shiftHolderContainer1ForShiftExchange;
+String shiftHolderContainer2ForShiftExchange;
 int _beginMonthPadding = 0;
 DateTime _dateTime = DateTime.now();
 int selectedMonth = _dateTime.month;
 Employee employee;
+int workingHours;
 List<Day> daysWithShiftsForCountThisMonth = List<Day>();
 List<Day> daysWithShiftsForCountLastMonth = List<Day>();
-final dbController = DBController();
+final shiftsScaffoldKey = new GlobalKey<ScaffoldState>();
 
 class ShiftScreen extends StatefulWidget {
   static const String id = 'shifts_screen';
@@ -42,7 +49,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
       final user = await _auth.currentUser();
       if (user != null) {
         loggedInUser = user;
-        for (Employee emp in employees) {
+        for (Employee emp in listWithEmployees) {
           if (emp.email == loggedInUser.email) employee = emp;
         }
       }
@@ -54,37 +61,50 @@ class _ShiftScreenState extends State<ShiftScreen> {
   @override
   void initState() {
     super.initState();
-    print("InitState method invoked");
+//    print("InitState method invoked");
     getCurrentUser();
-    dbController.getDays();
   }
 
   @override
   void reassemble() {
     super.reassemble();
-    print("Reassemble method invoked");
+//    print("Reassemble method invoked");
     daysWithShiftsForCountThisMonth.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     daysWithShiftsForCountThisMonth.clear();
-    print("Parent build method invoked");
+//    print("Parent build method invoked");
     return Scaffold(
+      key: shiftsScaffoldKey,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text('PayBis Schedule'),
         actions: <Widget>[
-          PopupMenuButton<String>(
-            itemBuilder: (BuildContext context) {
-              return kChoicesPopupMenu.map((String choice) {
-                return PopupMenuItem<String>(
-                  value: choice,
-                  child: Text(choice),
-                );
-              }).toList();
-            },
-            onSelected: choicesAction,
-          ),
+          (employee != null)
+              ? PopupMenuButton<String>(
+                  itemBuilder: (BuildContext context) {
+                    return kEmployeeChoicesPopupMenu.map((String choice) {
+                      return PopupMenuItem<String>(
+                        value: choice,
+                        child: Text(choice),
+                      );
+                    }).toList();
+                  },
+                  onSelected: choicesAction,
+                )
+              : PopupMenuButton<String>(
+                  itemBuilder: (BuildContext context) {
+                    return kAdminChoicesPopupMenu.map((String choice) {
+                      return PopupMenuItem<String>(
+                        value: choice,
+                        child: Text(choice),
+                      );
+                    }).toList();
+                  },
+                  onSelected: choicesAction,
+                ),
         ],
       ),
       body: Column(
@@ -161,56 +181,97 @@ class _ShiftScreenState extends State<ShiftScreen> {
 //                      for (int i = 1;
 //                          i <= getNumberOfDaysInMonth(_dateTime.month + 1);
 //                          i++) {
-//                        Day newDay = new Day(
-//                            i,
-//                            9,
-//                            19,
-//                            210919,
-//                            {'holder': '', 'id': '${i}061}', 'type': 'night'},
-//                            {'holder': '', 'id': '${i}062', 'type': 'night'},
-//                            {'holder': '', 'id': '${i}063', 'type': 'night'},
-//                            {'holder': '', 'id': '${i}064', 'type': 'morning'},
-//                            {'holder': '', 'id': '${i}065', 'type': 'morning'},
-//                            {'holder': '', 'id': '${i}066', 'type': 'morning'},
-//                            {'holder': '', 'id': '${i}067', 'type': 'evening'},
-//                            {'holder': '', 'id': '${i}068', 'type': 'evening'},
-//                            {'holder': '', 'id': '${i}069', 'type': 'evening'});
-//                        Map dayMap = newDay.buildMap(i, 9, 2019, 210919, {
+//                        Day newDay = new Day(i, 10, 19, 211019, {
+//                          'holder': '',
+//                          'id': '${i}061',
+//                          'type': 'night',
+//                          'hours': 8
+//                        }, {
+//                          'holder': '',
+//                          'id': '${i}062',
+//                          'type': 'night',
+//                          'hours': 8
+//                        }, {
+//                          'holder': '',
+//                          'id': '${i}063',
+//                          'type': 'night',
+//                          'hours': 8
+//                        }, {
+//                          'holder': '',
+//                          'id': '${i}064',
+//                          'type': 'morning',
+//                          'hours': 8
+//                        }, {
+//                          'holder': '',
+//                          'id': '${i}065',
+//                          'type': 'morning',
+//                          'hours': 8
+//                        }, {
+//                          'holder': '',
+//                          'id': '${i}066',
+//                          'type': 'morning',
+//                          'hours': 8
+//                        }, {
+//                          'holder': '',
+//                          'id': '${i}067',
+//                          'type': 'evening',
+//                          'hours': 8
+//                        }, {
+//                          'holder': '',
+//                          'id': '${i}068',
+//                          'type': 'evening',
+//                          'hours': 8
+//                        }, {
+//                          'holder': '',
+//                          'id': '${i}069',
+//                          'type': 'evening',
+//                          'hours': 8
+//                        });
+//                        Map dayMap = newDay.buildMap(i, 10, 2019, 211019, {
 //                          'holder': '',
 //                          'id': '${newDay.day}${newDay.month}${newDay.year}1',
-//                          'type': 'night'
+//                          'type': 'night',
+//                          'hours': 8
 //                        }, {
 //                          'holder': '',
 //                          'id': '${newDay.day}${newDay.month}${newDay.year}2',
-//                          'type': 'night'
+//                          'type': 'night',
+//                          'hours': 8
 //                        }, {
 //                          'holder': '',
 //                          'id': '${newDay.day}${newDay.month}${newDay.year}3',
-//                          'type': 'night'
+//                          'type': 'night',
+//                          'hours': 8
 //                        }, {
 //                          'holder': '',
 //                          'id': '${newDay.day}${newDay.month}${newDay.year}4',
-//                          'type': 'morning'
+//                          'type': 'morning',
+//                          'hours': 8
 //                        }, {
 //                          'holder': '',
 //                          'id': '${newDay.day}${newDay.month}${newDay.year}5',
-//                          'type': 'morning'
+//                          'type': 'morning',
+//                          'hours': 8
 //                        }, {
 //                          'holder': '',
 //                          'id': '${newDay.day}${newDay.month}${newDay.year}6',
-//                          'type': 'morning'
+//                          'type': 'morning',
+//                          'hours': 8
 //                        }, {
 //                          'holder': '',
 //                          'id': '${newDay.day}${newDay.month}${newDay.year}7',
-//                          'type': 'evening'
+//                          'type': 'evening',
+//                          'hours': 8
 //                        }, {
 //                          'holder': '',
 //                          'id': '${newDay.day}${newDay.month}${newDay.year}8',
-//                          'type': 'evening'
+//                          'type': 'evening',
+//                          'hours': 8
 //                        }, {
 //                          'holder': '',
 //                          'id': '${newDay.day}${newDay.month}${newDay.year}9',
-//                          'type': 'evening'
+//                          'type': 'evening',
+//                          'hours': 8
 //                        });
 //                        await _fireStore
 //                            .collection('days')
@@ -253,7 +314,9 @@ class _ShiftScreenState extends State<ShiftScreen> {
       if (employee != null)
         Navigator.pushNamed(context, PersonalPanelScreen.id);
     }
-    if (choice == kSettings) {}
+    if (choice == kSettings) {
+      Navigator.pushNamed(context, SettingsScreen.id);
+    }
     if (choice == kItVacations) {}
     if (choice == kSupportVacations) {}
     if (choice == kChangesLog) {
@@ -274,7 +337,7 @@ class DaysStream extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("Child build method invoked");
+//    print("Child build method invoked");
     if (daysWithShiftsForCountThisMonth.isNotEmpty)
       daysWithShiftsForCountThisMonth.clear();
     return StreamBuilder<QuerySnapshot>(
@@ -317,26 +380,6 @@ class DaysStream extends StatelessWidget {
           String idEveningShift1 = day.data['8']['id'];
           String idEveningShift2 = day.data['9']['id'];
 
-//          String holderNightShift0 = day.data['1']['holder'];
-//          String holderNightShift1 = day.data['2']['holder'];
-//          String holderNightShift2 = day.data['3']['holder'];
-//          String holderMorningShift0 = day.data['4']['holder'];
-//          String holderMorningShift1 = day.data['5']['holder'];
-//          String holderMorningShift2 = day.data['6']['holder'];
-//          String holderEveningShift0 = day.data['7']['holder'];
-//          String holderEveningShift1 = day.data['8']['holder'];
-//          String holderEveningShift2 = day.data['9']['holder'];
-//
-//          String typeNightShift0 = day.data['1']['type'];
-//          String typeNightShift1 = day.data['2']['type'];
-//          String typeNightShift2 = day.data['3']['type'];
-//          String typeMorningShift0 = day.data['4']['type'];
-//          String typeMorningShift1 = day.data['5']['type'];
-//          String typeMorningShift2 = day.data['6']['type'];
-//          String typeEveningShift0 = day.data['7']['type'];
-//          String typeEveningShift1 = day.data['8']['type'];
-//          String typeEveningShift2 = day.data['9']['type'];
-
           final dayWithShifts = Day(dayDay, dayMonth, dayYear, dayId, shift1,
               shift2, shift3, shift4, shift5, shift6, shift7, shift8, shift9);
 
@@ -377,6 +420,7 @@ class DaysStream extends StatelessWidget {
                             month: dayWithShifts.month,
                             id: dayWithShifts.s1['id'],
                             text: dayWithShifts.s1['holder'],
+                            workingHours: dayWithShifts.s1['hours'],
                             documentID: dayDocumentID,
                             number: 1,
                           ),
@@ -386,6 +430,7 @@ class DaysStream extends StatelessWidget {
                             month: dayWithShifts.month,
                             id: dayWithShifts.s2['id'],
                             text: dayWithShifts.s2['holder'],
+                            workingHours: dayWithShifts.s2['hours'],
                             documentID: dayDocumentID,
                             number: 2,
                           ),
@@ -395,6 +440,7 @@ class DaysStream extends StatelessWidget {
                             month: dayWithShifts.month,
                             id: dayWithShifts.s3['id'],
                             text: dayWithShifts.s3['holder'],
+                            workingHours: dayWithShifts.s3['hours'],
                             documentID: dayDocumentID,
                             number: 3,
                           ),
@@ -413,6 +459,7 @@ class DaysStream extends StatelessWidget {
                           month: dayWithShifts.month,
                           id: dayWithShifts.s4['id'],
                           text: dayWithShifts.s4['holder'],
+                          workingHours: dayWithShifts.s4['hours'],
                           documentID: dayDocumentID,
                           number: 4,
                         ),
@@ -422,6 +469,7 @@ class DaysStream extends StatelessWidget {
                           month: dayWithShifts.month,
                           id: dayWithShifts.s5['id'],
                           text: dayWithShifts.s5['holder'],
+                          workingHours: dayWithShifts.s5['hours'],
                           documentID: dayDocumentID,
                           number: 5,
                         ),
@@ -431,6 +479,7 @@ class DaysStream extends StatelessWidget {
                           month: dayWithShifts.month,
                           id: dayWithShifts.s6['id'],
                           text: dayWithShifts.s6['holder'],
+                          workingHours: dayWithShifts.s6['hours'],
                           documentID: dayDocumentID,
                           number: 6,
                         ),
@@ -448,6 +497,7 @@ class DaysStream extends StatelessWidget {
                           month: dayWithShifts.month,
                           id: dayWithShifts.s7['id'],
                           text: dayWithShifts.s7['holder'],
+                          workingHours: dayWithShifts.s7['hours'],
                           documentID: dayDocumentID,
                           number: 7,
                         ),
@@ -457,6 +507,7 @@ class DaysStream extends StatelessWidget {
                           month: dayWithShifts.month,
                           id: dayWithShifts.s8['id'],
                           text: dayWithShifts.s8['holder'],
+                          workingHours: dayWithShifts.s8['hours'],
                           documentID: dayDocumentID,
                           number: 8,
                         ),
@@ -466,6 +517,7 @@ class DaysStream extends StatelessWidget {
                           month: dayWithShifts.month,
                           id: dayWithShifts.s9['id'],
                           text: dayWithShifts.s9['holder'],
+                          workingHours: dayWithShifts.s9['hours'],
                           documentID: dayDocumentID,
                           number: 9,
                         ),
@@ -512,7 +564,7 @@ class DateTableCell extends StatelessWidget {
             child: Text(
               '$month',
               style: TextStyle(
-                fontSize: 12.0,
+                fontSize: 11.0,
                 fontWeight: FontWeight.bold,
                 color: isWeekend ? Colors.redAccent : Colors.black,
               ),
@@ -523,7 +575,7 @@ class DateTableCell extends StatelessWidget {
             child: Text(
               '$day.',
               style: TextStyle(
-                fontSize: 12.0,
+                fontSize: 11.0,
                 fontWeight: FontWeight.bold,
                 color: isWeekend ? Colors.red : Colors.black,
               ),
@@ -542,6 +594,7 @@ class ShiftsRoundButton extends StatefulWidget {
   final int number;
   final String text;
   final String documentID;
+  final int workingHours;
 
   ShiftsRoundButton(
       {@required Key key,
@@ -550,7 +603,8 @@ class ShiftsRoundButton extends StatefulWidget {
       @required this.month,
       @required this.number,
       @required this.text,
-      @required this.documentID})
+      @required this.documentID,
+      @required this.workingHours})
       : super(key: ObjectKey(id));
 
   @override
@@ -558,7 +612,7 @@ class ShiftsRoundButton extends StatefulWidget {
 }
 
 class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
-  MaterialColor color = Colors.lightBlue;
+  Color color = Colors.lightBlue;
   String buttonText = '+';
   double size = 26.0;
   double bottom = 5.0;
@@ -578,13 +632,16 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
     documentID = widget.documentID;
     number = widget.number;
     widget.text == '' ? employeeChosen = false : employeeChosen = true;
-    if (widget.text == 'ALA' || widget.text == 'ANT') isLong = true;
+    if (widget.text.length == 3) isLong = true;
     if ((widget.day < DateTime.now().day &&
             widget.month <= DateTime.now().month) ||
         widget.month < DateTime.now().month) isPast = true;
 
-    for (Employee emp in employees) {
-      if (emp.initial == widget.text) color = emp.color;
+    for (Employee emp in listWithEmployees) {
+      //Converting String to Color
+      if (emp.initial == widget.text) {
+        color = convertColor(emp.empColor);
+      }
     }
 // if USER is Admin and not in the Past build this
     return (loggedInUser.email == 'admin@paybis.com' && isPast == false)
@@ -597,8 +654,13 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                 ? MaterialButton(
                     onPressed: () {
                       setState(() {
-                        popupEmployeesLayout.showPopup(context, widget.id,
-                            documentID, number, "Who's gonna work?");
+                        popupEmployeesLayout.showPopup(
+                            context,
+                            widget.id,
+                            documentID,
+                            number,
+                            widget.workingHours,
+                            "Who's gonna work?");
                       });
                     },
                     color: Colors.white,
@@ -622,22 +684,51 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                 : MaterialButton(
                     onPressed: () {
                       setState(() {
-                        popupEmployeesLayout.showPopup(context, widget.id,
-                            documentID, number, "Who's gonna work?");
+                        popupEmployeesLayout.showPopup(
+                            context,
+                            widget.id,
+                            documentID,
+                            number,
+                            widget.workingHours,
+                            "Who's gonna work?");
                       });
                     },
                     color: color,
                     shape: CircleBorder(),
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
-                      child: Text(
-                        widget.text,
-                        style: TextStyle(
-                          fontSize: isLong ? 13.0 : 16.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+                    child: (widget.workingHours != 8)
+                        ? Column(
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(top: 16.0),
+                                child: Text(
+                                  widget.text,
+                                  style: TextStyle(
+                                    fontSize: isLong ? 13.0 : 16.0,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 24.0),
+                                child: Text(
+                                  (widget.workingHours < 8) ? '-' : '+',
+                                  style: TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: (widget.workingHours < 8)
+                                          ? Colors.red
+                                          : Colors.green),
+                                ),
+                              )
+                            ],
+                          )
+                        : Text(
+                            widget.text,
+                            style: TextStyle(
+                              fontSize: isLong ? 13.0 : 16.0,
+                              color: Colors.white,
+                            ),
+                          ),
                     padding: EdgeInsets.all(0.0),
                     minWidth: 10.0,
                   ),
@@ -674,32 +765,80 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                 : MaterialButton(
                     onPressed: () {
                       setState(() {
-                        if (widget.text == employee.initial) {
+                        if (widget.text == employee.initial &&
+                            isPast == false &&
+                            shiftDocIDContainer1ForShiftExchange == null &&
+                            shiftNumberContainer1ForShiftExchange == null &&
+                            shiftHolderContainer1ForShiftExchange == null) {
                           popupEmployeesLayout.showPersonalShiftPopup(
                               context,
                               widget.id,
                               documentID,
                               number,
                               'What to do with this shift?');
+                          shiftDocIDContainer1ForShiftExchange = documentID;
+                          shiftNumberContainer1ForShiftExchange = number;
+                          shiftHolderContainer1ForShiftExchange =
+                              employee.initial;
+                        }
+                        if (isPast == false &&
+                            widget.text != employee.initial &&
+                            shiftDocIDContainer1ForShiftExchange != null &&
+                            shiftNumberContainer1ForShiftExchange != null &&
+                            shiftHolderContainer1ForShiftExchange != null) {
+                          popupEmployeesLayout
+                              .showChangeShiftsConfirmationPopup(
+                                  context,
+                                  widget.id,
+                                  documentID,
+                                  number,
+                                  'Are you sure you want to exchange?');
+                          shiftDocIDContainer2ForShiftExchange = documentID;
+                          shiftNumberContainer2ForShiftExchange = number;
+                          shiftHolderContainer2ForShiftExchange = widget.text;
                         }
                       });
                     },
-                    color: color,
+                    color: (employee != null)
+                        ? (widget.text == employee.initial)
+                            ? color
+                            : color.withOpacity(0.25)
+                        : color,
                     shape: CircleBorder(),
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
-                      child: Text(
-                        widget.text,
-                        style: TextStyle(
-                          fontSize: isLong ? 13.0 : 16.0,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: (widget.workingHours != 8)
+                          ? Column(
+                              children: <Widget>[
+                                Text(
+                                  widget.text,
+                                  style: TextStyle(
+                                    fontSize: isLong ? 13.0 : 16.0,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Text(
+                                  (widget.workingHours < 8) ? '-' : '+',
+                                  style: TextStyle(
+                                      fontSize: 8.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: (widget.workingHours < 8)
+                                          ? Colors.red
+                                          : Colors.green),
+                                )
+                              ],
+                            )
+                          : Text(
+                              widget.text,
+                              style: TextStyle(
+                                fontSize: isLong ? 13.0 : 16.0,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                     padding: EdgeInsets.all(0.0),
                     minWidth: 10.0,
-                  ),
-          );
+                  ));
   }
 }
 
@@ -768,13 +907,13 @@ class PopupEmployeesLayout extends ModalRoute {
 
   List<Widget> listMyWidgets(BuildContext context) {
     List<Widget> list = List();
-    for (Employee emp in employees) {
+    for (Employee emp in listWithEmployees) {
       list.add(
         MaterialButton(
           onPressed: () {
             Navigator.pop(context, emp.initial);
           },
-          color: emp.color,
+          color: convertColor(emp.empColor),
           child: Text(
             emp.name,
             style: kHeaderFontStyle,
@@ -795,8 +934,8 @@ class PopupEmployeesLayout extends ModalRoute {
     return list;
   }
 
-  showPopup(
-      BuildContext context, String id, String docID, int number, String title,
+  showPopup(BuildContext context, String id, String docID, int number,
+      int workingHoursFromWidget, String title,
       {BuildContext popupContext}) {
     final result = Navigator.of(context).push(
       PopupEmployeesLayout(
@@ -821,10 +960,65 @@ class PopupEmployeesLayout extends ModalRoute {
               brightness: Brightness.light,
             ),
             resizeToAvoidBottomPadding: false,
-            body: Wrap(
-              alignment: WrapAlignment.spaceEvenly,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: listMyWidgets(context),
+            body: ListView(
+              children: <Widget>[
+                Wrap(
+                  alignment: WrapAlignment.spaceEvenly,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: listMyWidgets(context),
+                ),
+                SizedBox(
+                  height: 40.0,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(60.0),
+                  child: Container(
+                    decoration:
+                        BoxDecoration(color: Colors.grey.withOpacity(0.2)),
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(height: 10.0),
+                        Text(
+                          'Update working hours for this shift (at this moment: $workingHoursFromWidget)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                          child: TextFormField(
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            maxLength: 2,
+                            onChanged: (value) {
+                              //Do something with the user input.
+                              workingHours = int.parse(value);
+                            },
+                          ),
+                        ),
+                        MaterialButton(
+                          child: Text(
+                            'Update',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                          color: Colors.lightBlue,
+                          onPressed: () async {
+                            try {
+                              Navigator.pop(context); //close the popup
+                            } catch (e) {}
+                            _currentDocument =
+                                await dbController.getDocument(docID);
+                            await dbController.updateHours(
+                                _currentDocument, number, workingHours);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -835,23 +1029,17 @@ class PopupEmployeesLayout extends ModalRoute {
         if (result == null || result == '') {
           result = '+';
         } else {
-          _currentDocument =
-              await _fireStore.collection('days').document('$docID').get();
+          _currentDocument = await dbController.getDocument(docID);
 
           choiceOfEmployee = result.toString();
           print('result ' + result);
           print('Choice ' + choiceOfEmployee);
 
           if (choiceOfEmployee == 'none') {
-            await _fireStore
-                .collection('days')
-                .document(_currentDocument.documentID)
-                .updateData({'$number.holder': ''});
+            await dbController.updateHolderToNone(_currentDocument, number);
           } else
-            await _fireStore
-                .collection('days')
-                .document(_currentDocument.documentID)
-                .updateData({'$number.holder': choiceOfEmployee});
+            await dbController.updateHolder(
+                _currentDocument, number, choiceOfEmployee);
         }
       });
     });
@@ -860,7 +1048,7 @@ class PopupEmployeesLayout extends ModalRoute {
   showPersonalShiftPopup(
       BuildContext context, String id, String docID, int number, String title,
       {BuildContext popupContext}) {
-    final result = Navigator.of(context).push(
+    Navigator.of(context).push(
       PopupEmployeesLayout(
         top: 30,
         left: 40,
@@ -892,6 +1080,7 @@ class PopupEmployeesLayout extends ModalRoute {
                     //ToDo implement Exchange Shift logic
                     onPressed: () {
                       changeShifts();
+                      Navigator.pop(context);
                     },
                     color: Colors.green,
                     shape: RoundedRectangleBorder(),
@@ -912,7 +1101,9 @@ class PopupEmployeesLayout extends ModalRoute {
                 Expanded(
                   child: MaterialButton(
                     //ToDo implement refuse Shift logic
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                     color: Colors.red,
                     shape: RoundedRectangleBorder(),
                     child: Padding(
@@ -935,25 +1126,96 @@ class PopupEmployeesLayout extends ModalRoute {
         ),
       ),
     );
-    result.then((result) {
-      setState(() async {
-        if (result == null || result == '') {
-          result = '+';
-        } else {
-          _currentDocument = await dbController.getDocument(docID);
+  }
 
-          choiceOfEmployee = result.toString();
-//          print('result ' + result);
-//          print('Choice ' + choiceOfEmployee);
+  showChangeShiftsConfirmationPopup(
+      BuildContext context, String id, String docID, int number, String title,
+      {BuildContext popupContext}) {
+    Navigator.of(context).push(
+      PopupEmployeesLayout(
+        top: 30,
+        left: 40,
+        right: 40,
+        bottom: 500,
+        child: PopupContent(
+          content: Scaffold(
+            appBar: AppBar(
+              title: Text(title),
+              leading: new Builder(builder: (context) {
+                return IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () {
+                    try {
+                      Navigator.pop(context); //close the popup
+                    } catch (e) {}
+                  },
+                );
+              }),
+              brightness: Brightness.light,
+            ),
+            resizeToAvoidBottomPadding: false,
+            body: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  child: MaterialButton(
+                    onPressed: () {
+                      dbController.changeShiftHolders(
+                          shiftDocIDContainer1ForShiftExchange,
+                          shiftDocIDContainer2ForShiftExchange,
+                          shiftNumberContainer1ForShiftExchange,
+                          shiftNumberContainer2ForShiftExchange,
+                          shiftHolderContainer1ForShiftExchange,
+                          shiftHolderContainer2ForShiftExchange);
 
-          if (choiceOfEmployee == 'none') {
-            await dbController.updateHolderToNone(_currentDocument, number);
-          } else
-            await dbController.updateHolder(
-                _currentDocument, number, choiceOfEmployee);
-        }
-      });
-    });
+                      updateShiftExchangeValuesToNull();
+                      Navigator.pop(context);
+                    },
+                    color: Colors.green,
+                    shape: RoundedRectangleBorder(),
+                    child: Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: Text(
+                        'Yes',
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    padding: EdgeInsets.all(0.0),
+                    minWidth: 10.0,
+                  ),
+                ),
+                Expanded(
+                  child: MaterialButton(
+                    onPressed: () {
+                      updateShiftExchangeValuesToNull();
+                      Navigator.pop(context);
+                    },
+                    color: Colors.red,
+                    shape: RoundedRectangleBorder(),
+                    child: Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    padding: EdgeInsets.all(0.0),
+                    minWidth: 10.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   //the dynamic content pass by parameter
@@ -979,6 +1241,15 @@ class PopupEmployeesLayout extends ModalRoute {
         child: child,
       ),
     );
+  }
+
+  void updateShiftExchangeValuesToNull() {
+    shiftDocIDContainer1ForShiftExchange = null;
+    shiftDocIDContainer2ForShiftExchange = null;
+    shiftHolderContainer1ForShiftExchange = null;
+    shiftHolderContainer2ForShiftExchange = null;
+    shiftNumberContainer1ForShiftExchange = null;
+    shiftNumberContainer2ForShiftExchange = null;
   }
 }
 
@@ -1010,15 +1281,15 @@ class Day {
   int month;
   int year;
   int id;
-  Map s1 = {'holder': '', 'id': '', 'type': ''};
-  Map s2 = {'holder': '', 'id': '', 'type': ''};
-  Map s3 = {'holder': '', 'id': '', 'type': ''};
-  Map s4 = {'holder': '', 'id': '', 'type': ''};
-  Map s5 = {'holder': '', 'id': '', 'type': ''};
-  Map s6 = {'holder': '', 'id': '', 'type': ''};
-  Map s7 = {'holder': '', 'id': '', 'type': ''};
-  Map s8 = {'holder': '', 'id': '', 'type': ''};
-  Map s9 = {'holder': '', 'id': '', 'type': ''};
+  Map s1 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
+  Map s2 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
+  Map s3 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
+  Map s4 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
+  Map s5 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
+  Map s6 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
+  Map s7 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
+  Map s8 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
+  Map s9 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
 
   Day(this.day, this.month, this.year, this.id, this.s1, this.s2, this.s3,
       this.s4, this.s5, this.s6, this.s7, this.s8, this.s9);
@@ -1047,7 +1318,7 @@ class Day {
 
 String getEmployeeName(String initials) {
   String result = '';
-  for (Employee emp in employees) {
+  for (Employee emp in listWithEmployees) {
     if (initials == emp.initial) result = emp.name;
   }
   return result;
@@ -1138,5 +1409,16 @@ int weekdayCheck(int day, int month, int year) {
 }
 
 void changeShifts() {
-  print('Changing Shifts...');
+  chooseShiftToExchange();
+}
+
+void chooseShiftToExchange() {
+  shiftsScaffoldKey.currentState.showSnackBar(
+      new SnackBar(content: new Text("Choose The Shift You Want")));
+}
+
+Color convertColor(String color) {
+  int colorValueInt = int.parse(color, radix: 16);
+  Color otherColor = new Color(colorValueInt);
+  return otherColor;
 }

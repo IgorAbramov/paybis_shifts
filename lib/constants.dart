@@ -1,78 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:paybis_com_shifts/models/employee.dart';
-
-final Employee stefan =
-    Employee(name: 'Стефан', color: Colors.indigo, initial: 'SN');
-final Employee vova = Employee(
-    name: 'Вова',
-    color: Colors.green,
-    initial: 'VJ',
-    salaryNight: 12.75,
-    salaryRegular: 8.5);
-final Employee ira = Employee(
-    name: 'Ира',
-    color: Colors.deepOrange,
-    initial: 'IP',
-    salaryNight: 12.75,
-    salaryRegular: 8.5);
-final Employee aleksandra =
-    Employee(name: 'Александра', color: Colors.purple, initial: 'ALA');
-final Employee kiril = Employee(
-    name: 'Кирилл',
-    color: Colors.grey,
-    initial: 'KT',
-    salaryNight: 10.59,
-    salaryRegular: 7.06);
-final Employee rodion =
-    Employee(name: 'Родион', color: Colors.pink, initial: 'RF');
-final Employee igor = Employee(
-    name: 'Игорь',
-    color: Colors.blue,
-    initial: 'IA',
-    email: 'igor.paybis@gmail.com',
-    salaryNight: 10.59,
-    salaryRegular: 7.06);
-final Employee aleksey = Employee(
-    name: 'Алексей',
-    color: Colors.brown,
-    initial: 'AK',
-    salaryNight: 10.59,
-    salaryRegular: 7.06);
-final Employee lyosha =
-    Employee(name: 'Лёша', color: Colors.red, initial: 'DA');
-final Employee diana = Employee(
-    name: 'Диана',
-    color: Colors.orange,
-    initial: 'DO',
-    salaryNight: 12.75,
-    salaryRegular: 8.5);
-final Employee alyona =
-    Employee(name: 'Алёна', color: Colors.cyan, initial: 'AA');
-final Employee oskar =
-    Employee(name: 'Оскар', color: Colors.lightGreen, initial: 'OZ');
-final Employee sergey =
-    Employee(name: 'Сергей', color: Colors.amber, initial: 'SJ');
-final Employee anton =
-    Employee(name: 'Антон', color: Colors.teal, initial: 'ANT');
-final Employee none =
-    Employee(name: 'никто', color: Colors.black, initial: '+');
-
-final List<Employee> employees = [
-  vova,
-  kiril,
-  lyosha,
-  stefan,
-  alyona,
-  ira,
-  igor,
-  aleksandra,
-  diana,
-  aleksey,
-  rodion,
-  oskar,
-  sergey,
-  anton
-];
 
 const String kPersonalPanel = 'Personal panel';
 const String kSettings = 'Settings';
@@ -80,15 +6,54 @@ const String kLogOut = 'Log out';
 const String kItVacations = 'IT Vacations';
 const String kSupportVacations = 'Support Vacations';
 const String kChangesLog = 'Changes Log';
+const String kSupportDepartment = 'Support Department';
+const String kITDepartment = 'IT Department';
+const String kMarketingDepartment = 'Marketing Department';
+const String kManagement = 'Management';
+const String kTrainee = 'Trainee';
+const String kJuniorSupport = 'Junior Support';
+const String kMiddleSupport = 'Middle Support';
+const String kSeniorSupport = 'Senior Support';
+const String kAMLCertifiedSupport = 'AML Sertified Support';
+const String kTeamLeadSupport = 'Team Lead Support';
 
-const List<String> kChoicesPopupMenu = [
-  kPersonalPanel,
+const List<String> kAdminChoicesPopupMenu = [
   kSettings,
   kSupportVacations,
   kItVacations,
   kChangesLog,
   kLogOut
 ];
+
+const List<String> kEmployeeChoicesPopupMenu = [
+  kPersonalPanel,
+  kSupportVacations,
+  kItVacations,
+  kChangesLog,
+  kLogOut
+];
+
+const List<String> kEmployeeDepartmentTypes = [
+  kSupportDepartment,
+  kITDepartment,
+  kMarketingDepartment,
+  kManagement
+];
+
+const List<String> kSupportPositionsChoices = [
+  kTrainee,
+  kJuniorSupport,
+  kMiddleSupport,
+  kSeniorSupport,
+  kAMLCertifiedSupport,
+  kTeamLeadSupport
+];
+
+const List<double> kJuniorSupportSalary = [4.0, 6.0];
+const List<double> kMiddleSupportSalary = [5.1, 7.65];
+const List<double> kSeniorSupportSalary = [6.2, 9.3];
+const List<double> kAMLCertifiedSupportSalary = [7.06, 10.59];
+const List<double> kTeamLeadSupportSalary = [8.5, 12.75];
 
 const TextStyle kHeaderFontStyle = TextStyle(
   fontSize: 18.0,
