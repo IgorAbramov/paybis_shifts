@@ -10,8 +10,6 @@ import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/screens/welcome_screen.dart';
 import 'package:paybis_com_shifts/ui_parts/rounded_button.dart';
 
-//TODO add validations to form fields
-
 class RegistrationScreen extends StatefulWidget {
   static const String id = 'register_user_screen';
   @override

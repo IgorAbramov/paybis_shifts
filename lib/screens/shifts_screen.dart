@@ -623,7 +623,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
   String documentID;
   int number;
   bool isPast = false;
-  PopupEmployeesLayout popupEmployeesLayout = PopupEmployeesLayout();
+  PopupEmployeesLayout popupEmployeesLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -743,8 +743,9 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                 //If Emp is NOT chosen
 
                 ? MaterialButton(
-//                    onPressed: () {
-//                    },
+                  //  onPressed: () {
+                  //  },
+                
                     color: Colors.lightBlue,
                     shape: CircleBorder(),
                     child: Padding(

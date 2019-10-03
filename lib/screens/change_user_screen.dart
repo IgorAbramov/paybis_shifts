@@ -11,7 +11,7 @@ import 'package:paybis_com_shifts/ui_parts/rounded_button.dart';
 
 import 'shifts_screen.dart';
 
-//TODO add validations to form fields
+
 
 class ChangeUserScreen extends StatefulWidget {
   static const String id = 'change_user_screen';
