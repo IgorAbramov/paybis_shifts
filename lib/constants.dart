@@ -5,7 +5,8 @@ const String kSettings = 'Settings';
 const String kLogOut = 'Log out';
 const String kItVacations = 'IT Vacations';
 const String kSupportVacations = 'Support Vacations';
-const String kChangesLog = 'Changes Log';
+const String kChangeRequests = 'Change Requests';
+const String kRecentChanges = 'Recent Changes';
 const String kSupportDepartment = 'Support Department';
 const String kITDepartment = 'IT Department';
 const String kMarketingDepartment = 'Marketing Department';
@@ -18,18 +19,20 @@ const String kAMLCertifiedSupport = 'AML Sertified Support';
 const String kTeamLeadSupport = 'Team Lead Support';
 
 const List<String> kAdminChoicesPopupMenu = [
+  kChangeRequests,
   kSettings,
-  kSupportVacations,
-  kItVacations,
-  kChangesLog,
+  kRecentChanges,
+//  kSupportVacations,
+//  kItVacations,
   kLogOut
 ];
 
 const List<String> kEmployeeChoicesPopupMenu = [
   kPersonalPanel,
-  kSupportVacations,
-  kItVacations,
-  kChangesLog,
+  kRecentChanges,
+//  kSupportVacations,
+//  kItVacations,
+//  kFeed,
   kLogOut
 ];
 

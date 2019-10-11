@@ -3,11 +3,10 @@ import 'dart:io' show Platform;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/material_picker.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:paybis_com_shifts/constants.dart';
+import 'package:paybis_com_shifts/models/colorpicker.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
-import 'package:paybis_com_shifts/screens/welcome_screen.dart';
+import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/ui_parts/rounded_button.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -28,7 +27,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   TextEditingController pwdInputController;
   final GlobalKey<FormState> _registerFormKey = GlobalKey<FormState>();
   final registerScaffoldKey = new GlobalKey<ScaffoldState>();
-  bool showSpinner = false;
   Color pickerColor = Color(0xff443a49);
   Color currentColor = Color(0xff443a49);
 
@@ -145,236 +143,227 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         automaticallyImplyLeading: true,
       ),
       backgroundColor: Colors.white,
-      body: ModalProgressHUD(
-        inAsyncCall: showSpinner,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.0),
-          child: ListView(
-            children: <Widget>[
-              SizedBox(
-                height: 48.0,
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24.0),
+        child: ListView(
+          children: <Widget>[
+            SizedBox(
+              height: 48.0,
+            ),
+            TextFormField(
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.center,
+              validator: (value) =>
+                  value.isEmpty ? 'Name field can\'t be empty' : null,
+              onChanged: (value) {
+                //Do something with the user input.
+                name = value;
+              },
+              decoration: kTextFieldDecoration.copyWith(
+                hintText: 'Enter name',
               ),
-              TextFormField(
-                keyboardType: TextInputType.text,
-                textAlign: TextAlign.center,
-                validator: (value) =>
-                    value.isEmpty ? 'Name field can\'t be empty' : null,
-                onChanged: (value) {
-                  //Do something with the user input.
-                  name = value;
-                },
-                decoration: kTextFieldDecoration.copyWith(
-                  hintText: 'Enter name',
-                ),
-              ),
-              SizedBox(
-                height: 8.0,
-              ),
-              Form(
-                key: _registerFormKey,
-                child: Column(
-                  children: <Widget>[
-                    TextFormField(
-                      keyboardType: TextInputType.emailAddress,
-                      textAlign: TextAlign.center,
-                      controller: emailInputController,
-                      validator: emailValidator,
-                      decoration: kTextFieldDecoration.copyWith(
-                        hintText: 'Enter email',
-                      ),
-                      onChanged: (value) {
-                        //Do something with the user input.
-                        email = value;
-                      },
-                    ),
-                    SizedBox(
-                      height: 8.0,
-                    ),
-                    TextFormField(
-                      obscureText: true,
-                      textAlign: TextAlign.center,
-                      controller: pwdInputController,
-                      validator: pwdValidator,
-                      decoration: kTextFieldDecoration.copyWith(
-                        hintText: 'Enter password',
-                      ),
-                      onChanged: (value) {
-                        //Do something with the user input.
-                        password = value;
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 8.0,
-              ),
-              TextFormField(
-                autovalidate: true,
-                validator: (val) {
-                  if (val.trim().length < 2 || val.isEmpty) {
-                    return 'Too short';
-                  } else
-                    return null;
-                },
-                keyboardType: TextInputType.text,
-                textAlign: TextAlign.center,
-                maxLength: 3,
-                textCapitalization: TextCapitalization.sentences,
-                onChanged: (value) {
-                  //Do something with the user input.
-                  initials = value;
-                },
-                decoration: kTextFieldDecoration.copyWith(
-                  hintText: 'Enter initials',
-                ),
-              ),
-              Container(
-                height: 120.0,
-                alignment: Alignment.center,
-                padding: EdgeInsets.only(bottom: 30.0),
-                color: Colors.white,
-                child: Platform.isIOS
-                    ? iOSPickerDepartment()
-                    : androidDropdownDepartment(),
-              ),
-              (selectedDepartment == kSupportDepartment)
-                  ? Container(
-                      height: 120.0,
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.only(bottom: 30.0),
-                      color: Colors.white,
-                      child: Platform.isIOS
-                          ? iOSPickerSupportPositions()
-                          : androidDropdownSupportPositions(),
-                    )
-                  : SizedBox(
-                      height: 8.0,
-                    ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            ),
+            SizedBox(
+              height: 8.0,
+            ),
+            Form(
+              key: _registerFormKey,
+              child: Column(
                 children: <Widget>[
-                  MaterialButton(
-                    child: Text(
-                      'Pick color',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.0,
-                      ),
+                  TextFormField(
+                    keyboardType: TextInputType.emailAddress,
+                    textAlign: TextAlign.center,
+                    controller: emailInputController,
+                    validator: emailValidator,
+                    decoration: kTextFieldDecoration.copyWith(
+                      hintText: 'Enter email',
                     ),
-                    color: currentColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0),
+                    onChanged: (value) {
+                      //Do something with the user input.
+                      email = value;
+                    },
+                  ),
+                  SizedBox(
+                    height: 8.0,
+                  ),
+                  TextFormField(
+                    obscureText: true,
+                    textAlign: TextAlign.center,
+                    controller: pwdInputController,
+                    validator: pwdValidator,
+                    decoration: kTextFieldDecoration.copyWith(
+                      hintText: 'Enter password',
                     ),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        child: AlertDialog(
-                          title: const Text('Pick a color!'),
-                          content: SingleChildScrollView(
+                    onChanged: (value) {
+                      //Do something with the user input.
+                      password = value;
+                    },
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 8.0,
+            ),
+            TextFormField(
+              autovalidate: true,
+              validator: (val) {
+                if (val.trim().length < 2 || val.isEmpty) {
+                  return 'Too short';
+                } else
+                  return null;
+              },
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.center,
+              maxLength: 3,
+              textCapitalization: TextCapitalization.sentences,
+              onChanged: (value) {
+                //Do something with the user input.
+                initials = value;
+              },
+              decoration: kTextFieldDecoration.copyWith(
+                hintText: 'Enter initials',
+              ),
+            ),
+            Container(
+              height: 120.0,
+              alignment: Alignment.center,
+              padding: EdgeInsets.only(bottom: 30.0),
+              color: Colors.white,
+              child: Platform.isIOS
+                  ? iOSPickerDepartment()
+                  : androidDropdownDepartment(),
+            ),
+            (selectedDepartment == kSupportDepartment)
+                ? Container(
+                    height: 120.0,
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(bottom: 30.0),
+                    color: Colors.white,
+                    child: Platform.isIOS
+                        ? iOSPickerSupportPositions()
+                        : androidDropdownSupportPositions(),
+                  )
+                : SizedBox(
+                    height: 8.0,
+                  ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                MaterialButton(
+                  child: Text(
+                    'Pick color',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                  color: currentColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      child: AlertDialog(
+                        title: const Text('Pick a color!'),
+                        content: SingleChildScrollView(
 //                        child: ColorPicker(
 //                          pickerColor: pickerColor,
 //                          onColorChanged: changeColor,
 //                          enableLabel: true,
 //                          pickerAreaHeightPercent: 0.8,
 //                        ),
-                            // Use Material color picker:
-                            //
-                            child: MaterialPicker(
-                              pickerColor: pickerColor,
-                              onColorChanged: changeColor,
-                              enableLabel: true, // only on portrait mode
-                            ),
-                            //
-                            // Use Block color picker:
-                            //
-                            // child: BlockPicker(
-                            //   pickerColor: currentColor,
-                            //   onColorChanged: changeColor,
-                            // ),
+                          // Use Material color picker:
+                          //
+                          child: MaterialPicker(
+                            pickerColor: pickerColor,
+                            onColorChanged: changeColor,
+                            enableLabel: true, // only on portrait mode
                           ),
-                          actions: <Widget>[
-                            FlatButton(
-                              child: const Text(
-                                'OK',
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                              onPressed: () {
-                                setState(() => currentColor = pickerColor);
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
+                          //
+                          // Use Block color picker:
+                          //
+                          // child: BlockPicker(
+                          //   pickerColor: currentColor,
+                          //   onColorChanged: changeColor,
+                          // ),
                         ),
-                      );
-                    },
-                  ),
+                        actions: <Widget>[
+                          FlatButton(
+                            child: const Text(
+                              'OK',
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                color: Colors.blue,
+                              ),
+                            ),
+                            onPressed: () {
+                              setState(() => currentColor = pickerColor);
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
 //                  Container(
 //                    decoration: BoxDecoration(
 //                        shape: BoxShape.circle,
 //                        color: pickerColor,
 //                        borderRadius: BorderRadius.circular(10.0)),
 //                  ),
-                ],
-              ),
-              SizedBox(
-                height: 24.0,
-              ),
-              RoundedButton(
-                color: Colors.lightBlueAccent,
-                title: 'Create user',
-                onPressed: () async {
-                  //registration functionality
-                  if (_registerFormKey.currentState.validate()) {
-                    try {
-                      setState(() {
-                        showSpinner = true;
-                      });
-                      final newUser = await _auth
-                          .createUserWithEmailAndPassword(
-                              email: emailInputController.text,
-                              password: pwdInputController.text)
-                          .catchError((err) => thereIsSuchUserError(err));
+              ],
+            ),
+            SizedBox(
+              height: 24.0,
+            ),
+            RoundedButton(
+              color: Colors.lightBlueAccent,
+              title: 'Create user',
+              onPressed: () async {
+                //registration functionality
+                if (_registerFormKey.currentState.validate()) {
+                  try {
+                    final newUser = await _auth
+                        .createUserWithEmailAndPassword(
+                            email: emailInputController.text,
+                            password: pwdInputController.text)
+                        .catchError((err) => thereIsSuchUserError(err));
 
-                      //Convert Color to String
-                      String colorString = currentColor.toString();
-                      String colorValueString =
-                          colorString.split('(0x')[1].split(')')[0];
+                    //Convert Color to String
+                    String colorString = currentColor.toString();
+                    String colorValueString =
+                        colorString.split('(0x')[1].split(')')[0];
 
-                      Employee newEmployee = new Employee(
-                          name: name,
-                          email: email,
-                          initial: initials,
-                          empColor: colorValueString,
-                          department: selectedDepartment,
-                          position: selectedSupportPosition);
+                    Employee newEmployee = new Employee(
+                        name: name,
+                        email: email,
+                        initial: initials,
+                        empColor: colorValueString,
+                        department: selectedDepartment,
+                        position: selectedSupportPosition);
 
-                      Map newEmpMap = newEmployee.buildMap(
-                          name,
-                          email,
-                          initials,
-                          colorValueString,
-                          selectedDepartment,
-                          selectedSupportPosition);
-                      dbController.createUser(newEmpMap);
-                      listWithEmployees.add(newEmployee);
-                      if (newUser != null) {
-                        Navigator.pop(context);
-                      }
-                      setState(() {
-                        showSpinner = false;
-                      });
-                    } catch (e) {
-                      print(e);
+                    Map newEmpMap = newEmployee.buildMap(
+                        name,
+                        email,
+                        initials,
+                        colorValueString,
+                        selectedDepartment,
+                        selectedSupportPosition);
+                    dbController.createUser(newEmpMap);
+                    listWithEmployees.add(newEmployee);
+                    if (newUser != null) {
+                      Navigator.pop(context);
                     }
+                  } catch (e) {
+                    print(e);
                   }
-                },
-              ),
-            ],
-          ),
+                }
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -391,8 +380,5 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           height: 1.0,
           fontWeight: FontWeight.w300),
     )));
-    setState(() {
-      showSpinner = false;
-    });
   }
 }

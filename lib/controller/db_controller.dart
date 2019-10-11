@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
+import 'package:paybis_com_shifts/screens/feed_screen.dart';
 
 final _fireStore = Firestore.instance;
+final feedRef = Firestore.instance.collection('feed');
+final String adminFeedDocID = 'T8dBZmU5meD1LfEgfEM3';
 
 class DBController {
   Stream createStream<QuerySnapshot>(int month) {
@@ -10,6 +13,13 @@ class DBController {
         .where('month', isEqualTo: month)
         .orderBy('day', descending: false)
         .snapshots();
+  }
+
+  addMonth(Map dayMap) async {
+    await _fireStore
+        .collection('days')
+        .document()
+        .setData(Map<String, dynamic>.from(dayMap));
   }
 
   getDocument(String docID) async {
@@ -176,5 +186,106 @@ class DBController {
 //        .snapshots()) {
 ////      for (var day in snapshot.documents) {}
 //    }
+  }
+
+  getAdminFeed() async {
+    QuerySnapshot snapshot = await feedRef
+        .document(adminFeedDocID)
+        .collection('feedItems')
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
+    List<FeedItem> feedItems = [];
+    snapshot.documents.forEach((doc) {
+      feedItems.add(FeedItem.fromDocument(doc));
+    });
+    return feedItems;
+  }
+
+  Stream createAdminFeedStream<QuerySnapshot>() {
+    return feedRef
+        .document(adminFeedDocID)
+        .collection('feedItems')
+        .orderBy('timestamp', descending: false)
+        .snapshots();
+  }
+
+  addChangeRequestToAdminFeed(
+      String docID1,
+      String docID2,
+      int number1,
+      int number2,
+      String emp1,
+      String emp2,
+      String date1,
+      String date2,
+      String shiftType1,
+      String shiftType2,
+      String message) {
+    feedRef
+        .document(adminFeedDocID)
+        .collection('feedItems')
+        .document("$emp1$emp2$number1$number2")
+        .setData({
+      "type": "changeRequest",
+      "docID1": docID1,
+      "docID2": docID2,
+      "number1": number1,
+      "number2": number2,
+      "emp1": emp1,
+      "emp2": emp2,
+      "date1": date1,
+      "date2": date2,
+      "shiftType1": shiftType1,
+      "shiftType2": shiftType2,
+      "timestamp": DateTime.now(),
+      "message": message,
+    });
+  }
+
+  removeChangeRequestFromAdminFeed(String id) async {
+    await feedRef
+        .document(adminFeedDocID)
+        .collection('feedItems')
+        .document(id)
+        .get()
+        .then((doc) {
+      if (doc.exists) {
+        doc.reference.delete();
+      }
+    });
+  }
+
+  Stream createRecentChangesStream<QuerySnapshot>(
+      int numberToList, String emp, bool personal) {
+    return personal
+        ? feedRef
+            .document(adminFeedDocID)
+            .collection('changes')
+            .where('emps', arrayContains: emp)
+            .orderBy('timestamp', descending: true)
+            .limit(numberToList)
+            .snapshots()
+        : feedRef
+            .document(adminFeedDocID)
+            .collection('changes')
+            .orderBy('timestamp', descending: true)
+            .limit(numberToList)
+            .snapshots();
+  }
+
+  addChangeToRecentChanges(String emp1, String emp2, String date1, String date2,
+      String shiftType1, String shiftType2, String message, bool confirmed) {
+    List emps = [emp1, emp2];
+    Map<String, dynamic> change = {
+      'emps': emps,
+      'text': '$message $emp1 $date1 $shiftType1 with $emp2 $date2 $shiftType2',
+      'confirmed': confirmed,
+      'timestamp': DateTime.now()
+    };
+    feedRef
+        .document(adminFeedDocID)
+        .collection('changes')
+        .document()
+        .setData(Map<String, dynamic>.from(change));
   }
 }

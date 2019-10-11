@@ -1,12 +1,6 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:paybis_com_shifts/controller/db_controller.dart';
-import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/ui_parts/rounded_button.dart';
-
-final dbController = DBController();
-List<Employee> listWithEmployees = List<Employee>();
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'welcome_screen';
@@ -15,32 +9,16 @@ class WelcomeScreen extends StatefulWidget {
   _WelcomeScreenState createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen>
-    with SingleTickerProviderStateMixin {
-  AnimationController controller;
-  Animation animation;
-
+class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   void initState() {
     super.initState();
-    dbController.getUsers(listWithEmployees);
-    controller = AnimationController(
-      duration: Duration(seconds: 1),
-      vsync: this,
-    );
-
-    animation = ColorTween(begin: Colors.blueGrey, end: Colors.white)
-        .animate(controller);
-    controller.forward();
-    controller.addListener(() {
-      setState(() {});
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: animation.value,
+      backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
@@ -58,9 +36,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     height: 60.0,
                   ),
                 ),
-                TypewriterAnimatedTextKit(
-                  text: ['PayBis Shifts'],
-                  textStyle: TextStyle(
+                Text(
+                  'PayBis Shifts',
+                  style: TextStyle(
                     fontSize: 36.0,
                     fontWeight: FontWeight.w900,
                     color: Colors.lightBlueAccent,

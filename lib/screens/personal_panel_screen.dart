@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:paybis_com_shifts/constants.dart';
 
+import 'login_screen.dart';
 import 'shifts_screen.dart';
 
 class PersonalPanelScreen extends StatefulWidget {
@@ -46,7 +47,7 @@ class _PersonalPanelScreenState extends State<PersonalPanelScreen> {
     getAllPersonalData();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Привет ${employee.name}!'),
+        title: Text('Hi ${employee.name}! Stats for $selectedMonth.19'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
@@ -55,7 +56,7 @@ class _PersonalPanelScreenState extends State<PersonalPanelScreen> {
           children: <Widget>[
             RichText(
               text: TextSpan(
-                text: 'Amount of shifts ($selectedMonth.19): ',
+                text: 'Amount of shifts: ',
                 style: kPersonalPageDataTextStyle,
                 children: <TextSpan>[
                   TextSpan(
@@ -65,22 +66,19 @@ class _PersonalPanelScreenState extends State<PersonalPanelScreen> {
                 ],
               ),
             ),
-            Text(
-                'Amount of night shifts ($selectedMonth.19): $nightShiftsCountThisMonth',
+            Text('Amount of night shifts: $nightShiftsCountThisMonth',
                 style: kPersonalPageDataTextStyle),
-            Text(
-                'Amount of morning shifts ($selectedMonth.19): $morningShiftsCountThisMonth',
+            Text('Amount of morning shifts: $morningShiftsCountThisMonth',
                 style: kPersonalPageDataTextStyle),
-            Text(
-                'Amount of evening shifts ($selectedMonth.19): $eveningShiftsCountThisMonth',
+            Text('Amount of evening shifts: $eveningShiftsCountThisMonth',
                 style: kPersonalPageDataTextStyle),
             RichText(
               text: TextSpan(
-                text: 'Salary ($selectedMonth.19): ',
+                text: 'Salary: ',
                 style: kPersonalPageDataTextStyle,
                 children: <TextSpan>[
                   TextSpan(
-                    text: ' $salary',
+                    text: ' ${salary.toStringAsFixed(2)}',
                     style: TextStyle(color: Colors.blue, fontSize: 22.0),
                   ),
                 ],
@@ -214,8 +212,6 @@ class _PersonalPanelScreenState extends State<PersonalPanelScreen> {
   calculateAmountOfHoursEveningShifts() {}
 
   calculateSalaryThisMonth() {
-    print('printing position...');
-    print(employee.position);
     if (employee.position == kJuniorSupport) {
       salary = ((eveningShiftsCountThisMonth + morningShiftsCountThisMonth) *
               8 *

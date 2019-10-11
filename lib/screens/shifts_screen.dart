@@ -8,9 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
-import 'package:paybis_com_shifts/screens/welcome_screen.dart';
+import 'package:paybis_com_shifts/models/progress.dart';
+import 'package:paybis_com_shifts/screens/login_screen.dart';
+import 'package:paybis_com_shifts/screens/recent_changes_screen.dart';
 
-import 'changes_log_screen.dart';
+import 'feed_screen.dart';
 import 'personal_panel_screen.dart';
 import 'settings_screen.dart';
 
@@ -26,14 +28,19 @@ int shiftNumberContainer1ForShiftExchange;
 int shiftNumberContainer2ForShiftExchange;
 String shiftHolderContainer1ForShiftExchange;
 String shiftHolderContainer2ForShiftExchange;
+String shiftDateContainer1ForShiftExchange;
+String shiftDateContainer2ForShiftExchange;
+String shiftTypeContainer1ForShiftExchange;
+String shiftTypeContainer2ForShiftExchange;
+
 int _beginMonthPadding = 0;
-DateTime _dateTime = DateTime.now();
-int selectedMonth = _dateTime.month;
-Employee employee;
+DateTime timestamp = DateTime.now();
+int selectedMonth = timestamp.month;
 int workingHours;
+String shiftExchangeMessage = '';
 List<Day> daysWithShiftsForCountThisMonth = List<Day>();
-List<Day> daysWithShiftsForCountLastMonth = List<Day>();
 final shiftsScaffoldKey = new GlobalKey<ScaffoldState>();
+TextEditingController reasonTextInputController;
 
 class ShiftScreen extends StatefulWidget {
   static const String id = 'shifts_screen';
@@ -44,25 +51,10 @@ class ShiftScreen extends StatefulWidget {
 class _ShiftScreenState extends State<ShiftScreen> {
   final _auth = FirebaseAuth.instance;
 
-  void getCurrentUser() async {
-    try {
-      final user = await _auth.currentUser();
-      if (user != null) {
-        loggedInUser = user;
-        for (Employee emp in listWithEmployees) {
-          if (emp.email == loggedInUser.email) employee = emp;
-        }
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-//    print("InitState method invoked");
-    getCurrentUser();
+    reasonTextInputController = new TextEditingController();
   }
 
   @override
@@ -82,7 +74,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
         automaticallyImplyLeading: false,
         title: Text('PayBis Schedule'),
         actions: <Widget>[
-          (employee != null)
+          (loggedInUser.email != "admin@paybis.com")
               ? PopupMenuButton<String>(
                   itemBuilder: (BuildContext context) {
                     return kEmployeeChoicesPopupMenu.map((String choice) {
@@ -159,16 +151,20 @@ class _ShiftScreenState extends State<ShiftScreen> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: MaterialButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedMonth = selectedMonth - 1;
-                    });
-                  },
+                child: Material(
+                  elevation: 5.0,
                   color: Colors.lightBlue,
-                  child: Text(
-                    'prev month',
-                    style: kHeaderFontStyle,
+                  borderRadius: BorderRadius.circular(15.0),
+                  child: MaterialButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedMonth = selectedMonth - 1;
+                      });
+                    },
+                    child: Text(
+                      'prev month',
+                      style: kHeaderFontStyle,
+                    ),
                   ),
                 ),
               ),
@@ -179,9 +175,9 @@ class _ShiftScreenState extends State<ShiftScreen> {
 //                  onPressed: () {
 //                    setState(() async {
 //                      for (int i = 1;
-//                          i <= getNumberOfDaysInMonth(_dateTime.month + 1);
+//                          i <= getNumberOfDaysInMonth(timestamp.month + 1);
 //                          i++) {
-//                        Day newDay = new Day(i, 10, 19, 211019, {
+//                        Day newDay = new Day(i, 11, 19, 211119, {
 //                          'holder': '',
 //                          'id': '${i}061',
 //                          'type': 'night',
@@ -227,7 +223,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
 //                          'type': 'evening',
 //                          'hours': 8
 //                        });
-//                        Map dayMap = newDay.buildMap(i, 10, 2019, 211019, {
+//                        Map dayMap = newDay.buildMap(i, 11, 2019, 211019, {
 //                          'holder': '',
 //                          'id': '${newDay.day}${newDay.month}${newDay.year}1',
 //                          'type': 'night',
@@ -273,10 +269,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
 //                          'type': 'evening',
 //                          'hours': 8
 //                        });
-//                        await _fireStore
-//                            .collection('days')
-//                            .document()
-//                            .setData(Map<String, dynamic>.from(dayMap));
+//                        await dbController.addMonth(dayMap);
 //                      }
 //                    });
 //                  },
@@ -289,19 +282,23 @@ class _ShiftScreenState extends State<ShiftScreen> {
 //              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: MaterialButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedMonth = selectedMonth + 1;
-                    });
-                  },
+                child: Material(
+                  elevation: 5.0,
                   color: Colors.lightBlue,
-                  child: Text(
-                    'next month',
-                    style: kHeaderFontStyle,
+                  borderRadius: BorderRadius.circular(15.0),
+                  child: MaterialButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedMonth = selectedMonth + 1;
+                      });
+                    },
+                    child: Text(
+                      'next month',
+                      style: kHeaderFontStyle,
+                    ),
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ],
@@ -319,13 +316,20 @@ class _ShiftScreenState extends State<ShiftScreen> {
     }
     if (choice == kItVacations) {}
     if (choice == kSupportVacations) {}
-    if (choice == kChangesLog) {
-      Navigator.pushNamed(context, ChangesLogScreen.id);
+    if (choice == kChangeRequests) {
+      Navigator.pushNamed(context, FeedScreen.id);
     }
+    if (choice == kRecentChanges) {
+      Navigator.pushNamed(context, RecentChangesScreen.id);
+    }
+
     if (choice == kLogOut) {
       employee = null;
       _auth.signOut();
-      Navigator.pop(context);
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (BuildContext context) {
+        return LoginScreen();
+      }));
     }
   }
 }
@@ -344,11 +348,7 @@ class DaysStream extends StatelessWidget {
       stream: dbController.createStream(month),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(
-            child: CircularProgressIndicator(
-              backgroundColor: Colors.lightBlueAccent,
-            ),
-          );
+          return circularProgress();
         }
         final days = snapshot.data.documents;
         List<Widget> daysWithShifts = [];
@@ -622,13 +622,15 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
   String id;
   String documentID;
   int number;
+  String date;
   bool isPast = false;
-  PopupEmployeesLayout popupEmployeesLayout;
+//  PopupEmployeesLayout popupEmployeesLayout = PopupEmployeesLayout();
 
   @override
   Widget build(BuildContext context) {
     bool isLong = false;
     id = widget.id;
+    date = '${widget.day}.${widget.month}';
     documentID = widget.documentID;
     number = widget.number;
     widget.text == '' ? employeeChosen = false : employeeChosen = true;
@@ -654,19 +656,14 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                 ? MaterialButton(
                     onPressed: () {
                       setState(() {
-                        popupEmployeesLayout.showPopup(
-                            context,
-                            widget.id,
-                            documentID,
-                            number,
-                            widget.workingHours,
-                            "Who's gonna work?");
+                        showAdminAlertDialog(context, widget.id, documentID,
+                            number, widget.workingHours, "Who's gonna work?");
                       });
                     },
                     color: Colors.white,
                     shape: CircleBorder(),
                     child: Padding(
-                      padding: EdgeInsets.only(bottom: bottom, right: right),
+                      padding: EdgeInsets.only(bottom: 3.0, right: 0.0),
                       child: Text(
                         buttonText,
                         style: TextStyle(
@@ -684,13 +681,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                 : MaterialButton(
                     onPressed: () {
                       setState(() {
-                        popupEmployeesLayout.showPopup(
-                            context,
-                            widget.id,
-                            documentID,
-                            number,
-                            widget.workingHours,
-                            "Who's gonna work?");
+                        showAdminAlertDialog(context, widget.id, documentID,
+                            number, widget.workingHours, "Who's gonna work?");
                       });
                     },
                     color: color,
@@ -743,13 +735,13 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                 //If Emp is NOT chosen
 
                 ? MaterialButton(
-                  //  onPressed: () {
-                  //  },
-                
+                    //  onPressed: () {
+                    //  },
+
                     color: Colors.lightBlue,
                     shape: CircleBorder(),
                     child: Padding(
-                      padding: EdgeInsets.only(bottom: bottom, right: right),
+                      padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
                       child: Text(
                         '',
                         style: TextStyle(
@@ -763,518 +755,476 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                   )
 
                 //If Emp is chosen
-                : MaterialButton(
-                    onPressed: () {
-                      setState(() {
-                        if (widget.text == employee.initial &&
-                            isPast == false &&
-                            shiftDocIDContainer1ForShiftExchange == null &&
-                            shiftNumberContainer1ForShiftExchange == null &&
-                            shiftHolderContainer1ForShiftExchange == null) {
-                          popupEmployeesLayout.showPersonalShiftPopup(
-                              context,
-                              widget.id,
-                              documentID,
-                              number,
-                              'What to do with this shift?');
-                          shiftDocIDContainer1ForShiftExchange = documentID;
-                          shiftNumberContainer1ForShiftExchange = number;
-                          shiftHolderContainer1ForShiftExchange =
-                              employee.initial;
-                        }
-                        if (isPast == false &&
-                            widget.text != employee.initial &&
-                            shiftDocIDContainer1ForShiftExchange != null &&
-                            shiftNumberContainer1ForShiftExchange != null &&
-                            shiftHolderContainer1ForShiftExchange != null) {
-                          popupEmployeesLayout
-                              .showChangeShiftsConfirmationPopup(
+                : Padding(
+                    padding: EdgeInsets.symmetric(vertical: 1.8),
+                    child: Material(
+                        color: (employee != null)
+                            ? (widget.text == employee.initial)
+                                ? Colors.black
+                                : color.withOpacity(0)
+                            : color.withOpacity(0),
+                        borderRadius: BorderRadius.circular(15.0),
+                        child: MaterialButton(
+                          onPressed: () {
+                            setState(() {
+                              if (widget.text == employee.initial &&
+                                  isPast == false &&
+                                  shiftDocIDContainer1ForShiftExchange ==
+                                      null &&
+                                  shiftNumberContainer1ForShiftExchange ==
+                                      null &&
+                                  shiftHolderContainer1ForShiftExchange ==
+                                      null) {
+                                openPersonalShiftAlertBox(context, widget.id,
+                                    documentID, number, date, 'Exchange?');
+                              }
+                              if (isPast == false &&
+                                  widget.text != employee.initial &&
+                                  shiftDocIDContainer1ForShiftExchange !=
+                                      null &&
+                                  shiftNumberContainer1ForShiftExchange !=
+                                      null &&
+                                  shiftHolderContainer1ForShiftExchange !=
+                                      null) {
+                                openChangeShiftsConfirmationAlertBox(
                                   context,
                                   widget.id,
                                   documentID,
                                   number,
-                                  'Are you sure you want to exchange?');
-                          shiftDocIDContainer2ForShiftExchange = documentID;
-                          shiftNumberContainer2ForShiftExchange = number;
-                          shiftHolderContainer2ForShiftExchange = widget.text;
-                        }
-                      });
-                    },
-                    color: (employee != null)
-                        ? (widget.text == employee.initial)
-                            ? color
-                            : color.withOpacity(0.25)
-                        : color,
-                    shape: CircleBorder(),
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
-                      child: (widget.workingHours != 8)
-                          ? Column(
-                              children: <Widget>[
-                                Text(
+                                  date,
+                                  'Exchange with ${widget.text}?',
                                   widget.text,
-                                  style: TextStyle(
-                                    fontSize: isLong ? 13.0 : 16.0,
-                                    color: Colors.white,
+                                );
+                              }
+                            });
+                          },
+                          color: (employee != null)
+                              ? (widget.text == employee.initial)
+                                  ? Colors.pink
+                                  : color.withOpacity(0.25)
+                              : color,
+                          shape: CircleBorder(),
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
+                            child: (widget.workingHours != 8)
+                                ? Column(
+                                    children: <Widget>[
+                                      Text(
+                                        widget.text,
+                                        style: TextStyle(
+                                          fontSize: isLong ? 13.0 : 16.0,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        (widget.workingHours < 8) ? '-' : '+',
+                                        style: TextStyle(
+                                            fontSize: 8.0,
+                                            fontWeight: FontWeight.bold,
+                                            color: (widget.workingHours < 8)
+                                                ? Colors.red
+                                                : Colors.green),
+                                      )
+                                    ],
+                                  )
+                                : Text(
+                                    widget.text,
+                                    style: TextStyle(
+                                      fontSize: isLong ? 13.0 : 16.0,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  (widget.workingHours < 8) ? '-' : '+',
-                                  style: TextStyle(
-                                      fontSize: 8.0,
-                                      fontWeight: FontWeight.bold,
-                                      color: (widget.workingHours < 8)
-                                          ? Colors.red
-                                          : Colors.green),
-                                )
-                              ],
-                            )
-                          : Text(
-                              widget.text,
-                              style: TextStyle(
-                                fontSize: isLong ? 13.0 : 16.0,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                    padding: EdgeInsets.all(0.0),
-                    minWidth: 10.0,
-                  ));
+                          ),
+                          padding: EdgeInsets.all(0.0),
+                          minWidth: 10.0,
+                        ))));
   }
 }
 
-class PopupEmployeesLayout extends ModalRoute {
-  String id;
-  double top;
-  double bottom;
-  double left;
-  double right;
-  Color bgColor;
-  _ShiftsRoundButtonState state;
-  String choiceOfEmployee;
-  final Widget child;
-  PopupEmployeesLayout(
-      {Key key,
-      this.bgColor,
-      @required this.child,
-      this.top,
-      this.bottom,
-      this.left,
-      this.id,
-      this.right,
-      this.choiceOfEmployee});
+void updateShiftExchangeValuesToNull() {
+  shiftDocIDContainer1ForShiftExchange = null;
+  shiftDocIDContainer2ForShiftExchange = null;
+  shiftHolderContainer1ForShiftExchange = null;
+  shiftHolderContainer2ForShiftExchange = null;
+  shiftNumberContainer1ForShiftExchange = null;
+  shiftNumberContainer2ForShiftExchange = null;
+  shiftDateContainer1ForShiftExchange = null;
+  shiftDateContainer2ForShiftExchange = null;
+  shiftTypeContainer1ForShiftExchange = null;
+  shiftTypeContainer2ForShiftExchange = null;
+  shiftExchangeMessage = '';
+  reasonTextInputController.clear();
+}
 
-  @override
-  Duration get transitionDuration => Duration(milliseconds: 300);
-  @override
-  bool get opaque => false;
-  @override
-  bool get barrierDismissible => false;
-  @override
-  Color get barrierColor =>
-      bgColor == null ? Colors.black.withOpacity(0.5) : bgColor;
-  @override
-  String get barrierLabel => null;
-  @override
-  bool get maintainState => false;
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    if (top == null) this.top = 10;
-    if (bottom == null) this.bottom = 20;
-    if (left == null) this.left = 20;
-    if (right == null) this.right = 20;
-
-    return GestureDetector(
-      onTap: () {
-        // call this method here to hide soft keyboard
-        SystemChannels.textInput.invokeMethod('TextInput.hide');
-      },
-      child: Material(
-        // This makes sure that text and other content follows the material style
-        type: MaterialType.transparency,
-        //type: MaterialType.canvas,
-        // make sure that the overlay content is not cut off
-        child: SafeArea(
-          bottom: true,
-          child: _buildOverlayContent(context),
-        ),
-      ),
-    );
-  }
-
-  List<Widget> listMyWidgets(BuildContext context) {
-    List<Widget> list = List();
-    for (Employee emp in listWithEmployees) {
-      list.add(
-        MaterialButton(
-          onPressed: () {
-            Navigator.pop(context, emp.initial);
-          },
-          color: convertColor(emp.empColor),
-          child: Text(
-            emp.name,
-            style: kHeaderFontStyle,
-          ),
-        ),
-      );
-    }
-    list.add(MaterialButton(
-      onPressed: () {
-        Navigator.pop(context, 'none');
-      },
-      color: Colors.black,
-      child: Text(
-        'none',
-        style: kHeaderFontStyle,
-      ),
-    ));
-    return list;
-  }
-
-  showPopup(BuildContext context, String id, String docID, int number,
-      int workingHoursFromWidget, String title,
-      {BuildContext popupContext}) {
-    final result = Navigator.of(context).push(
-      PopupEmployeesLayout(
-        top: 30,
-        left: 40,
-        right: 40,
-        bottom: 100,
-        child: PopupContent(
-          content: Scaffold(
-            appBar: AppBar(
-              title: Text(title),
-              leading: new Builder(builder: (context) {
-                return IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  onPressed: () {
-                    try {
-                      Navigator.pop(context); //close the popup
-                    } catch (e) {}
-                  },
-                );
-              }),
-              brightness: Brightness.light,
+///ADMIN ALERT DIALOG
+///
+showAdminAlertDialog(
+  BuildContext context,
+  String id,
+  String docID,
+  int number,
+  int workingHoursFromWidget,
+  String title,
+) {
+  final result = showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(32.0))),
+        content: ListView(
+          children: <Widget>[
+            Center(
+              child: Text(
+                'Who is going to work?',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+              ),
             ),
-            resizeToAvoidBottomPadding: false,
-            body: ListView(
-              children: <Widget>[
-                Wrap(
-                  alignment: WrapAlignment.spaceEvenly,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: listMyWidgets(context),
+            SizedBox(
+              height: 5.0,
+            ),
+            Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: listMyWidgets(context),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black38,
+                  borderRadius: BorderRadius.circular(15.0),
                 ),
-                SizedBox(
-                  height: 40.0,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(60.0),
-                  child: Container(
-                    decoration:
-                        BoxDecoration(color: Colors.grey.withOpacity(0.2)),
-                    child: Column(
-                      children: <Widget>[
-                        SizedBox(height: 10.0),
-                        Text(
-                          'Update working hours for this shift (at this moment: $workingHoursFromWidget)',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(height: 10.0),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 15.0, top: 8.0, right: 4.0, bottom: 18.0),
+                      child: Text(
+                        'Update working hours for this shift (at this moment: $workingHoursFromWidget)',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                          color: Colors.white,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                          child: TextFormField(
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.center,
-                            maxLength: 2,
-                            onChanged: (value) {
-                              //Do something with the user input.
-                              workingHours = int.parse(value);
-                            },
-                          ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                      child: TextFormField(
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        maxLength: 2,
+                        decoration: kTextFieldDecoration.copyWith(
+                          hintText: '$workingHoursFromWidget',
                         ),
-                        MaterialButton(
+                        onChanged: (value) {
+                          //Do something with the user input.
+                          workingHours = int.parse(value);
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: Material(
+                        elevation: 5.0,
+                        color: Colors.lightBlue,
+                        borderRadius: BorderRadius.circular(15.0),
+                        child: MaterialButton(
                           child: Text(
                             'Update',
                             style: TextStyle(
+                              fontSize: 16.0,
                               color: Colors.white,
                             ),
                           ),
-                          color: Colors.lightBlue,
                           onPressed: () async {
-                            try {
-                              Navigator.pop(context); //close the popup
-                            } catch (e) {}
                             _currentDocument =
                                 await dbController.getDocument(docID);
                             await dbController.updateHours(
                                 _currentDocument, number, workingHours);
+                            Navigator.pop(context);
                           },
                         ),
-                      ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+  result.then((result) async {
+    if (result == null || result == '') {
+      result = '+';
+    } else {
+      _currentDocument = await dbController.getDocument(docID);
+
+      String choiceOfEmployee = result.toString();
+
+      if (choiceOfEmployee == 'none') {
+        await dbController.updateHolderToNone(_currentDocument, number);
+      } else
+        await dbController.updateHolder(
+            _currentDocument, number, choiceOfEmployee);
+    }
+  });
+}
+
+List<Widget> listMyWidgets(BuildContext context) {
+  List<Widget> list = List();
+  for (Employee emp in listWithEmployees) {
+    list.add(Padding(
+      padding: const EdgeInsets.all(2.0),
+      child: Material(
+        elevation: 5.0,
+        color: convertColor(emp.empColor),
+        borderRadius: BorderRadius.circular(15.0),
+        child: MaterialButton(
+          minWidth: 100.0,
+          onPressed: () {
+            Navigator.pop(context, emp.initial);
+          },
+          child: Text(
+            emp.name,
+            style: TextStyle(
+              fontSize: (emp.name.length <= 7) ? 17.0 : 14.0,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    ));
+  }
+  list.add(Padding(
+    padding: const EdgeInsets.all(5.0),
+    child: Material(
+      elevation: 5.0,
+      color: Colors.black,
+      borderRadius: BorderRadius.circular(15.0),
+      child: MaterialButton(
+        onPressed: () {
+          Navigator.pop(context, 'none');
+        },
+        child: Text(
+          'none',
+          style: kHeaderFontStyle,
+        ),
+      ),
+    ),
+  ));
+  return list;
+}
+
+openPersonalShiftAlertBox(BuildContext context, String id, String docID,
+    int number, String date, String title) {
+  return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          contentPadding: EdgeInsets.only(top: 10.0),
+          content: Container(
+            width: 300.0,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      title,
+                      style: TextStyle(fontSize: 24.0),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Divider(
+                  color: Colors.grey,
+                  height: 4.0,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 30.0, right: 30.0),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: "Type the reason here",
+                      border: InputBorder.none,
+                    ),
+                    maxLines: 5,
+                    controller: reasonTextInputController,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+//                        FocusScopeNode currentScope = FocusScope.of(context);
+//                        currentScope.unfocus();
+
+                    Navigator.pop(context);
+                    chooseShiftToExchange();
+                    shiftDocIDContainer1ForShiftExchange = docID;
+                    shiftNumberContainer1ForShiftExchange = number;
+                    shiftHolderContainer1ForShiftExchange = employee.initial;
+                    shiftDateContainer1ForShiftExchange = date;
+                    shiftExchangeMessage = reasonTextInputController.text;
+                    reasonTextInputController.clear();
+                    if (number < 4) {
+                      shiftTypeContainer1ForShiftExchange = 'night';
+                    } else if (number > 5) {
+                      shiftTypeContainer1ForShiftExchange = 'evening';
+                    } else {
+                      shiftTypeContainer1ForShiftExchange = 'morning';
+                    }
+                  },
+                  child: InkWell(
+                    child: Container(
+                      padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                      decoration: BoxDecoration(
+                        color: Colors.lightBlue,
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(32.0),
+                            bottomRight: Radius.circular(32.0)),
+                      ),
+                      child: Text(
+                        "Exchange",
+                        style: TextStyle(color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-    result.then((result) {
-      setState(() async {
-        if (result == null || result == '') {
-          result = '+';
-        } else {
-          _currentDocument = await dbController.getDocument(docID);
-
-          choiceOfEmployee = result.toString();
-          print('result ' + result);
-          print('Choice ' + choiceOfEmployee);
-
-          if (choiceOfEmployee == 'none') {
-            await dbController.updateHolderToNone(_currentDocument, number);
-          } else
-            await dbController.updateHolder(
-                _currentDocument, number, choiceOfEmployee);
-        }
+        );
       });
-    });
-  }
+}
 
-  showPersonalShiftPopup(
-      BuildContext context, String id, String docID, int number, String title,
-      {BuildContext popupContext}) {
-    Navigator.of(context).push(
-      PopupEmployeesLayout(
-        top: 30,
-        left: 40,
-        right: 40,
-        bottom: 500,
-        child: PopupContent(
-          content: Scaffold(
-            appBar: AppBar(
-              title: Text(title),
-              leading: new Builder(builder: (context) {
-                return IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  onPressed: () {
-                    try {
-                      Navigator.pop(context); //close the popup
-                    } catch (e) {}
-                  },
-                );
-              }),
-              brightness: Brightness.light,
-            ),
-            resizeToAvoidBottomPadding: false,
-            body: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
+openChangeShiftsConfirmationAlertBox(BuildContext context, String id,
+    String docID, int number, String date, String title, String initials) {
+  return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          contentPadding: EdgeInsets.only(top: 10.0),
+          content: Container(
+            width: 300.0,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Expanded(
-                  child: MaterialButton(
-                    //ToDo implement Exchange Shift logic
-                    onPressed: () {
-                      changeShifts();
-                      Navigator.pop(context);
-                    },
-                    color: Colors.green,
-                    shape: RoundedRectangleBorder(),
-                    child: Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Text(
-                        'Exchange',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          color: Colors.white,
-                        ),
-                      ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      title,
+                      style: TextStyle(fontSize: 24.0),
                     ),
-                    padding: EdgeInsets.all(0.0),
-                    minWidth: 10.0,
-                  ),
+                  ],
                 ),
-                Expanded(
-                  child: MaterialButton(
-                    //ToDo implement refuse Shift logic
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    color: Colors.red,
-                    shape: RoundedRectangleBorder(),
-                    child: Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Text(
-                        'Get rid of',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          color: Colors.white,
+                SizedBox(
+                  height: 5.0,
+                ),
+                Divider(
+                  color: Colors.grey,
+                  height: 4.0,
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          shiftDocIDContainer2ForShiftExchange = docID;
+                          shiftNumberContainer2ForShiftExchange = number;
+                          shiftHolderContainer2ForShiftExchange = initials;
+                          shiftDateContainer2ForShiftExchange = date;
+                          if (number < 4) {
+                            shiftTypeContainer2ForShiftExchange = 'night';
+                          } else if (number > 5) {
+                            shiftTypeContainer2ForShiftExchange = 'evening';
+                          } else {
+                            shiftTypeContainer2ForShiftExchange = 'morning';
+                          }
+                          dbController.addChangeRequestToAdminFeed(
+                              shiftDocIDContainer1ForShiftExchange,
+                              shiftDocIDContainer2ForShiftExchange,
+                              shiftNumberContainer1ForShiftExchange,
+                              shiftNumberContainer2ForShiftExchange,
+                              shiftHolderContainer1ForShiftExchange,
+                              shiftHolderContainer2ForShiftExchange,
+                              shiftDateContainer1ForShiftExchange,
+                              shiftDateContainer2ForShiftExchange,
+                              shiftTypeContainer1ForShiftExchange,
+                              shiftTypeContainer2ForShiftExchange,
+                              shiftExchangeMessage);
+
+                          updateShiftExchangeValuesToNull();
+                          Navigator.pop(context);
+                          showConfirmationMessage();
+                        },
+                        child: InkWell(
+                          child: Container(
+                            padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                            decoration: BoxDecoration(
+                              color: Colors.lightBlue,
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(32.0),
+                              ),
+                            ),
+                            child: Text(
+                              "Yes",
+                              style: TextStyle(color: Colors.white),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                    padding: EdgeInsets.all(0.0),
-                    minWidth: 10.0,
-                  ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          updateShiftExchangeValuesToNull();
+                          Navigator.pop(context);
+                          showCancelMessage();
+                        },
+                        child: InkWell(
+                          child: Container(
+                            padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.only(
+                                  bottomRight: Radius.circular(32.0)),
+                            ),
+                            child: Text(
+                              "Cancel",
+                              style: TextStyle(color: Colors.white),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  showChangeShiftsConfirmationPopup(
-      BuildContext context, String id, String docID, int number, String title,
-      {BuildContext popupContext}) {
-    Navigator.of(context).push(
-      PopupEmployeesLayout(
-        top: 30,
-        left: 40,
-        right: 40,
-        bottom: 500,
-        child: PopupContent(
-          content: Scaffold(
-            appBar: AppBar(
-              title: Text(title),
-              leading: new Builder(builder: (context) {
-                return IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  onPressed: () {
-                    try {
-                      Navigator.pop(context); //close the popup
-                    } catch (e) {}
-                  },
-                );
-              }),
-              brightness: Brightness.light,
-            ),
-            resizeToAvoidBottomPadding: false,
-            body: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                  child: MaterialButton(
-                    onPressed: () {
-                      dbController.changeShiftHolders(
-                          shiftDocIDContainer1ForShiftExchange,
-                          shiftDocIDContainer2ForShiftExchange,
-                          shiftNumberContainer1ForShiftExchange,
-                          shiftNumberContainer2ForShiftExchange,
-                          shiftHolderContainer1ForShiftExchange,
-                          shiftHolderContainer2ForShiftExchange);
-
-                      updateShiftExchangeValuesToNull();
-                      Navigator.pop(context);
-                    },
-                    color: Colors.green,
-                    shape: RoundedRectangleBorder(),
-                    child: Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Text(
-                        'Yes',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    padding: EdgeInsets.all(0.0),
-                    minWidth: 10.0,
-                  ),
-                ),
-                Expanded(
-                  child: MaterialButton(
-                    onPressed: () {
-                      updateShiftExchangeValuesToNull();
-                      Navigator.pop(context);
-                    },
-                    color: Colors.red,
-                    shape: RoundedRectangleBorder(),
-                    child: Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    padding: EdgeInsets.all(0.0),
-                    minWidth: 10.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  //the dynamic content pass by parameter
-  Widget _buildOverlayContent(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(
-          bottom: this.bottom,
-          left: this.left,
-          right: this.right,
-          top: this.top),
-      child: child,
-    );
-  }
-
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
-    // You can add your own animations for the overlay content
-    return FadeTransition(
-      opacity: animation,
-      child: ScaleTransition(
-        scale: animation,
-        child: child,
-      ),
-    );
-  }
-
-  void updateShiftExchangeValuesToNull() {
-    shiftDocIDContainer1ForShiftExchange = null;
-    shiftDocIDContainer2ForShiftExchange = null;
-    shiftHolderContainer1ForShiftExchange = null;
-    shiftHolderContainer2ForShiftExchange = null;
-    shiftNumberContainer1ForShiftExchange = null;
-    shiftNumberContainer2ForShiftExchange = null;
-  }
-}
-
-class PopupContent extends StatefulWidget {
-  final Widget content;
-  PopupContent({
-    Key key,
-    this.content,
-  }) : super(key: key);
-  _PopupContentState createState() => _PopupContentState();
-}
-
-class _PopupContentState extends State<PopupContent> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: widget.content,
-    );
-  }
+        );
+      });
 }
 
 class Day {
@@ -1409,13 +1359,19 @@ int weekdayCheck(int day, int month, int year) {
   return weekday;
 }
 
-void changeShifts() {
-  chooseShiftToExchange();
-}
-
 void chooseShiftToExchange() {
   shiftsScaffoldKey.currentState.showSnackBar(
       new SnackBar(content: new Text("Choose The Shift You Want")));
+}
+
+void showConfirmationMessage() {
+  shiftsScaffoldKey.currentState.showSnackBar(
+      new SnackBar(content: new Text("Your request has been sent to admin")));
+}
+
+void showCancelMessage() {
+  shiftsScaffoldKey.currentState.showSnackBar(
+      new SnackBar(content: new Text("Shift exchange cancelled")));
 }
 
 Color convertColor(String color) {
