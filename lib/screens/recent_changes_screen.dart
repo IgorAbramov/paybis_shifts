@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 
@@ -68,7 +69,7 @@ class Change extends StatelessWidget {
       child: ListTile(
         title: Text(
           text,
-          style: TextStyle(color: confirmed ? Colors.green : Colors.red),
+          style: TextStyle(color: confirmed ? Colors.green : accentColor),
         ),
         subtitle: Text(timestamp.toDate().toString()),
       ),

@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/screens/feed_screen.dart';
 
 final _fireStore = Firestore.instance;
 final feedRef = Firestore.instance.collection('feed');
 final String adminFeedDocID = 'T8dBZmU5meD1LfEgfEM3';
+final _auth = FirebaseAuth.instance;
 
 class DBController {
   Stream createStream<QuerySnapshot>(int month) {
@@ -24,6 +26,10 @@ class DBController {
 
   getDocument(String docID) async {
     return await _fireStore.collection('days').document('$docID').get();
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    return _auth.sendPasswordResetEmail(email: email);
   }
 
   updateHolderToNone(DocumentSnapshot documentSnapshot, int number) async {
@@ -104,7 +110,6 @@ class DBController {
   }
 
   void changeUser(String email, Map emp) async {
-    //TODO implement change User logic
     final docs = await _fireStore
         .collection('users')
         .where('email', isEqualTo: email)

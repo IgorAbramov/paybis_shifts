@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/screens/change_user_screen.dart';
+import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/ui_parts/rounded_button.dart';
 
 import 'register_user_screen.dart';
+import 'shifts_screen.dart';
+
+final settingsScaffoldKey = GlobalKey<ScaffoldState>();
 
 class SettingsScreen extends StatefulWidget {
   static const String id = 'settings_screen';
@@ -14,26 +19,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: settingsScaffoldKey,
       appBar: AppBar(
         title: Text('Settings'),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          SizedBox(
-            height: 10.0,
-          ),
-          SettingsButton(
-            buttonText: 'Add employee',
-            function: redirectToCreateUserPage,
-          ),
-          SettingsButton(
-            buttonText: 'Change or delete employee',
-            function: redirectToChangeUserPage,
-          ),
-          //TODO add options to change appearance of the shifts screen and theme
-        ],
-      ),
+      body: (loggedInUser.email == "admin@paybis.com")
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                SizedBox(
+                  height: 10.0,
+                ),
+                SettingsButton(
+                  buttonText: 'Add employee',
+                  function: redirectToCreateUserPage,
+                ),
+                SettingsButton(
+                  buttonText: 'Change or delete employee',
+                  function: redirectToChangeUserPage,
+                ),
+                SettingsButton(
+                  buttonText: 'Change password',
+                  function: openConfirmationWindow,
+                ),
+                //TODO add options to change appearance of the shifts screen and theme
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                SettingsButton(
+                  buttonText: 'Change password',
+                  function: openConfirmationWindow,
+                ),
+              ],
+            ),
     );
   }
 
@@ -43,6 +63,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void redirectToChangeUserPage() {
     Navigator.pushNamed(context, ChangeUserScreen.id);
+  }
+
+  void openConfirmationWindow() {
+    openPasswordChangeConfirmationAlertBox(context, 'Reset the password?');
   }
 }
 
@@ -64,8 +88,111 @@ class _SettingsButtonState extends State<SettingsButton> {
       child: RoundedButton(
         onPressed: widget.function,
         title: widget.buttonText,
-        color: Colors.lightBlueAccent,
+        color: primaryColor,
       ),
     );
   }
+}
+
+openPasswordChangeConfirmationAlertBox(BuildContext context, String title) {
+  return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          contentPadding: EdgeInsets.only(top: 10.0),
+          content: Container(
+            width: 300.0,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      title,
+                      style: TextStyle(fontSize: 24.0),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Divider(
+                  color: dividerColor,
+                  height: 4.0,
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          dbController
+                              .sendPasswordResetEmail(loggedInUser.email);
+                          Navigator.pop(context);
+                          showPasswordConfirmationMessage();
+                        },
+                        child: InkWell(
+                          child: Container(
+                            padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                            decoration: BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(32.0),
+                              ),
+                            ),
+                            child: Text(
+                              "Yes",
+                              style: TextStyle(
+                                  color: textIconColor,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                          showCancelMessage();
+                        },
+                        child: InkWell(
+                          child: Container(
+                            padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                            decoration: BoxDecoration(
+                              color: accentColor,
+                              borderRadius: BorderRadius.only(
+                                  bottomRight: Radius.circular(32.0)),
+                            ),
+                            child: Text(
+                              "Cancel",
+                              style: TextStyle(
+                                  color: textIconColor,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      });
+}
+
+showPasswordConfirmationMessage() {
+  settingsScaffoldKey.currentState.showSnackBar(
+      new SnackBar(content: new Text("Password reset email has been sent")));
 }

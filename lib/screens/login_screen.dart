@@ -11,6 +11,7 @@ import 'shifts_screen.dart';
 Employee employee;
 final dbController = DBController();
 List<Employee> listWithEmployees = List<Employee>();
+//bool isLoading = true;
 
 //TODO (In the end) add google auto log in option
 
@@ -27,16 +28,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
   final loginScaffoldKey = new GlobalKey<ScaffoldState>();
 
-  Future getCurrentUser() async {
+  Future getCurrentUserAndLogin() async {
     try {
       final user = await _auth.currentUser();
       listWithEmployees.clear();
       await dbController.getUsers(listWithEmployees);
+//      isLoading = false;
       if (user != null) {
         loggedInUser = user;
         for (Employee emp in listWithEmployees) {
           if (emp.email == loggedInUser.email) employee = emp;
         }
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (BuildContext context) {
+          return ShiftScreen(key: shiftsScreenKey);
+        }));
       }
     } catch (e) {
       print(e);
@@ -45,9 +51,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void initState() {
+    super.initState();
+    getCurrentUserAndLogin();
+
     emailInputController = new TextEditingController();
     pwdInputController = new TextEditingController();
-    super.initState();
   }
 
   String emailValidator(String value) {
@@ -73,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: loginScaffoldKey,
-      backgroundColor: Colors.white,
+      backgroundColor: textIconColor,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
@@ -126,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 24.0,
             ),
             RoundedButton(
-              color: Colors.lightBlueAccent,
+              color: primaryColor,
               title: 'Log In',
               onPressed: () async {
                 if (_loginFormKey.currentState.validate()) {
@@ -137,12 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             password: pwdInputController.text)
                         .catchError(((err) => wrongEmailOrPasswordError(err)));
                     if (user != null) {
-                      await getCurrentUser();
-//                      Navigator.pushNamed(context, ShiftScreen.id);
-                      Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (BuildContext context) {
-                        return ShiftScreen();
-                      }));
+                      await getCurrentUserAndLogin();
                     }
                   } catch (e) {
                     print(e);
@@ -163,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
       "Wrong email or password",
       style: TextStyle(
           fontSize: 13.0,
-          color: Colors.red,
+          color: accentColor,
           height: 1.0,
           fontWeight: FontWeight.w300),
     )));

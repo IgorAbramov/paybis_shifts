@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/screens/shifts_screen.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-//TODO show changes from Firebase Changes collections
-//TODO show only last 50 changes with the possibility to see more
+//TODO show only last 25 changes with the possibility to see more
 
 final feedScaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -166,7 +166,7 @@ class FeedItem extends StatelessWidget {
           ),
           children: <Widget>[
             Container(
-              color: Colors.lightBlueAccent.withOpacity(0.05),
+              color: lightPrimaryColor.withOpacity(0.05),
               child: ListTile(
                 leading: GestureDetector(
                   onTap: () {
@@ -198,7 +198,7 @@ class FeedItem extends StatelessWidget {
                         date2, shiftType1, shiftType2, 'Swap cancelled', false);
                   },
                   child: CircleAvatar(
-                    backgroundColor: Colors.red,
+                    backgroundColor: accentColor,
                     child: Icon(Icons.remove_circle),
                   ),
                 ),

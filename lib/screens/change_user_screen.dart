@@ -69,7 +69,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
     }
 
     return CupertinoPicker(
-      backgroundColor: Colors.white,
+      backgroundColor: textIconColor,
       itemExtent: 32.0,
       onSelectedItemChanged: (selectedIndex) {
         setState(() {
@@ -107,7 +107,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
     }
 
     return CupertinoPicker(
-      backgroundColor: Colors.white,
+      backgroundColor: textIconColor,
       itemExtent: 32.0,
       onSelectedItemChanged: (selectedIndex) {
         setState(() {
@@ -144,7 +144,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
     }
 
     return CupertinoPicker(
-      backgroundColor: Colors.white,
+      backgroundColor: textIconColor,
       itemExtent: 32.0,
       onSelectedItemChanged: (selectedIndex) {
         setState(() {
@@ -162,7 +162,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
         title: Text('Change user'),
         automaticallyImplyLeading: true,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: textIconColor,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: ListView(
@@ -171,7 +171,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
               height: 120.0,
               alignment: Alignment.center,
               padding: EdgeInsets.only(bottom: 30.0),
-              color: Colors.white,
+              color: textIconColor,
               child: Platform.isIOS ? iOSPickerName() : androidDropdownName(),
             ),
             TextFormField(
@@ -229,7 +229,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
               height: 120.0,
               alignment: Alignment.center,
               padding: EdgeInsets.only(bottom: 30.0),
-              color: Colors.white,
+              color: textIconColor,
               child: Platform.isIOS
                   ? iOSPickerDepartment()
                   : androidDropdownDepartment(),
@@ -239,7 +239,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
                     height: 120.0,
                     alignment: Alignment.center,
                     padding: EdgeInsets.only(bottom: 30.0),
-                    color: Colors.white,
+                    color: textIconColor,
                     child: Platform.isIOS
                         ? iOSPickerSupportPositions()
                         : androidDropdownSupportPositions(),
@@ -254,7 +254,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
                   child: Text(
                     'Pick color',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: textIconColor,
                       fontSize: 16.0,
                     ),
                   ),
@@ -295,7 +295,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
                               'OK',
                               style: TextStyle(
                                 fontSize: 20.0,
-                                color: Colors.blue,
+                                color: primaryColor,
                               ),
                             ),
                             onPressed: () {
@@ -320,7 +320,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
               height: 16.0,
             ),
             RoundedButton(
-              color: Colors.lightBlueAccent,
+              color: primaryColor,
               title: 'Confirm change',
               onPressed: () async {
                 //change user functionality
@@ -354,7 +354,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
               },
             ),
             RoundedButton(
-              color: Colors.red,
+              color: accentColor,
               title: 'Delete user',
               onPressed: () async {
                 //change user functionality

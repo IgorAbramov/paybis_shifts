@@ -30,9 +30,9 @@ const List<String> kAdminChoicesPopupMenu = [
 const List<String> kEmployeeChoicesPopupMenu = [
   kPersonalPanel,
   kRecentChanges,
+  kSettings,
 //  kSupportVacations,
 //  kItVacations,
-//  kFeed,
   kLogOut
 ];
 
@@ -61,23 +61,29 @@ const List<double> kTeamLeadSupportSalary = [8.5, 12.75];
 const TextStyle kHeaderFontStyle = TextStyle(
   fontSize: 18.0,
   fontWeight: FontWeight.bold,
-  color: Colors.white,
+  color: textIconColor,
 );
 
 const TextStyle kDateFontStyle = TextStyle(
   fontSize: 11.0,
   fontWeight: FontWeight.bold,
-  color: Colors.black,
+  color: textPrimaryColor,
+);
+
+const TextStyle kButtonFontStyle = TextStyle(
+  fontSize: 14.0,
+  fontWeight: FontWeight.bold,
+  color: textIconColor,
 );
 
 const kSendButtonTextStyle = TextStyle(
-  color: Colors.lightBlueAccent,
+  color: primaryColor,
   fontWeight: FontWeight.bold,
   fontSize: 18.0,
 );
 
 const kPersonalPageDataTextStyle = TextStyle(
-  color: Colors.black,
+  color: textPrimaryColor,
   fontSize: 18.0,
 );
 
@@ -89,7 +95,7 @@ const kMessageTextFieldDecoration = InputDecoration(
 
 const kMessageContainerDecoration = BoxDecoration(
   border: Border(
-    top: BorderSide(color: Colors.lightBlueAccent, width: 2.0),
+    top: BorderSide(color: accentColor, width: 2.0),
   ),
 );
 
@@ -100,11 +106,20 @@ const kTextFieldDecoration = InputDecoration(
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
   ),
   enabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Colors.lightBlueAccent, width: 1.0),
+    borderSide: BorderSide(color: primaryColor, width: 1.0),
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
   ),
   focusedBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Colors.lightBlueAccent, width: 2.0),
+    borderSide: BorderSide(color: darkPrimaryColor, width: 2.0),
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
   ),
 );
+
+const Color darkPrimaryColor = Color(0xFF0288D1);
+const Color lightPrimaryColor = Color(0xFFB3E5FC);
+const Color primaryColor = Color(0xFF03A9F4);
+const Color textIconColor = Color(0xFFFFFFFF);
+const Color accentColor = Color(0xFFFF5252);
+const Color textPrimaryColor = Color(0xFF212121);
+const Color secondaryColor = Color(0xFF757575);
+const Color dividerColor = Color(0xFFBDBDBD);

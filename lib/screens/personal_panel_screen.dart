@@ -61,7 +61,7 @@ class _PersonalPanelScreenState extends State<PersonalPanelScreen> {
                 children: <TextSpan>[
                   TextSpan(
                     text: ' $amountOfShiftsThisMonth',
-                    style: TextStyle(color: Colors.blue, fontSize: 22.0),
+                    style: TextStyle(color: darkPrimaryColor, fontSize: 22.0),
                   ),
                 ],
               ),
@@ -79,7 +79,7 @@ class _PersonalPanelScreenState extends State<PersonalPanelScreen> {
                 children: <TextSpan>[
                   TextSpan(
                     text: ' ${salary.toStringAsFixed(2)}',
-                    style: TextStyle(color: Colors.blue, fontSize: 22.0),
+                    style: TextStyle(color: darkPrimaryColor, fontSize: 22.0),
                   ),
                 ],
               ),

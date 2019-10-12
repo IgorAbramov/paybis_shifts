@@ -38,23 +38,29 @@ DateTime timestamp = DateTime.now();
 int selectedMonth = timestamp.month;
 int workingHours;
 String shiftExchangeMessage = '';
+String highlighted = '';
 List<Day> daysWithShiftsForCountThisMonth = List<Day>();
 final shiftsScaffoldKey = new GlobalKey<ScaffoldState>();
+final shiftsScreenKey = new GlobalKey<_ShiftScreenState>();
 TextEditingController reasonTextInputController;
 
 class ShiftScreen extends StatefulWidget {
   static const String id = 'shifts_screen';
+  const ShiftScreen({Key key}) : super(key: key);
   @override
   _ShiftScreenState createState() => _ShiftScreenState();
 }
 
 class _ShiftScreenState extends State<ShiftScreen> {
   final _auth = FirebaseAuth.instance;
-
   @override
   void initState() {
     super.initState();
     reasonTextInputController = new TextEditingController();
+  }
+
+  void rebuild() {
+    setState(() {});
   }
 
   @override
@@ -70,17 +76,32 @@ class _ShiftScreenState extends State<ShiftScreen> {
 //    print("Parent build method invoked");
     return Scaffold(
       key: shiftsScaffoldKey,
+      backgroundColor: textIconColor,
+//      bottomNavigationBar: BottomAppBar(
+//        color: textPrimaryColor,
+//        elevation: 10.0,
+//      ),
       appBar: AppBar(
+        backgroundColor: darkPrimaryColor,
         automaticallyImplyLeading: false,
         title: Text('PayBis Schedule'),
         actions: <Widget>[
           (loggedInUser.email != "admin@paybis.com")
               ? PopupMenuButton<String>(
+                  color: textPrimaryColor.withOpacity(0.8),
+                  elevation: 4.0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
                   itemBuilder: (BuildContext context) {
                     return kEmployeeChoicesPopupMenu.map((String choice) {
                       return PopupMenuItem<String>(
                         value: choice,
-                        child: Text(choice),
+                        child: Text(
+                          choice,
+                          style: TextStyle(
+                            color: textIconColor,
+                          ),
+                        ),
                       );
                     }).toList();
                   },
@@ -102,7 +123,9 @@ class _ShiftScreenState extends State<ShiftScreen> {
       body: Column(
         children: <Widget>[
           Table(
-            border: TableBorder.all(),
+            border: TableBorder.all(
+              color: secondaryColor,
+            ),
             columnWidths: {
               0: FlexColumnWidth(0.15),
               1: FlexColumnWidth(1),
@@ -111,7 +134,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
             },
             children: [
               TableRow(
-                decoration: BoxDecoration(color: Colors.blue),
+                decoration: BoxDecoration(color: darkPrimaryColor),
                 children: [
                   TableCell(
                     child: Text(
@@ -149,25 +172,49 @@ class _ShiftScreenState extends State<ShiftScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Material(
-                  elevation: 5.0,
-                  color: Colors.lightBlue,
-                  borderRadius: BorderRadius.circular(15.0),
-                  child: MaterialButton(
-                    onPressed: () {
-                      setState(() {
-                        selectedMonth = selectedMonth - 1;
-                      });
-                    },
-                    child: Text(
-                      'prev month',
-                      style: kHeaderFontStyle,
+              Expanded(
+                flex: 10,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      left: 16.0, right: 4.0, top: 8.0, bottom: 8.0),
+                  child: Material(
+                    elevation: 5.0,
+                    color: darkPrimaryColor,
+                    borderRadius: BorderRadius.circular(15.0),
+                    child: MaterialButton(
+                      onPressed: () {
+                        setState(() {
+                          selectedMonth = selectedMonth - 1;
+                        });
+                      },
+                      child: Text(
+                        'prev month',
+                        style: kButtonFontStyle,
+                      ),
                     ),
                   ),
                 ),
               ),
+
+              Expanded(
+                flex: 9,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      left: 4.0, right: 4.0, top: 8.0, bottom: 8.0),
+                  child: Material(
+                    elevation: 5.0,
+                    color: secondaryColor,
+                    borderRadius: BorderRadius.circular(15.0),
+                    child: MaterialButton(
+                      child: Text(
+                        getMonthName(selectedMonth),
+                        style: kButtonFontStyle,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
 //ADD MONTH Button
 //              Padding(
 //                padding: const EdgeInsets.all(8.0),
@@ -280,21 +327,25 @@ class _ShiftScreenState extends State<ShiftScreen> {
 //                  ),
 //                ),
 //              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Material(
-                  elevation: 5.0,
-                  color: Colors.lightBlue,
-                  borderRadius: BorderRadius.circular(15.0),
-                  child: MaterialButton(
-                    onPressed: () {
-                      setState(() {
-                        selectedMonth = selectedMonth + 1;
-                      });
-                    },
-                    child: Text(
-                      'next month',
-                      style: kHeaderFontStyle,
+              Expanded(
+                flex: 10,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      left: 4.0, right: 16.0, top: 8.0, bottom: 8.0),
+                  child: Material(
+                    elevation: 5.0,
+                    color: darkPrimaryColor,
+                    borderRadius: BorderRadius.circular(15.0),
+                    child: MaterialButton(
+                      onPressed: () {
+                        setState(() {
+                          selectedMonth = selectedMonth + 1;
+                        });
+                      },
+                      child: Text(
+                        'next month',
+                        style: kButtonFontStyle,
+                      ),
                     ),
                   ),
                 ),
@@ -389,7 +440,9 @@ class DaysStream extends StatelessWidget {
             daysWithShiftsForCountThisMonth.add(dayWithShifts);
 
           final dayWithShiftsUI = Table(
-            border: TableBorder.all(),
+            border: TableBorder.all(
+              color: textPrimaryColor,
+            ),
             columnWidths: {
               0: FlexColumnWidth(0.15),
               1: FlexColumnWidth(1),
@@ -529,6 +582,13 @@ class DaysStream extends StatelessWidget {
             ],
           );
           daysWithShifts.add(dayWithShiftsUI);
+
+          if (weekdayCheck(dayDay, dayMonth, dayYear) == 7) {
+            final divider = SizedBox(
+              height: 15.0,
+            );
+            daysWithShifts.add(divider);
+          }
         }
         return Expanded(
           child: ListView(
@@ -566,7 +626,7 @@ class DateTableCell extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11.0,
                 fontWeight: FontWeight.bold,
-                color: isWeekend ? Colors.redAccent : Colors.black,
+                color: isWeekend ? accentColor : textPrimaryColor,
               ),
             ),
           ),
@@ -577,7 +637,7 @@ class DateTableCell extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11.0,
                 fontWeight: FontWeight.bold,
-                color: isWeekend ? Colors.red : Colors.black,
+                color: isWeekend ? accentColor : textPrimaryColor,
               ),
             ),
           ),
@@ -612,7 +672,7 @@ class ShiftsRoundButton extends StatefulWidget {
 }
 
 class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
-  Color color = Colors.lightBlue;
+  Color color = primaryColor;
   String buttonText = '+';
   double size = 26.0;
   double bottom = 5.0;
@@ -645,8 +705,11 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
         color = convertColor(emp.empColor);
       }
     }
-// if USER is Admin and not in the Past build this
-    return (loggedInUser.email == 'admin@paybis.com' && isPast == false)
+
+// if USER is Admin "and not in the Past"(disabled) build this
+    return (loggedInUser.email == 'admin@paybis.com'
+//        && isPast == false
+        )
         ? SizedBox(
             width: 30.0,
             child: employeeChosen == false
@@ -660,7 +723,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                             number, widget.workingHours, "Who's gonna work?");
                       });
                     },
-                    color: Colors.white,
+                    color: textIconColor,
                     shape: CircleBorder(),
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 3.0, right: 0.0),
@@ -668,7 +731,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                         buttonText,
                         style: TextStyle(
                           fontSize: size,
-                          color: Colors.black,
+                          color: textPrimaryColor,
                         ),
                       ),
                     ),
@@ -696,7 +759,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                   widget.text,
                                   style: TextStyle(
                                     fontSize: isLong ? 13.0 : 16.0,
-                                    color: Colors.white,
+                                    color: textIconColor,
                                   ),
                                 ),
                               ),
@@ -708,7 +771,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                       fontSize: 18.0,
                                       fontWeight: FontWeight.bold,
                                       color: (widget.workingHours < 8)
-                                          ? Colors.red
+                                          ? accentColor
                                           : Colors.green),
                                 ),
                               )
@@ -718,7 +781,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                             widget.text,
                             style: TextStyle(
                               fontSize: isLong ? 13.0 : 16.0,
-                              color: Colors.white,
+                              color: textIconColor,
                             ),
                           ),
                     padding: EdgeInsets.all(0.0),
@@ -738,7 +801,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                     //  onPressed: () {
                     //  },
 
-                    color: Colors.lightBlue,
+                    color: primaryColor,
                     shape: CircleBorder(),
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
@@ -746,7 +809,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                         '',
                         style: TextStyle(
                           fontSize: size,
-                          color: Colors.white,
+                          color: textIconColor,
                         ),
                       ),
                     ),
@@ -760,7 +823,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                     child: Material(
                         color: (employee != null)
                             ? (widget.text == employee.initial)
-                                ? Colors.black
+                                ? textPrimaryColor
                                 : color.withOpacity(0)
                             : color.withOpacity(0),
                         borderRadius: BorderRadius.circular(15.0),
@@ -796,12 +859,33 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                   widget.text,
                                 );
                               }
+
+                              if (widget.text != employee.initial &&
+                                  highlighted == '' &&
+                                  shiftDocIDContainer1ForShiftExchange ==
+                                      null &&
+                                  shiftNumberContainer1ForShiftExchange ==
+                                      null &&
+                                  shiftHolderContainer1ForShiftExchange ==
+                                      null) {
+//                                setState(() {
+                                highlightEmp(widget.text);
+                                shiftsScreenKey.currentState.rebuild();
+//                                });
+                              } else {
+//                                setState(() {
+                                deHighlightEmp();
+                                shiftsScreenKey.currentState.rebuild();
+//                                });
+                              }
                             });
                           },
                           color: (employee != null)
                               ? (widget.text == employee.initial)
-                                  ? Colors.pink
-                                  : color.withOpacity(0.25)
+                                  ? darkPrimaryColor
+                                  : (widget.text == highlighted)
+                                      ? textPrimaryColor
+                                      : color.withOpacity(0.25)
                               : color,
                           shape: CircleBorder(),
                           child: Padding(
@@ -813,7 +897,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                         widget.text,
                                         style: TextStyle(
                                           fontSize: isLong ? 13.0 : 16.0,
-                                          color: Colors.white,
+                                          color: textIconColor,
                                         ),
                                       ),
                                       Text(
@@ -822,7 +906,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                             fontSize: 8.0,
                                             fontWeight: FontWeight.bold,
                                             color: (widget.workingHours < 8)
-                                                ? Colors.red
+                                                ? accentColor
                                                 : Colors.green),
                                       )
                                     ],
@@ -831,7 +915,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                     widget.text,
                                     style: TextStyle(
                                       fontSize: isLong ? 13.0 : 16.0,
-                                      color: Colors.white,
+                                      color: textIconColor,
                                     ),
                                   ),
                           ),
@@ -839,6 +923,19 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                           minWidth: 10.0,
                         ))));
   }
+}
+
+void highlightEmp(String initials) {
+//  print('Highlight $highlighted');
+  highlighted = initials;
+//  print(highlighted);
+}
+
+void deHighlightEmp() {
+//  print(' DeHighlight $highlighted');
+
+  highlighted = '';
+//  print(highlighted);
 }
 
 void updateShiftExchangeValuesToNull() {
@@ -930,14 +1027,14 @@ showAdminAlertDialog(
                       padding: const EdgeInsets.all(5.0),
                       child: Material(
                         elevation: 5.0,
-                        color: Colors.lightBlue,
+                        color: primaryColor,
                         borderRadius: BorderRadius.circular(15.0),
                         child: MaterialButton(
                           child: Text(
                             'Update',
                             style: TextStyle(
                               fontSize: 16.0,
-                              color: Colors.white,
+                              color: textIconColor,
                             ),
                           ),
                           onPressed: () async {
@@ -994,7 +1091,7 @@ List<Widget> listMyWidgets(BuildContext context) {
             emp.name,
             style: TextStyle(
               fontSize: (emp.name.length <= 7) ? 17.0 : 14.0,
-              color: Colors.white,
+              color: textIconColor,
             ),
           ),
         ),
@@ -1005,7 +1102,7 @@ List<Widget> listMyWidgets(BuildContext context) {
     padding: const EdgeInsets.all(5.0),
     child: Material(
       elevation: 5.0,
-      color: Colors.black,
+      color: textPrimaryColor,
       borderRadius: BorderRadius.circular(15.0),
       child: MaterialButton(
         onPressed: () {
@@ -1051,7 +1148,7 @@ openPersonalShiftAlertBox(BuildContext context, String id, String docID,
                   height: 5.0,
                 ),
                 Divider(
-                  color: Colors.grey,
+                  color: dividerColor,
                   height: 4.0,
                 ),
                 Padding(
@@ -1090,14 +1187,17 @@ openPersonalShiftAlertBox(BuildContext context, String id, String docID,
                     child: Container(
                       padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
                       decoration: BoxDecoration(
-                        color: Colors.lightBlue,
+                        color: primaryColor,
                         borderRadius: BorderRadius.only(
                             bottomLeft: Radius.circular(32.0),
                             bottomRight: Radius.circular(32.0)),
                       ),
                       child: Text(
                         "Exchange",
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                            color: textIconColor,
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -1140,7 +1240,7 @@ openChangeShiftsConfirmationAlertBox(BuildContext context, String id,
                   height: 5.0,
                 ),
                 Divider(
-                  color: Colors.grey,
+                  color: dividerColor,
                   height: 4.0,
                 ),
                 Row(
@@ -1180,14 +1280,17 @@ openChangeShiftsConfirmationAlertBox(BuildContext context, String id,
                           child: Container(
                             padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
                             decoration: BoxDecoration(
-                              color: Colors.lightBlue,
+                              color: primaryColor,
                               borderRadius: BorderRadius.only(
                                 bottomLeft: Radius.circular(32.0),
                               ),
                             ),
                             child: Text(
                               "Yes",
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(
+                                  color: textIconColor,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -1205,13 +1308,16 @@ openChangeShiftsConfirmationAlertBox(BuildContext context, String id,
                           child: Container(
                             padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
                             decoration: BoxDecoration(
-                              color: Colors.red,
+                              color: accentColor,
                               borderRadius: BorderRadius.only(
                                   bottomRight: Radius.circular(32.0)),
                             ),
                             child: Text(
                               "Cancel",
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(
+                                  color: textIconColor,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -1244,6 +1350,7 @@ class Day {
 
   Day(this.day, this.month, this.year, this.id, this.s1, this.s2, this.s3,
       this.s4, this.s5, this.s6, this.s7, this.s8, this.s9);
+  Day.year(this.year);
 
   Map buildMap(int day, int month, int year, int id, Map s1, Map s2, Map s3,
       Map s4, Map s5, Map s6, Map s7, Map s8, Map s9) {

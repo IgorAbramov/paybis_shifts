@@ -60,7 +60,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
 
     return CupertinoPicker(
-      backgroundColor: Colors.white,
+      backgroundColor: textIconColor,
       itemExtent: 32.0,
       onSelectedItemChanged: (selectedIndex) {
         setState(() {
@@ -97,7 +97,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
 
     return CupertinoPicker(
-      backgroundColor: Colors.white,
+      backgroundColor: textIconColor,
       itemExtent: 32.0,
       onSelectedItemChanged: (selectedIndex) {
         setState(() {
@@ -142,7 +142,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         title: Text('Create user'),
         automaticallyImplyLeading: true,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: textIconColor,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: ListView(
@@ -229,7 +229,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               height: 120.0,
               alignment: Alignment.center,
               padding: EdgeInsets.only(bottom: 30.0),
-              color: Colors.white,
+              color: textIconColor,
               child: Platform.isIOS
                   ? iOSPickerDepartment()
                   : androidDropdownDepartment(),
@@ -239,7 +239,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     height: 120.0,
                     alignment: Alignment.center,
                     padding: EdgeInsets.only(bottom: 30.0),
-                    color: Colors.white,
+                    color: textIconColor,
                     child: Platform.isIOS
                         ? iOSPickerSupportPositions()
                         : androidDropdownSupportPositions(),
@@ -254,7 +254,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   child: Text(
                     'Pick color',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: textIconColor,
                       fontSize: 16.0,
                     ),
                   ),
@@ -295,7 +295,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               'OK',
                               style: TextStyle(
                                 fontSize: 20.0,
-                                color: Colors.blue,
+                                color: primaryColor,
                               ),
                             ),
                             onPressed: () {
@@ -320,7 +320,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               height: 24.0,
             ),
             RoundedButton(
-              color: Colors.lightBlueAccent,
+              color: primaryColor,
               title: 'Create user',
               onPressed: () async {
                 //registration functionality
@@ -376,7 +376,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       "There is such user",
       style: TextStyle(
           fontSize: 13.0,
-          color: Colors.red,
+          color: accentColor,
           height: 1.0,
           fontWeight: FontWeight.w300),
     )));
