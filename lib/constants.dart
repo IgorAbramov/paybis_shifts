@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-const String kPersonalPanel = 'Personal panel';
+const String kStats = 'Stats';
 const String kSettings = 'Settings';
 const String kLogOut = 'Log out';
-const String kItVacations = 'IT Vacations';
-const String kSupportVacations = 'Support Vacations';
+const String kItDaysOff = 'IT days off';
+const String kSupportDaysOff = 'Support days off';
 const String kChangeRequests = 'Change Requests';
 const String kRecentChanges = 'Recent Changes';
 const String kSupportDepartment = 'Support Department';
@@ -20,18 +20,20 @@ const String kTeamLeadSupport = 'Team Lead Support';
 
 const List<String> kAdminChoicesPopupMenu = [
   kChangeRequests,
-  kSettings,
   kRecentChanges,
-//  kSupportVacations,
+  kStats,
+  kSupportDaysOff,
+  kSettings,
 //  kItVacations,
   kLogOut
 ];
 
 const List<String> kEmployeeChoicesPopupMenu = [
-  kPersonalPanel,
+  kStats,
   kRecentChanges,
+  kSupportDaysOff,
   kSettings,
-//  kSupportVacations,
+
 //  kItVacations,
   kLogOut
 ];

@@ -9,7 +9,7 @@ final String adminFeedDocID = 'T8dBZmU5meD1LfEgfEM3';
 final _auth = FirebaseAuth.instance;
 
 class DBController {
-  Stream createStream<QuerySnapshot>(int month) {
+  Stream createDaysStream<QuerySnapshot>(int month) {
     return _fireStore
         .collection('days')
         .where('month', isEqualTo: month)
@@ -292,5 +292,29 @@ class DBController {
         .collection('changes')
         .document()
         .setData(Map<String, dynamic>.from(change));
+  }
+
+  addVacation(String docID, String holder) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      'vacations': FieldValue.arrayUnion([holder])
+    });
+  }
+
+  removeVacation(String docID, String holder) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      'vacations': FieldValue.arrayRemove([holder])
+    });
+  }
+
+  addSickLeave(String docID, String holder) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      'sick': FieldValue.arrayUnion([holder])
+    });
+  }
+
+  removeSickLeave(String docID, String holder) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      'sick': FieldValue.arrayRemove([holder])
+    });
   }
 }

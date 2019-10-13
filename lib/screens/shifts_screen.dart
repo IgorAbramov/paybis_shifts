@@ -9,19 +9,21 @@ import 'package:flutter/services.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
+import 'package:paybis_com_shifts/screens/it_days_off_screen.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/screens/recent_changes_screen.dart';
+import 'package:paybis_com_shifts/screens/support_days_off_screen.dart';
 
 import 'feed_screen.dart';
-import 'personal_panel_screen.dart';
 import 'settings_screen.dart';
+import 'stats_screen.dart';
 
 //TODO implement ability to show holidays
 //TODO Implement push notifications when shift is being changed or removed
 //TODO Implement the ability for employees to mark shifts in the future they are not able to attend
 //TODO Create calendar page with Vacations and Sick days for employees
 FirebaseUser loggedInUser;
-DocumentSnapshot _currentDocument;
+DocumentSnapshot currentDocument;
 String shiftDocIDContainer1ForShiftExchange;
 String shiftDocIDContainer2ForShiftExchange;
 int shiftNumberContainer1ForShiftExchange;
@@ -108,11 +110,20 @@ class _ShiftScreenState extends State<ShiftScreen> {
                   onSelected: choicesAction,
                 )
               : PopupMenuButton<String>(
+                  color: textPrimaryColor.withOpacity(0.8),
+                  elevation: 4.0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
                   itemBuilder: (BuildContext context) {
                     return kAdminChoicesPopupMenu.map((String choice) {
                       return PopupMenuItem<String>(
                         value: choice,
-                        child: Text(choice),
+                        child: Text(
+                          choice,
+                          style: TextStyle(
+                            color: textIconColor,
+                          ),
+                        ),
                       );
                     }).toList();
                   },
@@ -358,15 +369,18 @@ class _ShiftScreenState extends State<ShiftScreen> {
   }
 
   void choicesAction(String choice) {
-    if (choice == kPersonalPanel) {
-      if (employee != null)
-        Navigator.pushNamed(context, PersonalPanelScreen.id);
+    if (choice == kStats) {
+      Navigator.pushNamed(context, StatsScreen.id);
     }
     if (choice == kSettings) {
       Navigator.pushNamed(context, SettingsScreen.id);
     }
-    if (choice == kItVacations) {}
-    if (choice == kSupportVacations) {}
+    if (choice == kItDaysOff) {
+      Navigator.pushNamed(context, ItDaysOffScreen.id);
+    }
+    if (choice == kSupportDaysOff) {
+      Navigator.pushNamed(context, SupportDaysOffScreen.id);
+    }
     if (choice == kChangeRequests) {
       Navigator.pushNamed(context, FeedScreen.id);
     }
@@ -396,7 +410,7 @@ class DaysStream extends StatelessWidget {
     if (daysWithShiftsForCountThisMonth.isNotEmpty)
       daysWithShiftsForCountThisMonth.clear();
     return StreamBuilder<QuerySnapshot>(
-      stream: dbController.createStream(month),
+      stream: dbController.createDaysStream(month),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return circularProgress();
@@ -408,7 +422,7 @@ class DaysStream extends StatelessWidget {
           final int dayMonth = day.data['month'];
           final int dayYear = day.data['year'];
           final int dayId = day.data['id'];
-          _currentDocument = day;
+          currentDocument = day;
           final String dayDocumentID = day.documentID;
 
           Map<dynamic, dynamic> shift1 = day.data['1'];
@@ -452,7 +466,10 @@ class DaysStream extends StatelessWidget {
             children: [
               TableRow(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: ('${dayWithShifts.day}${dayWithShifts.month}' ==
+                          '${DateTime.now().day}${DateTime.now().month}')
+                      ? primaryColor.withOpacity(0.4)
+                      : Colors.white,
                 ),
                 children: [
                   DateTableCell(
@@ -969,7 +986,8 @@ showAdminAlertDialog(
       return AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(32.0))),
-        content: ListView(
+        content: SingleChildScrollView(
+      child: Column(
           children: <Widget>[
             Center(
               child: Text(
@@ -1038,10 +1056,10 @@ showAdminAlertDialog(
                             ),
                           ),
                           onPressed: () async {
-                            _currentDocument =
+                            currentDocument =
                                 await dbController.getDocument(docID);
                             await dbController.updateHours(
-                                _currentDocument, number, workingHours);
+                                currentDocument, number, workingHours);
                             Navigator.pop(context);
                           },
                         ),
@@ -1052,7 +1070,7 @@ showAdminAlertDialog(
               ),
             ),
           ],
-        ),
+        ),),
       );
     },
   );
@@ -1060,15 +1078,15 @@ showAdminAlertDialog(
     if (result == null || result == '') {
       result = '+';
     } else {
-      _currentDocument = await dbController.getDocument(docID);
+      currentDocument = await dbController.getDocument(docID);
 
       String choiceOfEmployee = result.toString();
 
       if (choiceOfEmployee == 'none') {
-        await dbController.updateHolderToNone(_currentDocument, number);
+        await dbController.updateHolderToNone(currentDocument, number);
       } else
         await dbController.updateHolder(
-            _currentDocument, number, choiceOfEmployee);
+            currentDocument, number, choiceOfEmployee);
     }
   });
 }
