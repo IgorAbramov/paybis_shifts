@@ -9,6 +9,7 @@ import 'package:paybis_com_shifts/screens/welcome_screen.dart';
 import 'screens/feed_screen.dart';
 import 'screens/it_days_off_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/parking_screen.dart';
 import 'screens/recent_changes_screen.dart';
 import 'screens/shifts_screen.dart';
 import 'screens/stats_screen.dart';
@@ -34,6 +35,7 @@ class PBShifts extends StatelessWidget {
         RecentChangesScreen.id: (context) => RecentChangesScreen(),
         SupportDaysOffScreen.id: (context) => SupportDaysOffScreen(),
         ItDaysOffScreen.id: (context) => ItDaysOffScreen(),
+        ParkingScreen.id: (context) => ParkingScreen(),
       },
     );
   }

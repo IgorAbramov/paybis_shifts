@@ -32,7 +32,7 @@ class _StatsScreenState extends State<StatsScreen> {
     eveningShiftHoursCountThisMonth = 0;
     salary = 0;
 
-    print(daysWithShiftsForCountThisMonth.length);
+//    print(daysWithShiftsForCountThisMonth.length);
 
     calculateAmountOfShifts(employee);
     calculateAmountOfNightShifts(employee);
@@ -48,9 +48,9 @@ class _StatsScreenState extends State<StatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (loggedInUser.email != "admin@paybis.com") getAllPersonalData(employee);
+    if (employee.department != kAdmin) getAllPersonalData(employee);
 
-    return (loggedInUser.email == "admin@paybis.com")
+    return (employee.department == kAdmin)
         ? Scaffold(
             appBar: AppBar(
               title: Text('Stats for ${getMonthName(selectedMonth)}'),
@@ -462,19 +462,21 @@ class _StatsScreenState extends State<StatsScreen> {
     List<StatsObject> list = List<StatsObject>();
 
     for (Employee emp in listWithEmployees) {
-      getAllPersonalData(emp);
+      if (emp.department == kSupportDepartment) {
+        getAllPersonalData(emp);
 
-      StatsObject statsObject = StatsObject(
-          emp.name,
-          salary,
-          nightShiftHoursCountThisMonth,
-          morningShiftHoursCountThisMonth,
-          eveningShiftHoursCountThisMonth,
-          amountOfShiftsThisMonth,
-          nightShiftsCountThisMonth,
-          eveningShiftsCountThisMonth,
-          morningShiftsCountThisMonth);
-      list.add(statsObject);
+        StatsObject statsObject = StatsObject(
+            emp.name,
+            salary,
+            nightShiftHoursCountThisMonth,
+            morningShiftHoursCountThisMonth,
+            eveningShiftHoursCountThisMonth,
+            amountOfShiftsThisMonth,
+            nightShiftsCountThisMonth,
+            eveningShiftsCountThisMonth,
+            morningShiftsCountThisMonth);
+        list.add(statsObject);
+      }
     }
 
     return list;

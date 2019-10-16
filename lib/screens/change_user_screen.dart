@@ -26,6 +26,9 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
   String selectedSupportPosition = kJuniorSupport;
   Color pickerColor = Color(0xff443a49);
   Color currentColor = convertColor(listWithEmployees.first.empColor);
+  bool hasCar = false;
+  String cardId = 'Type card ID';
+  String carInfo = "Type car info";
 
   void changeColor(Color color) {
     setState(() => pickerColor = color);
@@ -38,6 +41,11 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
         email = emp.email;
         initials = emp.initial;
         currentColor = convertColor(emp.empColor);
+        selectedDepartment = emp.department;
+        selectedSupportPosition = emp.position;
+        hasCar = emp.hasCar;
+        carInfo = emp.carInfo;
+        cardId = emp.cardId;
       }
     }
   }
@@ -317,6 +325,54 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
               ],
             ),
             SizedBox(
+              height: 10.0,
+            ),
+            Row(
+              children: <Widget>[
+                Switch(
+                  value: hasCar,
+                  onChanged: (bool value) {
+                    setState(() {
+                      hasCar = value;
+                    });
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Has the car',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 17.0,
+                    ),
+                  ),
+                ),
+                (hasCar)
+                    ? Expanded(
+                        child: TextField(
+                          decoration: kTextFieldDecoration.copyWith(
+                            hintText: carInfo,
+                          ),
+                          onChanged: (value) {
+                            carInfo = value;
+                          },
+                        ),
+                      )
+                    : SizedBox(width: 1.0),
+              ],
+            ),
+            SizedBox(
+              height: 10.0,
+            ),
+            TextField(
+              decoration: kTextFieldDecoration.copyWith(
+                hintText: cardId,
+              ),
+              onChanged: (value) {
+                cardId = value;
+              },
+            ),
+            SizedBox(
               height: 16.0,
             ),
             RoundedButton(
@@ -330,21 +386,18 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
                   String colorValueString =
                       colorString.split('(0x')[1].split(')')[0];
 
-                  Employee newEmployee = new Employee(
-                      name: name,
-                      email: email,
-                      initial: initials,
-                      empColor: colorValueString,
-                      department: selectedDepartment,
-                      position: selectedSupportPosition);
-
+                  Employee newEmployee = new Employee();
                   Map empToChange = newEmployee.buildMap(
-                      name,
-                      email,
-                      initials,
-                      colorValueString,
-                      selectedDepartment,
-                      selectedSupportPosition);
+                    name,
+                    email,
+                    initials,
+                    colorValueString,
+                    selectedDepartment,
+                    selectedSupportPosition,
+                    hasCar,
+                    carInfo,
+                    cardId,
+                  );
                   dbController.changeUser(email, empToChange);
 
                   Navigator.pop(context);

@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:paybis_com_shifts/constants.dart';
@@ -29,6 +30,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final registerScaffoldKey = new GlobalKey<ScaffoldState>();
   Color pickerColor = Color(0xff443a49);
   Color currentColor = Color(0xff443a49);
+  bool hasCar = false;
+  String cardId = 'Type card ID';
+  String carInfo = "Type car info";
 
   void changeColor(Color color) {
     setState(() => pickerColor = color);
@@ -308,13 +312,55 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     );
                   },
                 ),
-//                  Container(
-//                    decoration: BoxDecoration(
-//                        shape: BoxShape.circle,
-//                        color: pickerColor,
-//                        borderRadius: BorderRadius.circular(10.0)),
-//                  ),
               ],
+            ),
+            SizedBox(
+              height: 10.0,
+            ),
+            Row(
+              children: <Widget>[
+                Switch(
+                  value: hasCar,
+                  onChanged: (bool value) {
+                    setState(() {
+                      hasCar = value;
+                    });
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Has the car',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 17.0,
+                    ),
+                  ),
+                ),
+                (hasCar)
+                    ? Expanded(
+                        child: TextField(
+                          decoration: kTextFieldDecoration.copyWith(
+                            hintText: carInfo,
+                          ),
+                          onChanged: (value) {
+                            carInfo = value;
+                          },
+                        ),
+                      )
+                    : SizedBox(width: 1.0),
+              ],
+            ),
+            SizedBox(
+              height: 10.0,
+            ),
+            TextField(
+              decoration: kTextFieldDecoration.copyWith(
+                hintText: cardId,
+              ),
+              onChanged: (value) {
+                cardId = value;
+              },
             ),
             SizedBox(
               height: 24.0,
@@ -324,26 +370,29 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               title: 'Create user',
               onPressed: () async {
                 //registration functionality
+
+                //
                 if (_registerFormKey.currentState.validate()) {
                   try {
-                    final newUser = await _auth
-                        .createUserWithEmailAndPassword(
-                            email: emailInputController.text,
-                            password: pwdInputController.text)
-                        .catchError((err) => thereIsSuchUserError(err));
+                    bool userExists = false;
+//                    final newUser = await _auth
+//                        .createUserWithEmailAndPassword(
+//                            email: emailInputController.text,
+//                            password: pwdInputController.text)
+//                        .catchError((err) {
+//                      thereIsSuchUserError(err);
+//                      userExists = true;
+//                    });
+
+                    final newUser = await register(
+                        emailInputController.text, pwdInputController.text);
 
                     //Convert Color to String
                     String colorString = currentColor.toString();
                     String colorValueString =
                         colorString.split('(0x')[1].split(')')[0];
 
-                    Employee newEmployee = new Employee(
-                        name: name,
-                        email: email,
-                        initial: initials,
-                        empColor: colorValueString,
-                        department: selectedDepartment,
-                        position: selectedSupportPosition);
+                    Employee newEmployee = new Employee();
 
                     Map newEmpMap = newEmployee.buildMap(
                         name,
@@ -351,9 +400,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         initials,
                         colorValueString,
                         selectedDepartment,
-                        selectedSupportPosition);
-                    dbController.createUser(newEmpMap);
-                    listWithEmployees.add(newEmployee);
+                        selectedSupportPosition,
+                        hasCar,
+                        carInfo,
+                        cardId);
+                    if (!userExists) {
+                      dbController.createUser(newEmpMap);
+                      listWithEmployees.add(newEmployee);
+                    }
                     if (newUser != null) {
                       Navigator.pop(context);
                     }
@@ -367,6 +421,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         ),
       ),
     );
+  }
+
+  Future<AuthResult> register(String email, String password) async {
+    FirebaseApp app = await FirebaseApp.configure(
+        name: 'Secondary', options: await FirebaseApp.instance.options);
+    return FirebaseAuth.fromApp(app)
+        .createUserWithEmailAndPassword(email: email, password: password);
   }
 
   thereIsSuchUserError(Exception err) {

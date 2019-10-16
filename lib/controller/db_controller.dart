@@ -171,6 +171,9 @@ class DBController {
         empColor: user.data['color'],
         department: user.data['department'],
         position: user.data['position'],
+        hasCar: user.data['hasCar'],
+        carInfo: user.data['carInfo'],
+        cardId: user.data['cardId'],
         id: user.documentID,
       ));
     }
@@ -315,6 +318,54 @@ class DBController {
   removeSickLeave(String docID, String holder) async {
     await _fireStore.collection('days').document(docID).updateData({
       'sick': FieldValue.arrayRemove([holder])
+    });
+  }
+
+  addITVacation(String docID, String holder) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      'ITVacations': FieldValue.arrayUnion([holder])
+    });
+  }
+
+  removeITVacation(String docID, String holder) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      'ITVacations': FieldValue.arrayRemove([holder])
+    });
+  }
+
+  addITSickLeave(String docID, String holder) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      'ITSick': FieldValue.arrayUnion([holder])
+    });
+  }
+
+  removeITSickLeave(String docID, String holder) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      'ITSick': FieldValue.arrayRemove([holder])
+    });
+  }
+
+  addParkingMGMT(String docID, String holder) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      'mgmt': FieldValue.arrayUnion([holder])
+    });
+  }
+
+  removeParkingMGMT(String docID, String holder) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      'mgmt': FieldValue.arrayRemove([holder])
+    });
+  }
+
+  addParkingItCs(String docID, String holder) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      'itcs': FieldValue.arrayUnion([holder])
+    });
+  }
+
+  removeParkingItCs(String docID, String holder) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      'itcs': FieldValue.arrayRemove([holder])
     });
   }
 }

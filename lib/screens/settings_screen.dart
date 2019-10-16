@@ -23,7 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         title: Text('Settings'),
       ),
-      body: (loggedInUser.email == "admin@paybis.com")
+      body: (employee.department == kAdmin)
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[

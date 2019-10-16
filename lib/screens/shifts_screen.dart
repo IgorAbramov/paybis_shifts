@@ -15,6 +15,7 @@ import 'package:paybis_com_shifts/screens/recent_changes_screen.dart';
 import 'package:paybis_com_shifts/screens/support_days_off_screen.dart';
 
 import 'feed_screen.dart';
+import 'parking_screen.dart';
 import 'settings_screen.dart';
 import 'stats_screen.dart';
 
@@ -88,27 +89,51 @@ class _ShiftScreenState extends State<ShiftScreen> {
         automaticallyImplyLeading: false,
         title: Text('PayBis Schedule'),
         actions: <Widget>[
-          (loggedInUser.email != "admin@paybis.com")
-              ? PopupMenuButton<String>(
-                  color: textPrimaryColor.withOpacity(0.8),
-                  elevation: 4.0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                  itemBuilder: (BuildContext context) {
-                    return kEmployeeChoicesPopupMenu.map((String choice) {
-                      return PopupMenuItem<String>(
-                        value: choice,
-                        child: Text(
-                          choice,
-                          style: TextStyle(
-                            color: textIconColor,
-                          ),
-                        ),
-                      );
-                    }).toList();
-                  },
-                  onSelected: choicesAction,
-                )
+          (employee.department != kAdmin)
+              ? (employee.hasCar)
+                  ? PopupMenuButton<String>(
+                      color: textPrimaryColor.withOpacity(0.8),
+                      elevation: 4.0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(10.0))),
+                      itemBuilder: (BuildContext context) {
+                        return kEmployeeWithCarChoicesPopupMenu
+                            .map((String choice) {
+                          return PopupMenuItem<String>(
+                            value: choice,
+                            child: Text(
+                              choice,
+                              style: TextStyle(
+                                color: textIconColor,
+                              ),
+                            ),
+                          );
+                        }).toList();
+                      },
+                      onSelected: choicesAction,
+                    )
+                  : PopupMenuButton<String>(
+                      color: textPrimaryColor.withOpacity(0.8),
+                      elevation: 4.0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(10.0))),
+                      itemBuilder: (BuildContext context) {
+                        return kEmployeeChoicesPopupMenu.map((String choice) {
+                          return PopupMenuItem<String>(
+                            value: choice,
+                            child: Text(
+                              choice,
+                              style: TextStyle(
+                                color: textIconColor,
+                              ),
+                            ),
+                          );
+                        }).toList();
+                      },
+                      onSelected: choicesAction,
+                    )
               : PopupMenuButton<String>(
                   color: textPrimaryColor.withOpacity(0.8),
                   elevation: 4.0,
@@ -195,6 +220,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                     child: MaterialButton(
                       onPressed: () {
                         setState(() {
+                          if (selectedMonth == 1) selectedMonth = 13;
                           selectedMonth = selectedMonth - 1;
                         });
                       },
@@ -350,6 +376,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                     child: MaterialButton(
                       onPressed: () {
                         setState(() {
+                          if (selectedMonth == 12) selectedMonth = 0;
                           selectedMonth = selectedMonth + 1;
                         });
                       },
@@ -377,6 +404,9 @@ class _ShiftScreenState extends State<ShiftScreen> {
     }
     if (choice == kItDaysOff) {
       Navigator.pushNamed(context, ItDaysOffScreen.id);
+    }
+    if (choice == kParking) {
+      Navigator.pushNamed(context, ParkingScreen.id);
     }
     if (choice == kSupportDaysOff) {
       Navigator.pushNamed(context, SupportDaysOffScreen.id);
@@ -724,7 +754,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
     }
 
 // if USER is Admin "and not in the Past"(disabled) build this
-    return (loggedInUser.email == 'admin@paybis.com'
+    return (employee.department == kAdmin
 //        && isPast == false
         )
         ? SizedBox(
@@ -768,24 +798,23 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                     color: color,
                     shape: CircleBorder(),
                     child: (widget.workingHours != 8)
-                        ? Column(
+                        ? Stack(
+                            alignment: AlignmentDirectional.center,
                             children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.only(top: 16.0),
-                                child: Text(
-                                  widget.text,
-                                  style: TextStyle(
-                                    fontSize: isLong ? 13.0 : 16.0,
-                                    color: textIconColor,
-                                  ),
+                              Text(
+                                widget.text,
+                                style: TextStyle(
+                                  fontSize: isLong ? 13.0 : 16.0,
+                                  color: textIconColor,
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(left: 24.0),
+                                padding: const EdgeInsets.only(
+                                    top: 24.0, left: 24.0),
                                 child: Text(
                                   (widget.workingHours < 8) ? '-' : '+',
                                   style: TextStyle(
-                                      fontSize: 18.0,
+                                      fontSize: 20.0,
                                       fontWeight: FontWeight.bold,
                                       color: (widget.workingHours < 8)
                                           ? accentColor
@@ -908,7 +937,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                           child: Padding(
                             padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
                             child: (widget.workingHours != 8)
-                                ? Column(
+                                ? Stack(
+                                    alignment: AlignmentDirectional.center,
                                     children: <Widget>[
                                       Text(
                                         widget.text,
@@ -917,14 +947,18 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                           color: textIconColor,
                                         ),
                                       ),
-                                      Text(
-                                        (widget.workingHours < 8) ? '-' : '+',
-                                        style: TextStyle(
-                                            fontSize: 8.0,
-                                            fontWeight: FontWeight.bold,
-                                            color: (widget.workingHours < 8)
-                                                ? accentColor
-                                                : Colors.green),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            top: 24.0, left: 24.0),
+                                        child: Text(
+                                          (widget.workingHours < 8) ? '-' : '+',
+                                          style: TextStyle(
+                                              fontSize: 20.0,
+                                              fontWeight: FontWeight.bold,
+                                              color: (widget.workingHours < 8)
+                                                  ? accentColor
+                                                  : Colors.green),
+                                        ),
                                       )
                                     ],
                                   )
@@ -987,90 +1021,91 @@ showAdminAlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(32.0))),
         content: SingleChildScrollView(
-      child: Column(
-          children: <Widget>[
-            Center(
-              child: Text(
-                'Who is going to work?',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-              ),
-            ),
-            SizedBox(
-              height: 5.0,
-            ),
-            Wrap(
-              alignment: WrapAlignment.spaceEvenly,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: listMyWidgets(context),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black38,
-                  borderRadius: BorderRadius.circular(15.0),
+          child: Column(
+            children: <Widget>[
+              Center(
+                child: Text(
+                  'Who is going to work?',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    SizedBox(height: 10.0),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: 15.0, top: 8.0, right: 4.0, bottom: 18.0),
-                      child: Text(
-                        'Update working hours for this shift (at this moment: $workingHoursFromWidget)',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                      child: TextFormField(
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.center,
-                        maxLength: 2,
-                        decoration: kTextFieldDecoration.copyWith(
-                          hintText: '$workingHoursFromWidget',
-                        ),
-                        onChanged: (value) {
-                          //Do something with the user input.
-                          workingHours = int.parse(value);
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Material(
-                        elevation: 5.0,
-                        color: primaryColor,
-                        borderRadius: BorderRadius.circular(15.0),
-                        child: MaterialButton(
-                          child: Text(
-                            'Update',
-                            style: TextStyle(
-                              fontSize: 16.0,
-                              color: textIconColor,
-                            ),
+              ),
+              SizedBox(
+                height: 5.0,
+              ),
+              Wrap(
+                alignment: WrapAlignment.spaceEvenly,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: listMyWidgets(context),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black38,
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      SizedBox(height: 10.0),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 15.0, top: 8.0, right: 4.0, bottom: 18.0),
+                        child: Text(
+                          'Update working hours for this shift (at this moment: $workingHoursFromWidget)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
+                            color: Colors.white,
                           ),
-                          onPressed: () async {
-                            currentDocument =
-                                await dbController.getDocument(docID);
-                            await dbController.updateHours(
-                                currentDocument, number, workingHours);
-                            Navigator.pop(context);
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          maxLength: 2,
+                          decoration: kTextFieldDecoration.copyWith(
+                            hintText: '$workingHoursFromWidget',
+                          ),
+                          onChanged: (value) {
+                            //Do something with the user input.
+                            workingHours = int.parse(value);
                           },
                         ),
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Material(
+                          elevation: 5.0,
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(15.0),
+                          child: MaterialButton(
+                            child: Text(
+                              'Update',
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                color: textIconColor,
+                              ),
+                            ),
+                            onPressed: () async {
+                              currentDocument =
+                                  await dbController.getDocument(docID);
+                              await dbController.updateHours(
+                                  currentDocument, number, workingHours);
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),),
+            ],
+          ),
+        ),
       );
     },
   );
@@ -1094,27 +1129,31 @@ showAdminAlertDialog(
 List<Widget> listMyWidgets(BuildContext context) {
   List<Widget> list = List();
   for (Employee emp in listWithEmployees) {
-    list.add(Padding(
-      padding: const EdgeInsets.all(2.0),
-      child: Material(
-        elevation: 5.0,
-        color: convertColor(emp.empColor),
-        borderRadius: BorderRadius.circular(15.0),
-        child: MaterialButton(
-          minWidth: 100.0,
-          onPressed: () {
-            Navigator.pop(context, emp.initial);
-          },
-          child: Text(
-            emp.name,
-            style: TextStyle(
-              fontSize: (emp.name.length <= 7) ? 17.0 : 14.0,
-              color: textIconColor,
+    if (emp.department == kSupportDepartment) {
+      list.add(
+        Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Material(
+            elevation: 5.0,
+            color: convertColor(emp.empColor),
+            borderRadius: BorderRadius.circular(15.0),
+            child: MaterialButton(
+              minWidth: 100.0,
+              onPressed: () {
+                Navigator.pop(context, emp.initial);
+              },
+              child: Text(
+                emp.name,
+                style: TextStyle(
+                  fontSize: (emp.name.length <= 7) ? 17.0 : 14.0,
+                  color: textIconColor,
+                ),
+              ),
             ),
           ),
         ),
-      ),
-    ));
+      );
+    }
   }
   list.add(Padding(
     padding: const EdgeInsets.all(5.0),

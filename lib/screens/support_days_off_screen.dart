@@ -26,7 +26,6 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
       appBar: AppBar(
         title: Text('Support days off'),
       ),
-//      floatingActionButton: InfoFloatingActionButton(),
       body: Container(
         child: Column(
           children: <Widget>[
@@ -142,76 +141,6 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
         ),
       ),
     );
-  }
-}
-
-class BottomSheetWidget extends StatefulWidget {
-  @override
-  _BottomSheetWidgetState createState() => _BottomSheetWidgetState();
-}
-
-class _BottomSheetWidgetState extends State<BottomSheetWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.grey[900],
-      height: 150,
-//      child: Column(
-//        children: <Widget>[
-//          Container(
-//            child: Icon(Icons.info),
-//            decoration: BoxDecoration(
-//              shape: BoxShape.circle,
-//              color: Colors.green,
-//            ),
-//          ),
-//          Container(
-//            child: Icon(Icons.info),
-//            decoration: BoxDecoration(
-//              shape: BoxShape.circle,
-//              color: accentColor,
-//            ),
-//          ),
-//        ],
-//      ),
-    );
-  }
-}
-
-class InfoFloatingActionButton extends StatefulWidget {
-  @override
-  _InfoFloatingActionButtonState createState() =>
-      _InfoFloatingActionButtonState();
-}
-
-class _InfoFloatingActionButtonState extends State<InfoFloatingActionButton> {
-  bool showFab = true;
-  @override
-  Widget build(BuildContext context) {
-    return showFab
-        ? FloatingActionButton(
-            backgroundColor: primaryColor,
-            child: Icon(
-              Icons.info_outline,
-              size: 35.0,
-            ),
-            onPressed: () {
-              var bottomSheetController = showBottomSheet(
-                  context: context, builder: (context) => BottomSheetWidget());
-
-              showFloatingActionButton(false);
-              bottomSheetController.closed.then((value) {
-                showFloatingActionButton(true);
-              });
-            },
-          )
-        : Container();
-  }
-
-  void showFloatingActionButton(bool value) {
-    setState(() {
-      showFab = value;
-    });
   }
 }
 
@@ -414,14 +343,13 @@ class DayOffRoundButton extends StatefulWidget {
   final String type;
 
   DayOffRoundButton({
-    @required Key key,
     @required this.day,
     @required this.month,
     @required this.text,
     @required this.documentID,
     @required this.number,
     @required this.type,
-  }) : super(key: key);
+  }) : super();
 
   @override
   _DayOffRoundButtonState createState() => _DayOffRoundButtonState();
@@ -460,7 +388,7 @@ class _DayOffRoundButtonState extends State<DayOffRoundButton> {
     }
 
 // if USER is Admin "and not in the Past"(disabled) build this
-    return (loggedInUser.email == 'admin@paybis.com'
+    return (employee.department == kAdmin
 //        && isPast == false
         )
         ? SizedBox(

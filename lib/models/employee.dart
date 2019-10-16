@@ -9,6 +9,9 @@ class Employee {
   String department;
   String position;
   String id;
+  bool hasCar;
+  String carInfo;
+  String cardId;
 
   Employee(
       {this.name,
@@ -18,17 +21,31 @@ class Employee {
       this.id,
       this.empColor,
       this.department,
-      this.position});
+      this.position,
+      this.hasCar,
+      this.carInfo,
+      this.cardId});
 
-  Map buildMap(String name, String email, String initial, String empColor,
-      String department, String position) {
+  Map buildMap(
+      String name,
+      String email,
+      String initial,
+      String empColor,
+      String department,
+      String position,
+      bool hasCar,
+      String carInfo,
+      String cardId) {
     Map map = {
       'name': name,
       'email': email,
       'initial': initial,
       'color': empColor,
       'department': department,
-      'position': position
+      'position': position,
+      'hasCar': hasCar,
+      'carInfo': carInfo,
+      'cardId': cardId,
     };
 
     return map;

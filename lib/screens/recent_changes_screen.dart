@@ -4,8 +4,6 @@ import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 
-import 'shifts_screen.dart';
-
 class RecentChangesScreen extends StatefulWidget {
   static const String id = 'recent_changes_screen';
 
@@ -23,7 +21,7 @@ class _RecentChangesScreenState extends State<RecentChangesScreen> {
       ),
       body: Container(
         child: StreamBuilder<QuerySnapshot>(
-          stream: (loggedInUser.email == 'admin@paybis.com')
+          stream: (employee.department == kAdmin)
               ? dbController.createRecentChangesStream(numberToList, '', false)
               : dbController.createRecentChangesStream(
                   numberToList, employee.initial, true),

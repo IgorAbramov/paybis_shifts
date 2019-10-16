@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/controller/db_controller.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
+import 'package:paybis_com_shifts/screens/parking_screen.dart';
 import 'package:paybis_com_shifts/screens/shifts_screen.dart';
 import 'package:paybis_com_shifts/ui_parts/rounded_button.dart';
 
@@ -39,10 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
         for (Employee emp in listWithEmployees) {
           if (emp.email == loggedInUser.email) employee = emp;
         }
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (BuildContext context) {
-          return ShiftScreen(key: shiftsScreenKey);
-        }));
+        recognizeUserType();
       }
     } catch (e) {
       print(e);
@@ -157,6 +155,65 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void recognizeUserType() {
+    switch (employee.department) {
+      case kAdmin:
+        {
+          print(kAdmin);
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (BuildContext context) {
+            return ShiftScreen(key: shiftsScreenKey);
+          }));
+        }
+        break;
+
+      case kManagement:
+        {
+          print(kManagement);
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (BuildContext context) {
+            return ParkingScreen();
+          }));
+        }
+        break;
+
+      case kITDepartment:
+        {
+          print(kITDepartment);
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (BuildContext context) {
+            return ParkingScreen();
+          }));
+        }
+        break;
+
+      case kSupportDepartment:
+        {
+          print(kSupportDepartment);
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (BuildContext context) {
+            return ShiftScreen(key: shiftsScreenKey);
+          }));
+        }
+        break;
+
+      case kMarketingDepartment:
+        {
+          print(kMarketingDepartment);
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (BuildContext context) {
+            return ParkingScreen();
+          }));
+        }
+        break;
+      default:
+        {
+          print("Invalid choice");
+        }
+        break;
+    }
   }
 
   wrongEmailOrPasswordError(Exception err) {
