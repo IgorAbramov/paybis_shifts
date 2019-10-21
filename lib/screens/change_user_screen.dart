@@ -22,13 +22,18 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
   String email = listWithEmployees.first.email;
   String password = '';
   String initials = listWithEmployees.first.initial;
-  String selectedDepartment = kSupportDepartment;
-  String selectedSupportPosition = kJuniorSupport;
-  Color pickerColor = Color(0xff443a49);
+  String selectedDepartment = listWithEmployees.first.department;
+  String selectedSupportPosition = listWithEmployees.first.position;
+  Color pickerColor = convertColor(listWithEmployees.first.empColor);
   Color currentColor = convertColor(listWithEmployees.first.empColor);
-  bool hasCar = false;
-  String cardId = 'Type card ID';
-  String carInfo = "Type car info";
+  bool hasCar = listWithEmployees.first.hasCar;
+  String cardId = listWithEmployees.first.cardId;
+  String carInfo = listWithEmployees.first.carInfo;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   void changeColor(Color color) {
     setState(() => pickerColor = color);
@@ -399,7 +404,6 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
                     cardId,
                   );
                   dbController.changeUser(email, empToChange);
-
                   Navigator.pop(context);
                 } catch (e) {
                   print(e);
@@ -435,7 +439,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
     Widget deleteButton = FlatButton(
       child: Text("Delete User"),
       onPressed: () {
-        setState(() {
+        setState(() async {
           Employee empToDelete;
           dbController.deleteUser(email);
           for (Employee emp in listWithEmployees) {

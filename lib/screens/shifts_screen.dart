@@ -47,6 +47,7 @@ List<Day> daysWithShiftsForCountThisMonth = List<Day>();
 final shiftsScaffoldKey = new GlobalKey<ScaffoldState>();
 final shiftsScreenKey = new GlobalKey<_ShiftScreenState>();
 TextEditingController reasonTextInputController;
+ScrollController scrollController;
 String _markerInitials = '';
 List<String> copiedShift = [];
 
@@ -63,6 +64,12 @@ class _ShiftScreenState extends State<ShiftScreen> {
   void initState() {
     super.initState();
     reasonTextInputController = new TextEditingController();
+    scrollController = new ScrollController();
+//    if (SchedulerBinding.instance.schedulerPhase ==
+//        SchedulerPhase.persistentCallbacks) {
+//      SchedulerBinding.instance.addPostFrameCallback((_) =>
+//          scrollController.jumpTo(scrollController.offset + timestamp.day));
+//    }
   }
 
   void rebuild() {
@@ -305,6 +312,9 @@ class _ShiftScreenState extends State<ShiftScreen> {
                     color: secondaryColor,
                     borderRadius: BorderRadius.circular(15.0),
                     child: MaterialButton(
+                      onPressed: () {
+                        scrollController.jumpTo(timestamp.day * 47.0);
+                      },
                       child: Text(
                         getMonthName(dateTime.month),
                         style: kButtonFontStyle,
@@ -578,19 +588,22 @@ class DaysStream extends StatelessWidget {
                       color: Colors.indigo.shade100,
                       child: GestureDetector(
                         onLongPress: () async {
-                          if (dayWithShifts.s1['holder'] == '') {
-                            currentDocument =
-                                await dbController.getDocument(dayDocumentID);
-                            await dbController.updateWholeShiftHolders(
-                                currentDocument, copiedShift, 1, 2, 3);
-                          } else {
-                            copiedShift.clear();
-                            copiedShift.add(dayWithShifts.s1['holder']);
-                            copiedShift.add(dayWithShifts.s2['holder']);
-                            copiedShift.add(dayWithShifts.s3['holder']);
-                            print(copiedShift);
+                          if (employee.department == kAdmin ||
+                              employee.department == kSuperAdmin) {
+                            if (dayWithShifts.s1['holder'] == '') {
+                              currentDocument =
+                                  await dbController.getDocument(dayDocumentID);
+                              await dbController.updateWholeShiftHolders(
+                                  currentDocument, copiedShift, 1, 2, 3);
+                            } else {
+                              copiedShift.clear();
+                              copiedShift.add(dayWithShifts.s1['holder']);
+                              copiedShift.add(dayWithShifts.s2['holder']);
+                              copiedShift.add(dayWithShifts.s3['holder']);
+                              print(copiedShift);
 
-                            showCopyMessage();
+                              showCopyMessage();
+                            }
                           }
                         },
                         child: Row(
@@ -638,18 +651,21 @@ class DaysStream extends StatelessWidget {
                   TableCell(
                     child: GestureDetector(
                       onLongPress: () async {
-                        if (dayWithShifts.s4['holder'] == '') {
-                          currentDocument =
-                              await dbController.getDocument(dayDocumentID);
-                          await dbController.updateWholeShiftHolders(
-                              currentDocument, copiedShift, 4, 5, 6);
-                        } else {
-                          copiedShift.clear();
-                          copiedShift.add(dayWithShifts.s4['holder']);
-                          copiedShift.add(dayWithShifts.s5['holder']);
-                          copiedShift.add(dayWithShifts.s6['holder']);
-                          showCopyMessage();
-                          print(copiedShift);
+                        if (employee.department == kAdmin ||
+                            employee.department == kSuperAdmin) {
+                          if (dayWithShifts.s4['holder'] == '') {
+                            currentDocument =
+                                await dbController.getDocument(dayDocumentID);
+                            await dbController.updateWholeShiftHolders(
+                                currentDocument, copiedShift, 4, 5, 6);
+                          } else {
+                            copiedShift.clear();
+                            copiedShift.add(dayWithShifts.s4['holder']);
+                            copiedShift.add(dayWithShifts.s5['holder']);
+                            copiedShift.add(dayWithShifts.s6['holder']);
+                            showCopyMessage();
+                            print(copiedShift);
+                          }
                         }
                       },
                       child: Row(
@@ -696,19 +712,22 @@ class DaysStream extends StatelessWidget {
                   TableCell(
                     child: GestureDetector(
                       onLongPress: () async {
-                        if (dayWithShifts.s7['holder'] == '') {
-                          currentDocument =
-                              await dbController.getDocument(dayDocumentID);
-                          await dbController.updateWholeShiftHolders(
-                              currentDocument, copiedShift, 7, 8, 9);
-                        } else {
-                          copiedShift.clear();
-                          copiedShift.add(dayWithShifts.s7['holder']);
-                          copiedShift.add(dayWithShifts.s8['holder']);
-                          copiedShift.add(dayWithShifts.s9['holder']);
-                          print(copiedShift);
+                        if (employee.department == kAdmin ||
+                            employee.department == kSuperAdmin) {
+                          if (dayWithShifts.s7['holder'] == '') {
+                            currentDocument =
+                                await dbController.getDocument(dayDocumentID);
+                            await dbController.updateWholeShiftHolders(
+                                currentDocument, copiedShift, 7, 8, 9);
+                          } else {
+                            copiedShift.clear();
+                            copiedShift.add(dayWithShifts.s7['holder']);
+                            copiedShift.add(dayWithShifts.s8['holder']);
+                            copiedShift.add(dayWithShifts.s9['holder']);
+                            print(copiedShift);
 
-                          showCopyMessage();
+                            showCopyMessage();
+                          }
                         }
                       },
                       child: Row(
@@ -767,6 +786,7 @@ class DaysStream extends StatelessWidget {
         }
         return Expanded(
           child: ListView(
+            controller: scrollController,
             reverse: false,
             children: daysWithShifts,
           ),
@@ -1759,25 +1779,25 @@ Color convertColor(String color) {
   Color otherColor = new Color(colorValueInt);
   return otherColor;
 }
-
-class Shift extends StatefulWidget {
-  final String type;
-  final String day;
-  final String month;
-  final String year;
-
-  Shift(this.type, this.day, this.month, this.year);
-
-  @override
-  _ShiftState createState() => _ShiftState();
-}
-
-class _ShiftState extends State<Shift> {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
+//
+//class Shift extends StatefulWidget {
+//  final String type;
+//  final String day;
+//  final String month;
+//  final String year;
+//
+//  Shift(this.type, this.day, this.month, this.year);
+//
+//  @override
+//  _ShiftState createState() => _ShiftState();
+//}
+//
+//class _ShiftState extends State<Shift> {
+//  @override
+//  Widget build(BuildContext context) {
+//    return Container();
+//  }
+//}
 
 void previousMonthSelected() {
   if (dateTime.month == DateTime.january) {

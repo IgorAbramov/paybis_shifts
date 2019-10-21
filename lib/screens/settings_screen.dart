@@ -16,8 +16,19 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  getUsers() async {
+    listWithEmployees.clear();
+    await dbController.getUsers(listWithEmployees);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    getUsers();
     return Scaffold(
       key: settingsScaffoldKey,
       appBar: AppBar(

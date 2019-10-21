@@ -159,6 +159,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void recognizeUserType() {
     switch (employee.department) {
+      case kSuperAdmin:
+        {
+          print(kSuperAdmin);
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (BuildContext context) {
+            return ShiftScreen(key: shiftsScreenKey);
+          }));
+        }
+        break;
       case kAdmin:
         {
           print(kAdmin);
