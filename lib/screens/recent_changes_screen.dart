@@ -21,7 +21,8 @@ class _RecentChangesScreenState extends State<RecentChangesScreen> {
       ),
       body: Container(
         child: StreamBuilder<QuerySnapshot>(
-          stream: (employee.department == kAdmin)
+          stream: (employee.department == kAdmin ||
+                  employee.department == kSuperAdmin)
               ? dbController.createRecentChangesStream(numberToList, '', false)
               : dbController.createRecentChangesStream(
                   numberToList, employee.initial, true),

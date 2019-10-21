@@ -19,6 +19,9 @@ import 'shifts_screen.dart';
 import 'stats_screen.dart';
 import 'support_days_off_screen.dart';
 
+String _markerInitials = '';
+String _markerTime = '';
+
 final _auth = FirebaseAuth.instance;
 String _parkingTime = '';
 
@@ -41,12 +44,13 @@ class _ParkingScreenState extends State<ParkingScreen> {
       appBar: AppBar(
         backgroundColor: darkPrimaryColor,
         automaticallyImplyLeading: (employee.department == kAdmin ||
+                employee.department == kSuperAdmin ||
                 employee.department == kSupportDepartment)
             ? true
             : false,
         title: Text('PayBis Parking'),
         actions: <Widget>[
-          (employee.department != kAdmin)
+          (employee.department != kAdmin && employee.department != kSuperAdmin)
               ? (employee.department == kSupportDepartment)
                   ? SizedBox(
                       height: 1.0,
@@ -72,9 +76,37 @@ class _ParkingScreenState extends State<ParkingScreen> {
                       },
                       onSelected: choicesAction,
                     )
-              : SizedBox(
-                  height: 1.0,
-                )
+              : (_markerInitials == '' || _markerInitials == 'none')
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        showAdminMarkerAlertDialogParking(context);
+                      },
+                    )
+                  : Material(
+                      elevation: 5.0,
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(30.0),
+                      child: MaterialButton(
+                        onPressed: () {
+                          setState(() {
+                            _markerInitials = '';
+                          });
+                        },
+                        minWidth: 26.0,
+                        height: 26.0,
+                        child: Text(
+                          _markerInitials,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ),
+                    ),
         ],
       ),
       body: Container(
@@ -118,12 +150,12 @@ class _ParkingScreenState extends State<ParkingScreen> {
                 ),
               ],
             ),
-            ParkingDaysStream(month: selectedMonth),
+            ParkingDaysStream(year: dateTime.year, month: dateTime.month),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Expanded(
-                  flex: 10,
+                  flex: 7,
                   child: Padding(
                     padding: const EdgeInsets.only(
                         left: 16.0, right: 4.0, top: 8.0, bottom: 8.0),
@@ -134,19 +166,19 @@ class _ParkingScreenState extends State<ParkingScreen> {
                       child: MaterialButton(
                         onPressed: () {
                           setState(() {
-                            selectedMonth = selectedMonth - 1;
+                            previousMonthSelected();
                           });
                         },
-                        child: Text(
-                          'prev month',
-                          style: kButtonFontStyle,
+                        child: Icon(
+                          Icons.navigate_before,
+                          color: Colors.white,
                         ),
                       ),
                     ),
                   ),
                 ),
                 Expanded(
-                  flex: 9,
+                  flex: 10,
                   child: Padding(
                     padding: const EdgeInsets.only(
                         left: 4.0, right: 4.0, top: 8.0, bottom: 8.0),
@@ -156,15 +188,15 @@ class _ParkingScreenState extends State<ParkingScreen> {
                       borderRadius: BorderRadius.circular(15.0),
                       child: MaterialButton(
                         child: Text(
-                          getMonthName(selectedMonth),
-                          style: kButtonFontStyle,
+                          getMonthName(dateTime.month),
+                          style: kButtonFontStyle.copyWith(fontSize: 14.0),
                         ),
                       ),
                     ),
                   ),
                 ),
                 Expanded(
-                  flex: 10,
+                  flex: 7,
                   child: Padding(
                     padding: const EdgeInsets.only(
                         left: 4.0, right: 16.0, top: 8.0, bottom: 8.0),
@@ -175,12 +207,12 @@ class _ParkingScreenState extends State<ParkingScreen> {
                       child: MaterialButton(
                         onPressed: () {
                           setState(() {
-                            selectedMonth = selectedMonth + 1;
+                            nextMonthSelected();
                           });
                         },
-                        child: Text(
-                          'next month',
-                          style: kButtonFontStyle,
+                        child: Icon(
+                          Icons.navigate_next,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -226,6 +258,69 @@ class _ParkingScreenState extends State<ParkingScreen> {
         return LoginScreen();
       }));
     }
+  }
+
+  showAdminMarkerAlertDialogParking(
+    BuildContext context,
+  ) {
+    final result = showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.all(20.0),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Center(
+                  child: Text(
+                    'Choose employee',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+                  ),
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Wrap(
+                  alignment: WrapAlignment.spaceEvenly,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: listParkingWidgets(context),
+                ),
+                Container(
+                  child: Wrap(
+                    children: <Widget>[
+                      ParkingDates(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    result.then((result) async {
+      if (result == null || result == '') {
+        result = '';
+      } else {
+        String choiceOfEmployee = result.toString();
+
+        if (choiceOfEmployee == 'none') {
+          setState(() {
+            _markerInitials = '';
+            _markerTime = '';
+            _parkingTime = '';
+          });
+        } else
+          setState(() {
+            _markerInitials = choiceOfEmployee;
+            _markerTime = _parkingTime;
+            _parkingTime = '';
+          });
+      }
+    });
   }
 }
 
@@ -440,15 +535,17 @@ List<Widget> listParkingWidgets(BuildContext context) {
 }
 
 class ParkingDaysStream extends StatelessWidget {
+  final int year;
+
   final int month;
 
-  ParkingDaysStream({@required this.month});
+  ParkingDaysStream({@required this.year, @required this.month});
 
   @override
   Widget build(BuildContext context) {
 //    print("Child build method invoked");
     return StreamBuilder<QuerySnapshot>(
-      stream: dbController.createDaysStream(month),
+      stream: dbController.createDaysStream(year, month),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return circularProgress();
@@ -566,6 +663,7 @@ class ParkingDaysStream extends StatelessWidget {
           list.add(ParkingRoundButton(
             day: day,
             month: month,
+            year: year,
             text: splitted[0],
             documentID: documentID,
             time: (splitted.length == 3) ? '${splitted[1]} ${splitted[2]}' : '',
@@ -576,6 +674,7 @@ class ParkingDaysStream extends StatelessWidget {
           list.add(ParkingRoundButton(
             day: day,
             month: month,
+            year: year,
             text: '',
             documentID: documentID,
             time: '',
@@ -587,6 +686,7 @@ class ParkingDaysStream extends StatelessWidget {
       list.add(ParkingRoundButton(
         day: day,
         month: month,
+        year: year,
         text: '',
         documentID: documentID,
         time: '',
@@ -605,6 +705,7 @@ class ParkingDaysStream extends StatelessWidget {
           list.add(ParkingRoundButton(
             day: day,
             month: month,
+            year: year,
             text: splitted[0],
             documentID: documentID,
             time: (splitted.length == 3) ? '${splitted[1]} ${splitted[2]}' : '',
@@ -615,6 +716,7 @@ class ParkingDaysStream extends StatelessWidget {
           list.add(ParkingRoundButton(
             day: day,
             month: month,
+            year: year,
             text: '',
             documentID: documentID,
             time: '',
@@ -626,6 +728,7 @@ class ParkingDaysStream extends StatelessWidget {
       list.add(ParkingRoundButton(
         day: day,
         month: month,
+        year: year,
         text: '',
         documentID: documentID,
         time: '',
@@ -638,6 +741,7 @@ class ParkingDaysStream extends StatelessWidget {
 class ParkingRoundButton extends StatefulWidget {
   final int day;
   final int month;
+  final int year;
   final String text;
   final String documentID;
   final String time;
@@ -646,6 +750,7 @@ class ParkingRoundButton extends StatefulWidget {
   ParkingRoundButton({
     @required this.day,
     @required this.month,
+    @required this.year,
     @required this.text,
     @required this.documentID,
     @required this.time,
@@ -677,9 +782,11 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
     widget.text == '+' ? employeeChosen = false : employeeChosen = true;
     widget.text == '' ? employeeChosen = false : employeeChosen = true;
     if (widget.text.length == 3) isLong = true;
-    if ((widget.day < DateTime.now().day &&
-            widget.month <= DateTime.now().month) ||
-        widget.month < DateTime.now().month) isPast = true;
+    if ((widget.day < DateTime.now().day - 2 &&
+            widget.month <= DateTime.now().month &&
+            widget.year <= DateTime.now().year) ||
+        (widget.month < DateTime.now().month &&
+            widget.year <= DateTime.now().year)) isPast = true;
 
     for (Employee emp in listWithEmployees) {
       //Converting String to Color
@@ -698,8 +805,9 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
       }
     }
 
-// if USER is Admin "and not in the Past"(disabled) build this
-    return (employee.department == kAdmin
+// if USER is Admin "and not in the Past" build this
+    return ((employee.department == kAdmin ||
+            employee.department == kSuperAdmin)
 //        && isPast == false
         )
         ? SizedBox(
@@ -710,9 +818,22 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
 
                 ? MaterialButton(
                     onPressed: () {
-                      setState(() {
-                        showAdminAlertDialogParking(context, documentID,
-                            widget.type, '${widget.text} ${widget.time}');
+                      setState(() async {
+                        if (_markerInitials == '') {
+                          showAdminAlertDialogParking(
+                              context, documentID, widget.type, widget.text);
+                        } else if (_markerInitials == 'none') {
+                        } else {
+                          if (widget.type == 'mgmt') {
+                            await dbController.addParkingMGMT(
+                                documentID, '$_markerInitials $_markerTime');
+                          }
+
+                          if (widget.type == 'itcs') {
+                            await dbController.addParkingItCs(
+                                documentID, '$_markerInitials $_markerTime');
+                          }
+                        }
                       });
                     },
                     color: textIconColor,
@@ -737,14 +858,30 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
 
                 : MaterialButton(
                     onPressed: () {
-                      setState(() {
-                        if (widget.type == 'mgmt') {
-                          dbController.removeParkingMGMT(
-                              documentID, '${widget.text} ${widget.time}');
-                        }
-                        if (widget.type == 'itcs') {
-                          dbController.removeParkingItCs(
-                              documentID, '${widget.text} ${widget.time}');
+                      setState(() async {
+                        if (_markerInitials == '' ||
+                            _markerInitials == 'none') {
+                          if (widget.type == 'mgmt') {
+                            dbController.removeParkingMGMT(
+                                documentID, '${widget.text} ${widget.time}');
+                          }
+                          if (widget.type == 'itcs') {
+                            dbController.removeParkingItCs(
+                                documentID, '${widget.text} ${widget.time}');
+                          }
+                        } else {
+                          if (widget.text == _markerInitials) {
+                          } else {
+                            if (widget.type == 'mgmt') {
+                              await dbController.addParkingMGMT(
+                                  documentID, '$_markerInitials $_markerTime');
+                            }
+
+                            if (widget.type == 'itcs') {
+                              await dbController.addParkingItCs(
+                                  documentID, '$_markerInitials $_markerTime');
+                            }
+                          }
                         }
                       });
                     },

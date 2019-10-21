@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
+import 'package:paybis_com_shifts/screens/calendar_screen.dart';
 import 'package:paybis_com_shifts/screens/it_days_off_screen.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/screens/recent_changes_screen.dart';
@@ -38,7 +39,7 @@ String shiftTypeContainer2ForShiftExchange;
 
 int _beginMonthPadding = 0;
 DateTime timestamp = DateTime.now();
-int selectedMonth = timestamp.month;
+DateTime dateTime = DateTime(timestamp.year, timestamp.month);
 int workingHours;
 String shiftExchangeMessage = '';
 String highlighted = '';
@@ -46,6 +47,8 @@ List<Day> daysWithShiftsForCountThisMonth = List<Day>();
 final shiftsScaffoldKey = new GlobalKey<ScaffoldState>();
 final shiftsScreenKey = new GlobalKey<_ShiftScreenState>();
 TextEditingController reasonTextInputController;
+String _markerInitials = '';
+List<String> copiedShift = [];
 
 class ShiftScreen extends StatefulWidget {
   static const String id = 'shifts_screen';
@@ -89,7 +92,44 @@ class _ShiftScreenState extends State<ShiftScreen> {
         automaticallyImplyLeading: false,
         title: Text('PayBis Schedule'),
         actions: <Widget>[
-          (employee.department != kAdmin)
+          (employee.department == kAdmin || employee.department == kSuperAdmin)
+              ? (_markerInitials == '')
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        showAdminMarkerAlertDialog(context);
+                      },
+                    )
+                  : Material(
+                      elevation: 5.0,
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(30.0),
+                      child: MaterialButton(
+                        onPressed: () {
+                          _markerInitials = '';
+                          shiftsScreenKey.currentState.rebuild();
+                        },
+                        minWidth: 26.0,
+                        height: 26.0,
+                        child: Text(
+                          _markerInitials,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ),
+                    )
+              : IconButton(
+                  icon: Icon(
+                    Icons.today,
+                    color: Colors.white,
+                  ),
+                  onPressed: goToCalendar),
+          (employee.department != kAdmin && employee.department != kSuperAdmin)
               ? (employee.hasCar)
                   ? PopupMenuButton<String>(
                       color: textPrimaryColor.withOpacity(0.8),
@@ -134,26 +174,49 @@ class _ShiftScreenState extends State<ShiftScreen> {
                       },
                       onSelected: choicesAction,
                     )
-              : PopupMenuButton<String>(
-                  color: textPrimaryColor.withOpacity(0.8),
-                  elevation: 4.0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                  itemBuilder: (BuildContext context) {
-                    return kAdminChoicesPopupMenu.map((String choice) {
-                      return PopupMenuItem<String>(
-                        value: choice,
-                        child: Text(
-                          choice,
-                          style: TextStyle(
-                            color: textIconColor,
-                          ),
-                        ),
-                      );
-                    }).toList();
-                  },
-                  onSelected: choicesAction,
-                ),
+              : (employee.department == kAdmin)
+                  ? PopupMenuButton<String>(
+                      color: textPrimaryColor.withOpacity(0.8),
+                      elevation: 4.0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(10.0))),
+                      itemBuilder: (BuildContext context) {
+                        return kAdminChoicesPopupMenu.map((String choice) {
+                          return PopupMenuItem<String>(
+                            value: choice,
+                            child: Text(
+                              choice,
+                              style: TextStyle(
+                                color: textIconColor,
+                              ),
+                            ),
+                          );
+                        }).toList();
+                      },
+                      onSelected: choicesAction,
+                    )
+                  : PopupMenuButton<String>(
+                      color: textPrimaryColor.withOpacity(0.8),
+                      elevation: 4.0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(10.0))),
+                      itemBuilder: (BuildContext context) {
+                        return kSuperAdminChoicesPopupMenu.map((String choice) {
+                          return PopupMenuItem<String>(
+                            value: choice,
+                            child: Text(
+                              choice,
+                              style: TextStyle(
+                                color: textIconColor,
+                              ),
+                            ),
+                          );
+                        }).toList();
+                      },
+                      onSelected: choicesAction,
+                    ),
         ],
       ),
       body: Column(
@@ -204,12 +267,12 @@ class _ShiftScreenState extends State<ShiftScreen> {
               )
             ],
           ),
-          DaysStream(month: selectedMonth),
+          DaysStream(year: dateTime.year, month: dateTime.month),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Expanded(
-                flex: 10,
+                flex: 7,
                 child: Padding(
                   padding: const EdgeInsets.only(
                       left: 16.0, right: 4.0, top: 8.0, bottom: 8.0),
@@ -220,13 +283,12 @@ class _ShiftScreenState extends State<ShiftScreen> {
                     child: MaterialButton(
                       onPressed: () {
                         setState(() {
-                          if (selectedMonth == 1) selectedMonth = 13;
-                          selectedMonth = selectedMonth - 1;
+                          previousMonthSelected();
                         });
                       },
-                      child: Text(
-                        'prev month',
-                        style: kButtonFontStyle,
+                      child: Icon(
+                        Icons.navigate_before,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -244,7 +306,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                     borderRadius: BorderRadius.circular(15.0),
                     child: MaterialButton(
                       child: Text(
-                        getMonthName(selectedMonth),
+                        getMonthName(dateTime.month),
                         style: kButtonFontStyle,
                       ),
                     ),
@@ -365,7 +427,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
 //                ),
 //              ),
               Expanded(
-                flex: 10,
+                flex: 7,
                 child: Padding(
                   padding: const EdgeInsets.only(
                       left: 4.0, right: 16.0, top: 8.0, bottom: 8.0),
@@ -376,13 +438,12 @@ class _ShiftScreenState extends State<ShiftScreen> {
                     child: MaterialButton(
                       onPressed: () {
                         setState(() {
-                          if (selectedMonth == 12) selectedMonth = 0;
-                          selectedMonth = selectedMonth + 1;
+                          nextMonthSelected();
                         });
                       },
-                      child: Text(
-                        'next month',
-                        style: kButtonFontStyle,
+                      child: Icon(
+                        Icons.navigate_next,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -393,6 +454,10 @@ class _ShiftScreenState extends State<ShiftScreen> {
         ],
       ),
     );
+  }
+
+  void goToCalendar() {
+    Navigator.pushNamed(context, CalendarScreen.id);
   }
 
   void choicesAction(String choice) {
@@ -430,9 +495,10 @@ class _ShiftScreenState extends State<ShiftScreen> {
 }
 
 class DaysStream extends StatelessWidget {
+  final int year;
   final int month;
 
-  DaysStream({@required this.month});
+  DaysStream({@required this.year, @required this.month});
 
   @override
   Widget build(BuildContext context) {
@@ -440,7 +506,7 @@ class DaysStream extends StatelessWidget {
     if (daysWithShiftsForCountThisMonth.isNotEmpty)
       daysWithShiftsForCountThisMonth.clear();
     return StreamBuilder<QuerySnapshot>(
-      stream: dbController.createDaysStream(month),
+      stream: dbController.createDaysStream(year, month),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return circularProgress();
@@ -480,7 +546,7 @@ class DaysStream extends StatelessWidget {
 
           if (!daysWithShiftsForCountThisMonth.contains(dayWithShifts) &&
               daysWithShiftsForCountThisMonth.length <
-                  getNumberOfDaysInMonth(selectedMonth))
+                  getNumberOfDaysInMonth(dateTime.month))
             daysWithShiftsForCountThisMonth.add(dayWithShifts);
 
           final dayWithShiftsUI = Table(
@@ -510,118 +576,180 @@ class DaysStream extends StatelessWidget {
                   TableCell(
                     child: Container(
                       color: Colors.indigo.shade100,
+                      child: GestureDetector(
+                        onLongPress: () async {
+                          if (dayWithShifts.s1['holder'] == '') {
+                            currentDocument =
+                                await dbController.getDocument(dayDocumentID);
+                            await dbController.updateWholeShiftHolders(
+                                currentDocument, copiedShift, 1, 2, 3);
+                          } else {
+                            copiedShift.clear();
+                            copiedShift.add(dayWithShifts.s1['holder']);
+                            copiedShift.add(dayWithShifts.s2['holder']);
+                            copiedShift.add(dayWithShifts.s3['holder']);
+                            print(copiedShift);
+
+                            showCopyMessage();
+                          }
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            ShiftsRoundButton(
+                              key: ObjectKey(idNightShift0),
+                              day: dayWithShifts.day,
+                              month: dayWithShifts.month,
+                              year: dayWithShifts.year,
+                              id: dayWithShifts.s1['id'],
+                              text: dayWithShifts.s1['holder'],
+                              workingHours: dayWithShifts.s1['hours'],
+                              documentID: dayDocumentID,
+                              number: 1,
+                            ),
+                            ShiftsRoundButton(
+                              key: ObjectKey(idNightShift1),
+                              day: dayWithShifts.day,
+                              month: dayWithShifts.month,
+                              year: dayWithShifts.year,
+                              id: dayWithShifts.s2['id'],
+                              text: dayWithShifts.s2['holder'],
+                              workingHours: dayWithShifts.s2['hours'],
+                              documentID: dayDocumentID,
+                              number: 2,
+                            ),
+                            ShiftsRoundButton(
+                              key: ObjectKey(idNightShift2),
+                              day: dayWithShifts.day,
+                              month: dayWithShifts.month,
+                              year: dayWithShifts.year,
+                              id: dayWithShifts.s3['id'],
+                              text: dayWithShifts.s3['holder'],
+                              workingHours: dayWithShifts.s3['hours'],
+                              documentID: dayDocumentID,
+                              number: 3,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  TableCell(
+                    child: GestureDetector(
+                      onLongPress: () async {
+                        if (dayWithShifts.s4['holder'] == '') {
+                          currentDocument =
+                              await dbController.getDocument(dayDocumentID);
+                          await dbController.updateWholeShiftHolders(
+                              currentDocument, copiedShift, 4, 5, 6);
+                        } else {
+                          copiedShift.clear();
+                          copiedShift.add(dayWithShifts.s4['holder']);
+                          copiedShift.add(dayWithShifts.s5['holder']);
+                          copiedShift.add(dayWithShifts.s6['holder']);
+                          showCopyMessage();
+                          print(copiedShift);
+                        }
+                      },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           ShiftsRoundButton(
-                            key: ObjectKey(idNightShift0),
+                            key: ObjectKey(idMorningShift0),
                             day: dayWithShifts.day,
                             month: dayWithShifts.month,
-                            id: dayWithShifts.s1['id'],
-                            text: dayWithShifts.s1['holder'],
-                            workingHours: dayWithShifts.s1['hours'],
+                            year: dayWithShifts.year,
+                            id: dayWithShifts.s4['id'],
+                            text: dayWithShifts.s4['holder'],
+                            workingHours: dayWithShifts.s4['hours'],
                             documentID: dayDocumentID,
-                            number: 1,
+                            number: 4,
                           ),
                           ShiftsRoundButton(
-                            key: ObjectKey(idNightShift1),
+                            key: ObjectKey(idMorningShift1),
                             day: dayWithShifts.day,
                             month: dayWithShifts.month,
-                            id: dayWithShifts.s2['id'],
-                            text: dayWithShifts.s2['holder'],
-                            workingHours: dayWithShifts.s2['hours'],
+                            year: dayWithShifts.year,
+                            id: dayWithShifts.s5['id'],
+                            text: dayWithShifts.s5['holder'],
+                            workingHours: dayWithShifts.s5['hours'],
                             documentID: dayDocumentID,
-                            number: 2,
+                            number: 5,
                           ),
                           ShiftsRoundButton(
-                            key: ObjectKey(idNightShift2),
+                            key: ObjectKey(idMorningShift2),
                             day: dayWithShifts.day,
                             month: dayWithShifts.month,
-                            id: dayWithShifts.s3['id'],
-                            text: dayWithShifts.s3['holder'],
-                            workingHours: dayWithShifts.s3['hours'],
+                            year: dayWithShifts.year,
+                            id: dayWithShifts.s6['id'],
+                            text: dayWithShifts.s6['holder'],
+                            workingHours: dayWithShifts.s6['hours'],
                             documentID: dayDocumentID,
-                            number: 3,
+                            number: 6,
                           ),
                         ],
                       ),
                     ),
                   ),
                   TableCell(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        ShiftsRoundButton(
-                          key: ObjectKey(idMorningShift0),
-                          day: dayWithShifts.day,
-                          month: dayWithShifts.month,
-                          id: dayWithShifts.s4['id'],
-                          text: dayWithShifts.s4['holder'],
-                          workingHours: dayWithShifts.s4['hours'],
-                          documentID: dayDocumentID,
-                          number: 4,
-                        ),
-                        ShiftsRoundButton(
-                          key: ObjectKey(idMorningShift1),
-                          day: dayWithShifts.day,
-                          month: dayWithShifts.month,
-                          id: dayWithShifts.s5['id'],
-                          text: dayWithShifts.s5['holder'],
-                          workingHours: dayWithShifts.s5['hours'],
-                          documentID: dayDocumentID,
-                          number: 5,
-                        ),
-                        ShiftsRoundButton(
-                          key: ObjectKey(idMorningShift2),
-                          day: dayWithShifts.day,
-                          month: dayWithShifts.month,
-                          id: dayWithShifts.s6['id'],
-                          text: dayWithShifts.s6['holder'],
-                          workingHours: dayWithShifts.s6['hours'],
-                          documentID: dayDocumentID,
-                          number: 6,
-                        ),
-                      ],
-                    ),
-                  ),
-                  TableCell(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        ShiftsRoundButton(
-                          key: ObjectKey(idEveningShift0),
-                          day: dayWithShifts.day,
-                          month: dayWithShifts.month,
-                          id: dayWithShifts.s7['id'],
-                          text: dayWithShifts.s7['holder'],
-                          workingHours: dayWithShifts.s7['hours'],
-                          documentID: dayDocumentID,
-                          number: 7,
-                        ),
-                        ShiftsRoundButton(
-                          key: ObjectKey(idEveningShift1),
-                          day: dayWithShifts.day,
-                          month: dayWithShifts.month,
-                          id: dayWithShifts.s8['id'],
-                          text: dayWithShifts.s8['holder'],
-                          workingHours: dayWithShifts.s8['hours'],
-                          documentID: dayDocumentID,
-                          number: 8,
-                        ),
-                        ShiftsRoundButton(
-                          key: ObjectKey(idEveningShift2),
-                          day: dayWithShifts.day,
-                          month: dayWithShifts.month,
-                          id: dayWithShifts.s9['id'],
-                          text: dayWithShifts.s9['holder'],
-                          workingHours: dayWithShifts.s9['hours'],
-                          documentID: dayDocumentID,
-                          number: 9,
-                        ),
-                      ],
+                    child: GestureDetector(
+                      onLongPress: () async {
+                        if (dayWithShifts.s7['holder'] == '') {
+                          currentDocument =
+                              await dbController.getDocument(dayDocumentID);
+                          await dbController.updateWholeShiftHolders(
+                              currentDocument, copiedShift, 7, 8, 9);
+                        } else {
+                          copiedShift.clear();
+                          copiedShift.add(dayWithShifts.s7['holder']);
+                          copiedShift.add(dayWithShifts.s8['holder']);
+                          copiedShift.add(dayWithShifts.s9['holder']);
+                          print(copiedShift);
+
+                          showCopyMessage();
+                        }
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          ShiftsRoundButton(
+                            key: ObjectKey(idEveningShift0),
+                            day: dayWithShifts.day,
+                            month: dayWithShifts.month,
+                            year: dayWithShifts.year,
+                            id: dayWithShifts.s7['id'],
+                            text: dayWithShifts.s7['holder'],
+                            workingHours: dayWithShifts.s7['hours'],
+                            documentID: dayDocumentID,
+                            number: 7,
+                          ),
+                          ShiftsRoundButton(
+                            key: ObjectKey(idEveningShift1),
+                            day: dayWithShifts.day,
+                            month: dayWithShifts.month,
+                            year: dayWithShifts.year,
+                            id: dayWithShifts.s8['id'],
+                            text: dayWithShifts.s8['holder'],
+                            workingHours: dayWithShifts.s8['hours'],
+                            documentID: dayDocumentID,
+                            number: 8,
+                          ),
+                          ShiftsRoundButton(
+                            key: ObjectKey(idEveningShift2),
+                            day: dayWithShifts.day,
+                            month: dayWithShifts.month,
+                            year: dayWithShifts.year,
+                            id: dayWithShifts.s9['id'],
+                            text: dayWithShifts.s9['holder'],
+                            workingHours: dayWithShifts.s9['hours'],
+                            documentID: dayDocumentID,
+                            number: 9,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -702,12 +830,14 @@ class ShiftsRoundButton extends StatefulWidget {
   final String text;
   final String documentID;
   final int workingHours;
+  final int year;
 
   ShiftsRoundButton(
       {@required Key key,
       @required this.id,
       @required this.day,
       @required this.month,
+      @required this.year,
       @required this.number,
       @required this.text,
       @required this.documentID,
@@ -742,9 +872,11 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
     number = widget.number;
     widget.text == '' ? employeeChosen = false : employeeChosen = true;
     if (widget.text.length == 3) isLong = true;
-    if ((widget.day < DateTime.now().day &&
-            widget.month <= DateTime.now().month) ||
-        widget.month < DateTime.now().month) isPast = true;
+    if ((widget.day < DateTime.now().day - 2 &&
+            widget.month <= DateTime.now().month &&
+            widget.year <= DateTime.now().year) ||
+        (widget.month < DateTime.now().month &&
+            widget.year <= DateTime.now().year)) isPast = true;
 
     for (Employee emp in listWithEmployees) {
       //Converting String to Color
@@ -753,10 +885,10 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
       }
     }
 
-// if USER is Admin "and not in the Past"(disabled) build this
-    return (employee.department == kAdmin
-//        && isPast == false
-        )
+// if USER is Admin "and not in the Past" build this
+    return ((employee.department == kAdmin ||
+                employee.department == kSuperAdmin) &&
+            isPast == false)
         ? SizedBox(
             width: 30.0,
             child: employeeChosen == false
@@ -765,9 +897,18 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 
                 ? MaterialButton(
                     onPressed: () {
-                      setState(() {
-                        showAdminAlertDialog(context, widget.id, documentID,
-                            number, widget.workingHours, "Who's gonna work?");
+                      setState(() async {
+                        if (_markerInitials == '') {
+                          showAdminAlertDialog(context, widget.id, documentID,
+                              number, widget.workingHours, "Who's gonna work?");
+                        } else if (_markerInitials == 'X') {
+                        } else {
+                          currentDocument =
+                              await dbController.getDocument(documentID);
+
+                          await dbController.updateHolder(
+                              currentDocument, number, _markerInitials);
+                        }
                       });
                     },
                     color: textIconColor,
@@ -790,9 +931,22 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 
                 : MaterialButton(
                     onPressed: () {
-                      setState(() {
-                        showAdminAlertDialog(context, widget.id, documentID,
-                            number, widget.workingHours, "Who's gonna work?");
+                      setState(() async {
+                        if (_markerInitials == '') {
+                          showAdminAlertDialog(context, widget.id, documentID,
+                              number, widget.workingHours, "Who's gonna work?");
+                        } else if (_markerInitials == 'X') {
+                          currentDocument =
+                              await dbController.getDocument(documentID);
+                          await dbController.updateHolderToNone(
+                              currentDocument, number);
+                        } else {
+                          currentDocument =
+                              await dbController.getDocument(documentID);
+
+                          await dbController.updateHolder(
+                              currentDocument, number, _markerInitials);
+                        }
                       });
                     },
                     color: color,
@@ -1126,6 +1280,54 @@ showAdminAlertDialog(
   });
 }
 
+showAdminMarkerAlertDialog(
+  BuildContext context,
+) {
+  final result = showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(32.0))),
+        content: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Center(
+                child: Text(
+                  'Who is going to work?',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+                ),
+              ),
+              SizedBox(
+                height: 5.0,
+              ),
+              Wrap(
+                alignment: WrapAlignment.spaceEvenly,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: listMyWidgets(context),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+  result.then((result) async {
+    if (result == null || result == '') {
+      result = '';
+    } else {
+      String choiceOfEmployee = result.toString();
+
+      if (choiceOfEmployee == 'none') {
+        _markerInitials = 'X';
+        shiftsScreenKey.currentState.rebuild();
+      } else
+        _markerInitials = choiceOfEmployee;
+      shiftsScreenKey.currentState.rebuild();
+    }
+  });
+}
+
 List<Widget> listMyWidgets(BuildContext context) {
   List<Widget> list = List();
   for (Employee emp in listWithEmployees) {
@@ -1316,7 +1518,7 @@ openChangeShiftsConfirmationAlertBox(BuildContext context, String id,
                           } else {
                             shiftTypeContainer2ForShiftExchange = 'morning';
                           }
-                          dbController.addChangeRequestToAdminFeed(
+                          dbController.addChangeRequestToFeed(
                               shiftDocIDContainer1ForShiftExchange,
                               shiftDocIDContainer2ForShiftExchange,
                               shiftNumberContainer1ForShiftExchange,
@@ -1327,7 +1529,8 @@ openChangeShiftsConfirmationAlertBox(BuildContext context, String id,
                               shiftDateContainer2ForShiftExchange,
                               shiftTypeContainer1ForShiftExchange,
                               shiftTypeContainer2ForShiftExchange,
-                              shiftExchangeMessage);
+                              shiftExchangeMessage,
+                              false);
 
                           updateShiftExchangeValuesToNull();
                           Navigator.pop(context);
@@ -1524,22 +1727,70 @@ int weekdayCheck(int day, int month, int year) {
 }
 
 void chooseShiftToExchange() {
-  shiftsScaffoldKey.currentState.showSnackBar(
-      new SnackBar(content: new Text("Choose The Shift You Want")));
+  shiftsScaffoldKey.currentState.showSnackBar(new SnackBar(
+    content: new Text("Choose The Shift You Want"),
+    duration: Duration(seconds: 2),
+  ));
 }
 
 void showConfirmationMessage() {
-  shiftsScaffoldKey.currentState.showSnackBar(
-      new SnackBar(content: new Text("Your request has been sent to admin")));
+  shiftsScaffoldKey.currentState.showSnackBar(new SnackBar(
+    content: new Text("Your request has been sent"),
+    duration: Duration(seconds: 2),
+  ));
 }
 
 void showCancelMessage() {
-  shiftsScaffoldKey.currentState.showSnackBar(
-      new SnackBar(content: new Text("Shift exchange cancelled")));
+  shiftsScaffoldKey.currentState.showSnackBar(new SnackBar(
+    content: new Text("Shift exchange cancelled"),
+    duration: Duration(seconds: 2),
+  ));
+}
+
+void showCopyMessage() {
+  shiftsScaffoldKey.currentState.showSnackBar(new SnackBar(
+    content: new Text("Shift coppied"),
+    duration: Duration(seconds: 2),
+  ));
 }
 
 Color convertColor(String color) {
   int colorValueInt = int.parse(color, radix: 16);
   Color otherColor = new Color(colorValueInt);
   return otherColor;
+}
+
+class Shift extends StatefulWidget {
+  final String type;
+  final String day;
+  final String month;
+  final String year;
+
+  Shift(this.type, this.day, this.month, this.year);
+
+  @override
+  _ShiftState createState() => _ShiftState();
+}
+
+class _ShiftState extends State<Shift> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+void previousMonthSelected() {
+  if (dateTime.month == DateTime.january) {
+    dateTime = new DateTime(dateTime.year - 1, DateTime.december);
+  } else {
+    dateTime = new DateTime(dateTime.year, dateTime.month - 1);
+  }
+}
+
+void nextMonthSelected() {
+  if (dateTime.month == DateTime.december) {
+    dateTime = new DateTime(dateTime.year + 1, DateTime.january);
+  } else {
+    dateTime = new DateTime(dateTime.year, dateTime.month + 1);
+  }
 }

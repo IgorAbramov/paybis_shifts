@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
-import 'package:paybis_com_shifts/models/progress.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/screens/shifts_screen.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -10,6 +9,7 @@ import 'package:timeago/timeago.dart' as timeago;
 //TODO show only last 25 changes with the possibility to see more
 
 final feedScaffoldKey = new GlobalKey<ScaffoldState>();
+final feedScreenKey = new GlobalKey<_FeedScreenState>();
 
 class FeedScreen extends StatefulWidget {
   static const String id = 'feed_screen';
@@ -18,6 +18,10 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
+  void rebuild() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,21 +29,72 @@ class _FeedScreenState extends State<FeedScreen> {
       appBar: AppBar(
         title: Text('Requests to review'),
       ),
-      body: Container(
-        child: StreamBuilder<QuerySnapshot>(
-          stream: dbController.createAdminFeedStream(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return circularProgress();
-            }
-            final changes = snapshot.data.documents;
-            List<FeedItem> feedItems = [];
-            changes.forEach((doc) {
-              feedItems.add(FeedItem.fromDocument(doc));
-            });
-            return ListView(children: feedItems);
-          },
-        ),
+      body: Column(
+        children: <Widget>[
+          Container(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: (employee.department == kSupportDepartment)
+                  ? dbController.createSupportFeedStream()
+                  : dbController.createAdminFeedStream(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return SizedBox(
+                    height: 1.0,
+                  );
+                }
+                final changes = snapshot.data.documents;
+                List<FeedItem> feedItems = [];
+                changes.forEach((doc) {
+                  feedItems.add(FeedItem.fromDocument(doc));
+                });
+                return SingleChildScrollView(
+                    child: Column(children: feedItems));
+              },
+            ),
+          ),
+          (employee.department == kSupportDepartment)
+              ? Column(
+                  children: <Widget>[
+                    Divider(
+                      color: secondaryColor,
+                    ),
+                    Center(
+                      child: Text(
+                        'Your pending Requests',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Divider(
+                      color: secondaryColor,
+                    ),
+                    Container(
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: dbController
+                            .createEmployeePendingRequestFeedStream(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return Container();
+                          }
+                          final changes = snapshot.data.documents;
+                          List<FeedItem> feedItems = [];
+                          changes.forEach((doc) {
+                            feedItems.add(FeedItem.fromDocument(doc));
+                          });
+                          return SingleChildScrollView(
+                              child: Column(children: feedItems));
+                        },
+                      ),
+                    ),
+                  ],
+                )
+              : SizedBox(
+                  height: 1.0,
+                ),
+        ],
       ),
     );
   }
@@ -104,7 +159,10 @@ class FeedItem extends StatelessWidget {
 
   configureText() {
     if (type == 'changeRequest') {
-      feedItemText = 'wants to change with';
+      if (employee.initial == emp1) {
+        feedItemText = 'want to change with';
+      } else
+        feedItemText = 'wants to change with';
     } else
       feedItemText = '';
   }
@@ -144,14 +202,14 @@ class FeedItem extends StatelessWidget {
                 ),
                 children: [
                   TextSpan(
-                    text: name1,
+                    text: (employee.name == name1) ? 'You' : name1,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   TextSpan(
                     text: ' $feedItemText ',
                   ),
                   TextSpan(
-                    text: name2,
+                    text: (employee.name == name2) ? 'You' : name2,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ]),
@@ -168,19 +226,38 @@ class FeedItem extends StatelessWidget {
             Container(
               color: lightPrimaryColor.withOpacity(0.05),
               child: ListTile(
-                leading: GestureDetector(
-                  onTap: () {
-                    dbController.changeShiftHolders(
-                        docID1, docID2, number1, number2, emp1, emp2);
-                    dbController.removeChangeRequestFromAdminFeed(id);
-                    dbController.addChangeToRecentChanges(emp1, emp2, date1,
-                        date2, shiftType1, shiftType2, 'Swap confirmed', true);
-                  },
-                  child: CircleAvatar(
-                    backgroundColor: Colors.green,
-                    child: Icon(Icons.check),
-                  ),
-                ),
+                leading: (employee.department == kSupportDepartment &&
+                        employee.initial == emp1)
+                    ? SizedBox(
+                        height: 1.0,
+                      )
+                    : GestureDetector(
+                        onTap: () {
+                          if (employee.department == kAdmin ||
+                              employee.department == kSuperAdmin) {
+                            dbController.changeShiftHolders(
+                                docID1, docID2, number1, number2, emp1, emp2);
+                            dbController.removeChangeRequestFromFeed(id);
+                            dbController.addChangeToRecentChanges(
+                                emp1,
+                                emp2,
+                                date1,
+                                date2,
+                                shiftType1,
+                                shiftType2,
+                                'Swap confirmed',
+                                true);
+                          }
+                          if (employee.department == kSupportDepartment &&
+                              employee.initial == emp2) {
+                            dbController.setChangeRequestStateToConfirmed(id);
+                          }
+                        },
+                        child: CircleAvatar(
+                          backgroundColor: Colors.green,
+                          child: Icon(Icons.check),
+                        ),
+                      ),
                 title: Text(
                   "$message \n $date1 $shiftType1 ($emp1) to $date2 $shiftType2 ($emp2)",
                   style: TextStyle(
@@ -193,7 +270,7 @@ class FeedItem extends StatelessWidget {
                 ),
                 trailing: GestureDetector(
                   onTap: () {
-                    dbController.removeChangeRequestFromAdminFeed(id);
+                    dbController.removeChangeRequestFromFeed(id);
                     dbController.addChangeToRecentChanges(emp1, emp2, date1,
                         date2, shiftType1, shiftType2, 'Swap cancelled', false);
                   },

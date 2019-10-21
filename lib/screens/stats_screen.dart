@@ -48,12 +48,12 @@ class _StatsScreenState extends State<StatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (employee.department != kAdmin) getAllPersonalData(employee);
+    if (employee.department != kSuperAdmin) getAllPersonalData(employee);
 
-    return (employee.department == kAdmin)
+    return (employee.department == kSuperAdmin)
         ? Scaffold(
             appBar: AppBar(
-              title: Text('Stats for ${getMonthName(selectedMonth)}'),
+              title: Text('Stats for ${getMonthName(dateTime.month)}'),
             ),
             body: Container(
               child: Column(
@@ -132,7 +132,7 @@ class _StatsScreenState extends State<StatsScreen> {
         : Scaffold(
             appBar: AppBar(
               title: Text(
-                  'Hi ${employee.name}! Stats for ${getMonthName(selectedMonth)}'),
+                  'Hi ${employee.name}! Stats for ${getMonthName(dateTime.month)}'),
             ),
             body: Padding(
               padding: const EdgeInsets.all(15.0),
@@ -186,23 +186,23 @@ class _StatsScreenState extends State<StatsScreen> {
 
   calculateAmountOfShifts(Employee employee) {
     for (Day day in daysWithShiftsForCountThisMonth) {
-      if (day.s1.containsValue(employee.initial) && day.month == selectedMonth)
+      if (day.s1.containsValue(employee.initial) && day.month == dateTime.month)
         amountOfShiftsThisMonth++;
-      if (day.s2.containsValue(employee.initial) && day.month == selectedMonth)
+      if (day.s2.containsValue(employee.initial) && day.month == dateTime.month)
         amountOfShiftsThisMonth++;
-      if (day.s3.containsValue(employee.initial) && day.month == selectedMonth)
+      if (day.s3.containsValue(employee.initial) && day.month == dateTime.month)
         amountOfShiftsThisMonth++;
-      if (day.s4.containsValue(employee.initial) && day.month == selectedMonth)
+      if (day.s4.containsValue(employee.initial) && day.month == dateTime.month)
         amountOfShiftsThisMonth++;
-      if (day.s5.containsValue(employee.initial) && day.month == selectedMonth)
+      if (day.s5.containsValue(employee.initial) && day.month == dateTime.month)
         amountOfShiftsThisMonth++;
-      if (day.s6.containsValue(employee.initial) && day.month == selectedMonth)
+      if (day.s6.containsValue(employee.initial) && day.month == dateTime.month)
         amountOfShiftsThisMonth++;
-      if (day.s7.containsValue(employee.initial) && day.month == selectedMonth)
+      if (day.s7.containsValue(employee.initial) && day.month == dateTime.month)
         amountOfShiftsThisMonth++;
-      if (day.s8.containsValue(employee.initial) && day.month == selectedMonth)
+      if (day.s8.containsValue(employee.initial) && day.month == dateTime.month)
         amountOfShiftsThisMonth++;
-      if (day.s9.containsValue(employee.initial) && day.month == selectedMonth)
+      if (day.s9.containsValue(employee.initial) && day.month == dateTime.month)
         amountOfShiftsThisMonth++;
     }
   }
@@ -210,63 +210,63 @@ class _StatsScreenState extends State<StatsScreen> {
   calculateAmountOfNightShifts(Employee employee) {
     for (Day day in daysWithShiftsForCountThisMonth) {
       if (day.s1.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s1.containsValue('night')) {
         nightShiftsCountThisMonth++;
         nightShiftHoursCountThisMonth =
             nightShiftHoursCountThisMonth + day.s1['hours'];
       }
       if (day.s2.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s2.containsValue('night')) {
         nightShiftsCountThisMonth++;
         nightShiftHoursCountThisMonth =
             nightShiftHoursCountThisMonth + day.s2['hours'];
       }
       if (day.s3.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s3.containsValue('night')) {
         nightShiftsCountThisMonth++;
         nightShiftHoursCountThisMonth =
             nightShiftHoursCountThisMonth + day.s3['hours'];
       }
       if (day.s4.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s4.containsValue('night')) {
         nightShiftsCountThisMonth++;
         nightShiftHoursCountThisMonth =
             nightShiftHoursCountThisMonth + day.s4['hours'];
       }
       if (day.s5.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s5.containsValue('night')) {
         nightShiftsCountThisMonth++;
         nightShiftHoursCountThisMonth =
             nightShiftHoursCountThisMonth + day.s5['hours'];
       }
       if (day.s6.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s6.containsValue('night')) {
         nightShiftsCountThisMonth++;
         nightShiftHoursCountThisMonth =
             nightShiftHoursCountThisMonth + day.s6['hours'];
       }
       if (day.s7.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s7.containsValue('night')) {
         nightShiftsCountThisMonth++;
         nightShiftHoursCountThisMonth =
             nightShiftHoursCountThisMonth + day.s7['hours'];
       }
       if (day.s8.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s8.containsValue('night')) {
         nightShiftsCountThisMonth++;
         nightShiftHoursCountThisMonth =
             nightShiftHoursCountThisMonth + day.s8['hours'];
       }
       if (day.s9.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s9.containsValue('night')) {
         nightShiftsCountThisMonth++;
         nightShiftHoursCountThisMonth =
@@ -278,7 +278,7 @@ class _StatsScreenState extends State<StatsScreen> {
   calculateAmountOfMorningShifts(Employee employee) {
     for (Day day in daysWithShiftsForCountThisMonth) {
       if (day.s1.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s1.containsValue('morning')) {
         morningShiftsCountThisMonth++;
 
@@ -286,7 +286,7 @@ class _StatsScreenState extends State<StatsScreen> {
             morningShiftHoursCountThisMonth + day.s1['hours'];
       }
       if (day.s2.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s2.containsValue('morning')) {
         morningShiftsCountThisMonth++;
 
@@ -294,7 +294,7 @@ class _StatsScreenState extends State<StatsScreen> {
             morningShiftHoursCountThisMonth + day.s2['hours'];
       }
       if (day.s3.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s3.containsValue('morning')) {
         morningShiftsCountThisMonth++;
 
@@ -302,7 +302,7 @@ class _StatsScreenState extends State<StatsScreen> {
             morningShiftHoursCountThisMonth + day.s3['hours'];
       }
       if (day.s4.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s4.containsValue('morning')) {
         morningShiftsCountThisMonth++;
 
@@ -310,7 +310,7 @@ class _StatsScreenState extends State<StatsScreen> {
             morningShiftHoursCountThisMonth + day.s4['hours'];
       }
       if (day.s5.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s5.containsValue('morning')) {
         morningShiftsCountThisMonth++;
 
@@ -318,7 +318,7 @@ class _StatsScreenState extends State<StatsScreen> {
             morningShiftHoursCountThisMonth + day.s5['hours'];
       }
       if (day.s6.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s6.containsValue('morning')) {
         morningShiftsCountThisMonth++;
 
@@ -326,7 +326,7 @@ class _StatsScreenState extends State<StatsScreen> {
             morningShiftHoursCountThisMonth + day.s6['hours'];
       }
       if (day.s7.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s7.containsValue('morning')) {
         morningShiftsCountThisMonth++;
 
@@ -334,7 +334,7 @@ class _StatsScreenState extends State<StatsScreen> {
             morningShiftHoursCountThisMonth + day.s7['hours'];
       }
       if (day.s8.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s8.containsValue('morning')) {
         morningShiftsCountThisMonth++;
 
@@ -342,7 +342,7 @@ class _StatsScreenState extends State<StatsScreen> {
             morningShiftHoursCountThisMonth + day.s8['hours'];
       }
       if (day.s9.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s9.containsValue('morning')) {
         morningShiftsCountThisMonth++;
 
@@ -355,7 +355,7 @@ class _StatsScreenState extends State<StatsScreen> {
   calculateAmountOfEveningShifts(Employee employee) {
     for (Day day in daysWithShiftsForCountThisMonth) {
       if (day.s1.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s1.containsValue('evening')) {
         eveningShiftsCountThisMonth++;
 
@@ -363,7 +363,7 @@ class _StatsScreenState extends State<StatsScreen> {
             eveningShiftHoursCountThisMonth + day.s1['hours'];
       }
       if (day.s2.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s2.containsValue('evening')) {
         eveningShiftsCountThisMonth++;
 
@@ -371,7 +371,7 @@ class _StatsScreenState extends State<StatsScreen> {
             eveningShiftHoursCountThisMonth + day.s2['hours'];
       }
       if (day.s3.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s3.containsValue('evening')) {
         eveningShiftsCountThisMonth++;
 
@@ -379,7 +379,7 @@ class _StatsScreenState extends State<StatsScreen> {
             eveningShiftHoursCountThisMonth + day.s3['hours'];
       }
       if (day.s4.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s4.containsValue('evening')) {
         eveningShiftsCountThisMonth++;
 
@@ -387,7 +387,7 @@ class _StatsScreenState extends State<StatsScreen> {
             eveningShiftHoursCountThisMonth + day.s4['hours'];
       }
       if (day.s5.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s5.containsValue('evening')) {
         eveningShiftsCountThisMonth++;
 
@@ -395,7 +395,7 @@ class _StatsScreenState extends State<StatsScreen> {
             eveningShiftHoursCountThisMonth + day.s5['hours'];
       }
       if (day.s6.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s6.containsValue('evening')) {
         eveningShiftsCountThisMonth++;
 
@@ -403,7 +403,7 @@ class _StatsScreenState extends State<StatsScreen> {
             eveningShiftHoursCountThisMonth + day.s6['hours'];
       }
       if (day.s7.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s7.containsValue('evening')) {
         eveningShiftsCountThisMonth++;
 
@@ -411,7 +411,7 @@ class _StatsScreenState extends State<StatsScreen> {
             eveningShiftHoursCountThisMonth + day.s7['hours'];
       }
       if (day.s8.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s8.containsValue('evening')) {
         eveningShiftsCountThisMonth++;
 
@@ -419,7 +419,7 @@ class _StatsScreenState extends State<StatsScreen> {
             eveningShiftHoursCountThisMonth + day.s8['hours'];
       }
       if (day.s9.containsValue(employee.initial) &&
-          day.month == selectedMonth &&
+          day.month == dateTime.month &&
           day.s9.containsValue('evening')) {
         eveningShiftsCountThisMonth++;
 

@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "443699746269-it7emfo8jb2rlj1td5ger0n1kfssm5og.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.paybis.shifts",
+            "certificate_hash": "18427aeca7605fe9ec83c17c38daff8ff710863a"
+          }
+        },
+        {
           "client_id": "443699746269-64sio58pk0mn3bmbnb59pjc2bkqsj9nn.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -32,10 +40,10 @@
               "client_type": 3
             },
             {
-              "client_id": "443699746269-6fi2b8rjr1o7ncgiha50jk2q9gn04j0q.apps.googleusercontent.com",
+              "client_id": "443699746269-65k20fggfeoceks6cddqjv60gv3utg7a.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.paybis.pb-shifts"
+                "bundle_id": "com.paybis.shifts"
               }
             }
           ]

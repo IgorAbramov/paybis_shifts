@@ -10,6 +10,8 @@ import 'package:paybis_com_shifts/screens/login_screen.dart';
 
 import 'shifts_screen.dart';
 
+String _markerInitials = '';
+
 class SupportDaysOffScreen extends StatefulWidget {
   static const String id = 'support_days_off_screen';
   @override
@@ -17,14 +19,48 @@ class SupportDaysOffScreen extends StatefulWidget {
 }
 
 class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
-  final GlobalKey<ScaffoldState> supportDaysOffScaffoldKey =
-      GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: supportDaysOffScaffoldKey,
       appBar: AppBar(
         title: Text('Support days off'),
+        actions: <Widget>[
+          (employee.department == kAdmin || employee.department == kSuperAdmin)
+              ? (_markerInitials == '' || _markerInitials == 'none')
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        showAdminMarkerAlertDialogDaysOff(context);
+                      },
+                    )
+                  : Material(
+                      elevation: 5.0,
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(30.0),
+                      child: MaterialButton(
+                        onPressed: () {
+                          setState(() {
+                            _markerInitials = '';
+                          });
+                        },
+                        minWidth: 26.0,
+                        height: 26.0,
+                        child: Text(
+                          _markerInitials,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ),
+                    )
+              : SizedBox(
+                  height: 1.0,
+                )
+        ],
       ),
       body: Container(
         child: Column(
@@ -67,12 +103,12 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
                 ),
               ],
             ),
-            DaysOffStream(month: selectedMonth),
+            DaysOffStream(month: dateTime.month),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Expanded(
-                  flex: 10,
+                  flex: 7,
                   child: Padding(
                     padding: const EdgeInsets.only(
                         left: 16.0, right: 4.0, top: 8.0, bottom: 8.0),
@@ -83,12 +119,12 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
                       child: MaterialButton(
                         onPressed: () {
                           setState(() {
-                            selectedMonth = selectedMonth - 1;
+                            previousMonthSelected();
                           });
                         },
-                        child: Text(
-                          'prev month',
-                          style: kButtonFontStyle,
+                        child: Icon(
+                          Icons.navigate_before,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -105,7 +141,7 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
                       borderRadius: BorderRadius.circular(15.0),
                       child: MaterialButton(
                         child: Text(
-                          getMonthName(selectedMonth),
+                          getMonthName(dateTime.month),
                           style: kButtonFontStyle,
                         ),
                       ),
@@ -113,7 +149,7 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
                   ),
                 ),
                 Expanded(
-                  flex: 10,
+                  flex: 7,
                   child: Padding(
                     padding: const EdgeInsets.only(
                         left: 4.0, right: 16.0, top: 8.0, bottom: 8.0),
@@ -124,12 +160,12 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
                       child: MaterialButton(
                         onPressed: () {
                           setState(() {
-                            selectedMonth = selectedMonth + 1;
+                            nextMonthSelected();
                           });
                         },
-                        child: Text(
-                          'next month',
-                          style: kButtonFontStyle,
+                        child: Icon(
+                          Icons.navigate_next,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -142,18 +178,70 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
       ),
     );
   }
+
+  showAdminMarkerAlertDialogDaysOff(
+    BuildContext context,
+  ) {
+    final result = showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Center(
+                  child: Text(
+                    'Choose agent',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+                  ),
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Wrap(
+                  alignment: WrapAlignment.spaceEvenly,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: listMyWidgets(context),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    result.then((result) async {
+      if (result == null || result == '') {
+        result = '';
+      } else {
+        String choiceOfEmployee = result.toString();
+
+        if (choiceOfEmployee == 'none') {
+          setState(() {
+            _markerInitials = 'X';
+          });
+        } else
+          setState(() {
+            _markerInitials = choiceOfEmployee;
+          });
+      }
+    });
+  }
 }
 
 class DaysOffStream extends StatelessWidget {
+  final int year;
   final int month;
 
-  DaysOffStream({@required this.month});
+  DaysOffStream({@required this.year, @required this.month});
 
   @override
   Widget build(BuildContext context) {
 //    print("Child build method invoked");
     return StreamBuilder<QuerySnapshot>(
-      stream: dbController.createDaysStream(month),
+      stream: dbController.createDaysStream(year, month),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return circularProgress();
@@ -266,6 +354,7 @@ class DaysOffStream extends StatelessWidget {
           list.add(DayOffRoundButton(
             day: day,
             month: month,
+            year: year,
             text: vacations[i],
             documentID: documentID,
             number: i,
@@ -276,6 +365,7 @@ class DaysOffStream extends StatelessWidget {
           list.add(DayOffRoundButton(
             day: day,
             month: month,
+            year: year,
             text: '',
             documentID: documentID,
             number: 0,
@@ -287,6 +377,7 @@ class DaysOffStream extends StatelessWidget {
       list.add(DayOffRoundButton(
         day: day,
         month: month,
+        year: year,
         text: '',
         documentID: documentID,
         number: 0,
@@ -304,6 +395,7 @@ class DaysOffStream extends StatelessWidget {
           list.add(DayOffRoundButton(
             day: day,
             month: month,
+            year: year,
             text: sickLeaves[i],
             documentID: documentID,
             number: i,
@@ -314,6 +406,7 @@ class DaysOffStream extends StatelessWidget {
           list.add(DayOffRoundButton(
             day: day,
             month: month,
+            year: year,
             text: '',
             documentID: documentID,
             number: 0,
@@ -325,6 +418,7 @@ class DaysOffStream extends StatelessWidget {
       list.add(DayOffRoundButton(
         day: day,
         month: month,
+        year: year,
         text: '',
         documentID: documentID,
         number: 0,
@@ -337,6 +431,7 @@ class DaysOffStream extends StatelessWidget {
 class DayOffRoundButton extends StatefulWidget {
   final int day;
   final int month;
+  final int year;
   final String text;
   final String documentID;
   final int number;
@@ -345,6 +440,7 @@ class DayOffRoundButton extends StatefulWidget {
   DayOffRoundButton({
     @required this.day,
     @required this.month,
+    @required this.year,
     @required this.text,
     @required this.documentID,
     @required this.number,
@@ -376,9 +472,11 @@ class _DayOffRoundButtonState extends State<DayOffRoundButton> {
     widget.text == '+' ? employeeChosen = false : employeeChosen = true;
     widget.text == '' ? employeeChosen = false : employeeChosen = true;
     if (widget.text.length == 3) isLong = true;
-    if ((widget.day < DateTime.now().day &&
-            widget.month <= DateTime.now().month) ||
-        widget.month < DateTime.now().month) isPast = true;
+    if ((widget.day < DateTime.now().day - 2 &&
+            widget.month <= DateTime.now().month &&
+            widget.year <= DateTime.now().year) ||
+        (widget.month < DateTime.now().month &&
+            widget.year <= DateTime.now().year)) isPast = true;
 
     for (Employee emp in listWithEmployees) {
       //Converting String to Color
@@ -387,8 +485,9 @@ class _DayOffRoundButtonState extends State<DayOffRoundButton> {
       }
     }
 
-// if USER is Admin "and not in the Past"(disabled) build this
-    return (employee.department == kAdmin
+// if USER is Admin "and not in the Past" build this
+    return ((employee.department == kAdmin ||
+            employee.department == kSuperAdmin)
 //        && isPast == false
         )
         ? SizedBox(
@@ -399,9 +498,22 @@ class _DayOffRoundButtonState extends State<DayOffRoundButton> {
 
                 ? MaterialButton(
                     onPressed: () {
-                      setState(() {
-                        showAdminAlertDialogDaysOff(
-                            context, documentID, widget.type, widget.text);
+                      setState(() async {
+                        if (_markerInitials == '') {
+                          showAdminAlertDialogDaysOff(
+                              context, documentID, widget.type, widget.text);
+                        } else if (_markerInitials == 'none') {
+                        } else {
+                          if (widget.type == 'vacation') {
+                            await dbController.addVacation(
+                                documentID, _markerInitials);
+                          }
+
+                          if (widget.type == 'sickLeave') {
+                            await dbController.addSickLeave(
+                                documentID, _markerInitials);
+                          }
+                        }
                       });
                     },
                     color: textIconColor,
@@ -424,12 +536,30 @@ class _DayOffRoundButtonState extends State<DayOffRoundButton> {
 
                 : MaterialButton(
                     onPressed: () {
-                      setState(() {
-                        if (widget.type == 'vacation') {
-                          dbController.removeVacation(documentID, widget.text);
-                        }
-                        if (widget.type == 'sickLeave') {
-                          dbController.removeSickLeave(documentID, widget.text);
+                      setState(() async {
+                        if (_markerInitials == '' ||
+                            _markerInitials == 'none') {
+                          if (widget.type == 'vacation') {
+                            dbController.removeVacation(
+                                documentID, widget.text);
+                          }
+                          if (widget.type == 'sickLeave') {
+                            dbController.removeSickLeave(
+                                documentID, widget.text);
+                          }
+                        } else {
+                          if (widget.text == _markerInitials) {
+                          } else {
+                            if (widget.type == 'vacation') {
+                              await dbController.addVacation(
+                                  documentID, _markerInitials);
+                            }
+
+                            if (widget.type == 'sickLeave') {
+                              await dbController.addSickLeave(
+                                  documentID, _markerInitials);
+                            }
+                          }
                         }
                       });
                     },

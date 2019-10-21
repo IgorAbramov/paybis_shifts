@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
-import 'package:paybis_com_shifts/screens/feed_screen.dart';
+import 'package:paybis_com_shifts/screens/login_screen.dart';
 
 final _fireStore = Firestore.instance;
 final feedRef = Firestore.instance.collection('feed');
@@ -9,10 +9,11 @@ final String adminFeedDocID = 'T8dBZmU5meD1LfEgfEM3';
 final _auth = FirebaseAuth.instance;
 
 class DBController {
-  Stream createDaysStream<QuerySnapshot>(int month) {
+  Stream createDaysStream<QuerySnapshot>(int year, int month) {
     return _fireStore
         .collection('days')
         .where('month', isEqualTo: month)
+        .where('year', isEqualTo: year)
         .orderBy('day', descending: false)
         .snapshots();
   }
@@ -45,6 +46,22 @@ class DBController {
         .collection('days')
         .document(documentSnapshot.documentID)
         .updateData({'$number.holder': choiceOfEmp});
+  }
+
+  updateWholeShiftHolders(DocumentSnapshot documentSnapshot, List holders,
+      int number1, int number2, int number3) async {
+    await _fireStore
+        .collection('days')
+        .document(documentSnapshot.documentID)
+        .updateData({'$number1.holder': holders[0]});
+    await _fireStore
+        .collection('days')
+        .document(documentSnapshot.documentID)
+        .updateData({'$number2.holder': holders[1]});
+    await _fireStore
+        .collection('days')
+        .document(documentSnapshot.documentID)
+        .updateData({'$number3.holder': holders[2]});
   }
 
   updateHours(DocumentSnapshot documentSnapshot, int number, int hours) async {
@@ -177,58 +194,51 @@ class DBController {
         id: user.documentID,
       ));
     }
-//    for (var emp in list) {
-//      print(emp.email);
-//      print(emp.name);
-//      print(emp.empColor);
-//      print(emp.id);
-//      print(emp.initial);
-//    }
     return list;
-  }
-
-  void daysStream() async {
-//    await for (var snapshot in _fireStore
-//        .collection('days')
-//        .where('month', isEqualTo: '${_dateTime.month.toString()}')
-//        .snapshots()) {
-////      for (var day in snapshot.documents) {}
-//    }
-  }
-
-  getAdminFeed() async {
-    QuerySnapshot snapshot = await feedRef
-        .document(adminFeedDocID)
-        .collection('feedItems')
-        .orderBy('timestamp', descending: true)
-        .getDocuments();
-    List<FeedItem> feedItems = [];
-    snapshot.documents.forEach((doc) {
-      feedItems.add(FeedItem.fromDocument(doc));
-    });
-    return feedItems;
   }
 
   Stream createAdminFeedStream<QuerySnapshot>() {
     return feedRef
         .document(adminFeedDocID)
         .collection('feedItems')
+        .where('confirmed', isEqualTo: true)
         .orderBy('timestamp', descending: false)
         .snapshots();
   }
 
-  addChangeRequestToAdminFeed(
-      String docID1,
-      String docID2,
-      int number1,
-      int number2,
-      String emp1,
-      String emp2,
-      String date1,
-      String date2,
-      String shiftType1,
-      String shiftType2,
-      String message) {
+  Stream createSupportFeedStream<QuerySnapshot>() {
+    return feedRef
+        .document(adminFeedDocID)
+        .collection('feedItems')
+        .where('emp2', isEqualTo: employee.initial)
+        .where('confirmed', isEqualTo: false)
+        .orderBy('timestamp', descending: false)
+        .snapshots();
+  }
+
+  Stream createEmployeePendingRequestFeedStream<QuerySnapshot>() {
+    return feedRef
+        .document(adminFeedDocID)
+        .collection('feedItems')
+        .where('emp1', isEqualTo: employee.initial)
+        .orderBy('timestamp', descending: false)
+        .snapshots();
+  }
+
+  addChangeRequestToFeed(
+    String docID1,
+    String docID2,
+    int number1,
+    int number2,
+    String emp1,
+    String emp2,
+    String date1,
+    String date2,
+    String shiftType1,
+    String shiftType2,
+    String message,
+    bool confirmed,
+  ) {
     feedRef
         .document(adminFeedDocID)
         .collection('feedItems')
@@ -245,12 +255,21 @@ class DBController {
       "date2": date2,
       "shiftType1": shiftType1,
       "shiftType2": shiftType2,
+      "confirmed": confirmed,
       "timestamp": DateTime.now(),
       "message": message,
     });
   }
 
-  removeChangeRequestFromAdminFeed(String id) async {
+  setChangeRequestStateToConfirmed(String id) async {
+    await feedRef
+        .document(adminFeedDocID)
+        .collection('feedItems')
+        .document(id)
+        .updateData({'confirmed': true});
+  }
+
+  removeChangeRequestFromFeed(String id) async {
     await feedRef
         .document(adminFeedDocID)
         .collection('feedItems')

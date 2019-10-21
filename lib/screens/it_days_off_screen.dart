@@ -7,6 +7,8 @@ import 'package:paybis_com_shifts/models/progress.dart';
 import 'login_screen.dart';
 import 'shifts_screen.dart';
 
+String _markerInitials = '';
+
 class ItDaysOffScreen extends StatefulWidget {
   static const String id = 'it_days_off_screen';
 
@@ -23,6 +25,43 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
       key: itDaysOffScaffoldKey,
       appBar: AppBar(
         title: Text('IT Days off'),
+        actions: <Widget>[
+          (employee.department == kAdmin || employee.department == kSuperAdmin)
+              ? (_markerInitials == '' || _markerInitials == 'none')
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        showAdminMarkerAlertDialogITDaysOff(context);
+                      },
+                    )
+                  : Material(
+                      elevation: 5.0,
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(30.0),
+                      child: MaterialButton(
+                        onPressed: () {
+                          setState(() {
+                            _markerInitials = '';
+                          });
+                        },
+                        minWidth: 26.0,
+                        height: 26.0,
+                        child: Text(
+                          _markerInitials,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ),
+                    )
+              : SizedBox(
+                  height: 1.0,
+                ),
+        ],
       ),
 //      floatingActionButton: InfoFloatingActionButton(),
       body: Container(
@@ -66,12 +105,12 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                 ),
               ],
             ),
-            ITDaysOffStream(month: selectedMonth),
+            ITDaysOffStream(year: dateTime.year, month: dateTime.month),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Expanded(
-                  flex: 10,
+                  flex: 7,
                   child: Padding(
                     padding: const EdgeInsets.only(
                         left: 16.0, right: 4.0, top: 8.0, bottom: 8.0),
@@ -82,12 +121,12 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                       child: MaterialButton(
                         onPressed: () {
                           setState(() {
-                            selectedMonth = selectedMonth - 1;
+                            previousMonthSelected();
                           });
                         },
-                        child: Text(
-                          'prev month',
-                          style: kButtonFontStyle,
+                        child: Icon(
+                          Icons.navigate_before,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -104,7 +143,7 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                       borderRadius: BorderRadius.circular(15.0),
                       child: MaterialButton(
                         child: Text(
-                          getMonthName(selectedMonth),
+                          getMonthName(dateTime.month),
                           style: kButtonFontStyle,
                         ),
                       ),
@@ -112,7 +151,7 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                   ),
                 ),
                 Expanded(
-                  flex: 10,
+                  flex: 7,
                   child: Padding(
                     padding: const EdgeInsets.only(
                         left: 4.0, right: 16.0, top: 8.0, bottom: 8.0),
@@ -123,12 +162,12 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                       child: MaterialButton(
                         onPressed: () {
                           setState(() {
-                            selectedMonth = selectedMonth + 1;
+                            nextMonthSelected();
                           });
                         },
-                        child: Text(
-                          'next month',
-                          style: kButtonFontStyle,
+                        child: Icon(
+                          Icons.navigate_next,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -141,18 +180,117 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
       ),
     );
   }
+
+  showAdminMarkerAlertDialogITDaysOff(
+    BuildContext context,
+  ) {
+    final result = showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Center(
+                  child: Text(
+                    'Choose employee',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+                  ),
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Wrap(
+                  alignment: WrapAlignment.spaceEvenly,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: listMyITWidgets(context),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    result.then((result) async {
+      if (result == null || result == '') {
+        result = '';
+      } else {
+        String choiceOfEmployee = result.toString();
+
+        if (choiceOfEmployee == 'none') {
+          setState(() {
+            _markerInitials = '';
+          });
+        } else
+          setState(() {
+            _markerInitials = choiceOfEmployee;
+          });
+      }
+    });
+  }
+
+  List<Widget> listMyITWidgets(BuildContext context) {
+    List<Widget> list = List();
+    for (Employee emp in listWithEmployees) {
+      if (emp.department == kITDepartment) {
+        list.add(Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Material(
+            elevation: 5.0,
+            color: convertColor(emp.empColor),
+            borderRadius: BorderRadius.circular(15.0),
+            child: MaterialButton(
+              minWidth: 100.0,
+              onPressed: () {
+                Navigator.pop(context, emp.initial);
+              },
+              child: Text(
+                emp.name,
+                style: TextStyle(
+                  fontSize: (emp.name.length <= 7) ? 17.0 : 14.0,
+                  color: textIconColor,
+                ),
+              ),
+            ),
+          ),
+        ));
+      }
+    }
+    list.add(Padding(
+      padding: const EdgeInsets.all(5.0),
+      child: Material(
+        elevation: 5.0,
+        color: textPrimaryColor,
+        borderRadius: BorderRadius.circular(15.0),
+        child: MaterialButton(
+          onPressed: () {
+            Navigator.pop(context, 'none');
+          },
+          child: Text(
+            'none',
+            style: kHeaderFontStyle,
+          ),
+        ),
+      ),
+    ));
+    return list;
+  }
 }
 
 class ITDaysOffStream extends StatelessWidget {
   final int month;
+  final int year;
 
-  ITDaysOffStream({@required this.month});
+  ITDaysOffStream({@required this.year, @required this.month});
 
   @override
   Widget build(BuildContext context) {
 //    print("Child build method invoked");
     return StreamBuilder<QuerySnapshot>(
-      stream: dbController.createDaysStream(month),
+      stream: dbController.createDaysStream(year, month),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return circularProgress();
@@ -265,6 +403,7 @@ class ITDaysOffStream extends StatelessWidget {
           list.add(ITDayOffRoundButton(
             day: day,
             month: month,
+            year: year,
             text: vacations[i],
             documentID: documentID,
             number: i,
@@ -275,6 +414,7 @@ class ITDaysOffStream extends StatelessWidget {
           list.add(ITDayOffRoundButton(
             day: day,
             month: month,
+            year: year,
             text: '',
             documentID: documentID,
             number: 0,
@@ -286,6 +426,7 @@ class ITDaysOffStream extends StatelessWidget {
       list.add(ITDayOffRoundButton(
         day: day,
         month: month,
+        year: year,
         text: '',
         documentID: documentID,
         number: 0,
@@ -303,6 +444,7 @@ class ITDaysOffStream extends StatelessWidget {
           list.add(ITDayOffRoundButton(
             day: day,
             month: month,
+            year: year,
             text: sickLeaves[i],
             documentID: documentID,
             number: i,
@@ -313,6 +455,7 @@ class ITDaysOffStream extends StatelessWidget {
           list.add(ITDayOffRoundButton(
             day: day,
             month: month,
+            year: year,
             text: '',
             documentID: documentID,
             number: 0,
@@ -324,6 +467,7 @@ class ITDaysOffStream extends StatelessWidget {
       list.add(ITDayOffRoundButton(
         day: day,
         month: month,
+        year: year,
         text: '',
         documentID: documentID,
         number: 0,
@@ -336,6 +480,7 @@ class ITDaysOffStream extends StatelessWidget {
 class ITDayOffRoundButton extends StatefulWidget {
   final int day;
   final int month;
+  final int year;
   final String text;
   final String documentID;
   final int number;
@@ -344,6 +489,7 @@ class ITDayOffRoundButton extends StatefulWidget {
   ITDayOffRoundButton({
     @required this.day,
     @required this.month,
+    @required this.year,
     @required this.text,
     @required this.documentID,
     @required this.number,
@@ -375,9 +521,11 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
     widget.text == '+' ? employeeChosen = false : employeeChosen = true;
     widget.text == '' ? employeeChosen = false : employeeChosen = true;
     if (widget.text.length == 3) isLong = true;
-    if ((widget.day < DateTime.now().day &&
-            widget.month <= DateTime.now().month) ||
-        widget.month < DateTime.now().month) isPast = true;
+    if ((widget.day < DateTime.now().day - 2 &&
+            widget.month <= DateTime.now().month &&
+            widget.year <= DateTime.now().year) ||
+        (widget.month < DateTime.now().month &&
+            widget.year <= DateTime.now().year)) isPast = true;
 
     for (Employee emp in listWithEmployees) {
       //Converting String to Color
@@ -386,8 +534,9 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
       }
     }
 
-// if USER is Admin "and not in the Past"(disabled) build this
-    return (employee.department == kAdmin
+// if USER is Admin "and not in the Past" build this
+    return ((employee.department == kAdmin ||
+            employee.department == kSuperAdmin)
 //        && isPast == false
         )
         ? SizedBox(
@@ -398,9 +547,22 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
 
                 ? MaterialButton(
                     onPressed: () {
-                      setState(() {
-                        showAdminAlertDialogDaysOff(
-                            context, documentID, widget.type, widget.text);
+                      setState(() async {
+                        if (_markerInitials == '') {
+                          showAdminAlertDialogDaysOff(
+                              context, documentID, widget.type, widget.text);
+                        } else if (_markerInitials == 'none') {
+                        } else {
+                          if (widget.type == 'vacation') {
+                            await dbController.addITVacation(
+                                documentID, _markerInitials);
+                          }
+
+                          if (widget.type == 'sickLeave') {
+                            await dbController.addITSickLeave(
+                                documentID, _markerInitials);
+                          }
+                        }
                       });
                     },
                     color: textIconColor,
@@ -423,14 +585,30 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
 
                 : MaterialButton(
                     onPressed: () {
-                      setState(() {
-                        if (widget.type == 'vacation') {
-                          dbController.removeITVacation(
-                              documentID, widget.text);
-                        }
-                        if (widget.type == 'sickLeave') {
-                          dbController.removeITSickLeave(
-                              documentID, widget.text);
+                      setState(() async {
+                        if (_markerInitials == '' ||
+                            _markerInitials == 'none') {
+                          if (widget.type == 'vacation') {
+                            dbController.removeITVacation(
+                                documentID, widget.text);
+                          }
+                          if (widget.type == 'sickLeave') {
+                            dbController.removeITSickLeave(
+                                documentID, widget.text);
+                          }
+                        } else {
+                          if (widget.text == _markerInitials) {
+                          } else {
+                            if (widget.type == 'vacation') {
+                              await dbController.addITVacation(
+                                  documentID, _markerInitials);
+                            }
+
+                            if (widget.type == 'sickLeave') {
+                              await dbController.addITSickLeave(
+                                  documentID, _markerInitials);
+                            }
+                          }
                         }
                       });
                     },

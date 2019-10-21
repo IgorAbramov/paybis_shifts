@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:paybis_com_shifts/screens/calendar_screen.dart';
 import 'package:paybis_com_shifts/screens/change_user_screen.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/screens/register_user_screen.dart';
@@ -16,6 +18,7 @@ import 'screens/stats_screen.dart';
 import 'screens/support_days_off_screen.dart';
 import 'screens/welcome_screen.dart';
 
+FirebaseAuth _auth = FirebaseAuth.instance;
 void main() => runApp(PBShifts());
 
 class PBShifts extends StatelessWidget {
@@ -23,6 +26,7 @@ class PBShifts extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       initialRoute: LoginScreen.id,
+//      home: _loadHomeScreen(),
       routes: {
         WelcomeScreen.id: (context) => WelcomeScreen(),
         LoginScreen.id: (context) => LoginScreen(),
@@ -36,7 +40,29 @@ class PBShifts extends StatelessWidget {
         SupportDaysOffScreen.id: (context) => SupportDaysOffScreen(),
         ItDaysOffScreen.id: (context) => ItDaysOffScreen(),
         ParkingScreen.id: (context) => ParkingScreen(),
+        CalendarScreen.id: (context) => CalendarScreen(),
       },
     );
   }
+
+//  Widget _loadHomeScreen() {
+//    return FutureBuilder<FirebaseUser>(
+//        future: _auth.currentUser(),
+//        builder: (BuildContext context, AsyncSnapshot<FirebaseUser> snapshot) {
+//          switch (snapshot.connectionState) {
+//            case ConnectionState.none:
+//            case ConnectionState.waiting:
+//              return CircularProgressIndicator();
+//            default:
+//              if (snapshot.hasError) {
+//                return Text('Error: ${snapshot.error}');
+//              } else {
+//                if (snapshot.data == null)
+//                  return LoginScreen();
+//                else
+//                  return ShiftScreen();
+//              }
+//          }
+//        });
+//  }
 }

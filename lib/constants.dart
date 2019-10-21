@@ -13,6 +13,7 @@ const String kITDepartment = 'IT Department';
 const String kMarketingDepartment = 'Marketing Department';
 const String kManagement = 'Management';
 const String kAdmin = 'Admin';
+const String kSuperAdmin = 'SuperAdmin';
 const String kTrainee = 'Trainee';
 const String kJuniorSupport = 'Junior Support';
 const String kMiddleSupport = 'Middle Support';
@@ -21,6 +22,15 @@ const String kAMLCertifiedSupport = 'AML Sertified Support';
 const String kTeamLeadSupport = 'Team Lead Support';
 
 const List<String> kAdminChoicesPopupMenu = [
+  kChangeRequests,
+  kRecentChanges,
+  kSupportDaysOff,
+  kItDaysOff,
+  kParking,
+  kSettings,
+  kLogOut
+];
+const List<String> kSuperAdminChoicesPopupMenu = [
   kChangeRequests,
   kRecentChanges,
   kStats,
@@ -34,6 +44,7 @@ const List<String> kAdminChoicesPopupMenu = [
 const List<String> kItChoicesPopupMenu = [kItDaysOff, kSettings, kLogOut];
 
 const List<String> kEmployeeWithCarChoicesPopupMenu = [
+  kChangeRequests,
   kStats,
   kRecentChanges,
   kSupportDaysOff,
@@ -43,6 +54,7 @@ const List<String> kEmployeeWithCarChoicesPopupMenu = [
 ];
 
 const List<String> kEmployeeChoicesPopupMenu = [
+  kChangeRequests,
   kStats,
   kRecentChanges,
   kSupportDaysOff,
@@ -56,6 +68,7 @@ const List<String> kEmployeeDepartmentTypes = [
   kMarketingDepartment,
   kManagement,
   kAdmin,
+  kSuperAdmin
 ];
 
 const List<String> kSupportPositionsChoices = [
@@ -138,3 +151,5 @@ const Color accentColor = Color(0xFFFF5252);
 const Color textPrimaryColor = Color(0xFF212121);
 const Color secondaryColor = Color(0xFF757575);
 const Color dividerColor = Color(0xFFBDBDBD);
+
+const String usersCollectionId = 'users';
