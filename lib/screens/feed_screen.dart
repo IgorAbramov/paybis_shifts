@@ -13,6 +13,7 @@ final feedScreenKey = new GlobalKey<_FeedScreenState>();
 
 class FeedScreen extends StatefulWidget {
   static const String id = 'feed_screen';
+  const FeedScreen({Key key}) : super(key: key);
   @override
   _FeedScreenState createState() => _FeedScreenState();
 }
@@ -232,13 +233,13 @@ class FeedItem extends StatelessWidget {
                         height: 1.0,
                       )
                     : GestureDetector(
-                        onTap: () {
+                        onTap: () async {
                           if (employee.department == kAdmin ||
                               employee.department == kSuperAdmin) {
-                            dbController.changeShiftHolders(
+                            await dbController.changeShiftHolders(
                                 docID1, docID2, number1, number2, emp1, emp2);
-                            dbController.removeChangeRequestFromFeed(id);
-                            dbController.addChangeToRecentChanges(
+                            await dbController.removeChangeRequestFromFeed(id);
+                            await dbController.addChangeToRecentChanges(
                                 emp1,
                                 emp2,
                                 date1,
@@ -250,7 +251,8 @@ class FeedItem extends StatelessWidget {
                           }
                           if (employee.department == kSupportDepartment &&
                               employee.initial == emp2) {
-                            dbController.setChangeRequestStateToConfirmed(id);
+                            await dbController
+                                .setChangeRequestStateToConfirmed(id);
                           }
                         },
                         child: CircleAvatar(
@@ -269,10 +271,17 @@ class FeedItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 trailing: GestureDetector(
-                  onTap: () {
-                    dbController.removeChangeRequestFromFeed(id);
-                    dbController.addChangeToRecentChanges(emp1, emp2, date1,
-                        date2, shiftType1, shiftType2, 'Swap cancelled', false);
+                  onTap: () async {
+                    await dbController.removeChangeRequestFromFeed(id);
+                    await dbController.addChangeToRecentChanges(
+                        emp1,
+                        emp2,
+                        date1,
+                        date2,
+                        shiftType1,
+                        shiftType2,
+                        'Swap cancelled',
+                        false);
                   },
                   child: CircleAvatar(
                     backgroundColor: accentColor,

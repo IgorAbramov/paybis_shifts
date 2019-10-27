@@ -20,6 +20,9 @@ const String kMiddleSupport = 'Middle Support';
 const String kSeniorSupport = 'Senior Support';
 const String kAMLCertifiedSupport = 'AML Sertified Support';
 const String kTeamLeadSupport = 'Team Lead Support';
+const String kNight = 'night';
+const String kMorning = 'morning';
+const String kEvening = 'evening';
 
 const List<String> kAdminChoicesPopupMenu = [
   kChangeRequests,

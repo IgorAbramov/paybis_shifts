@@ -12,6 +12,7 @@ import 'package:paybis_com_shifts/screens/it_days_off_screen.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/screens/recent_changes_screen.dart';
 
+import 'calendar_screen.dart';
 import 'feed_screen.dart';
 import 'login_screen.dart';
 import 'settings_screen.dart';
@@ -50,6 +51,18 @@ class _ParkingScreenState extends State<ParkingScreen> {
             : false,
         title: Text('PayBis Parking'),
         actions: <Widget>[
+          (employee.department == kITDepartment ||
+                  employee.department == kManagement ||
+                  employee.department == kMarketingDepartment)
+              ? IconButton(
+                  icon: Icon(
+                    Icons.today,
+                    color: Colors.white,
+                  ),
+                  onPressed: goToCalendar)
+              : SizedBox(
+                  height: 1.0,
+                ),
           (employee.department != kAdmin && employee.department != kSuperAdmin)
               ? (employee.department == kSupportDepartment)
                   ? SizedBox(
@@ -228,6 +241,10 @@ class _ParkingScreenState extends State<ParkingScreen> {
         ),
       ),
     );
+  }
+
+  void goToCalendar() {
+    Navigator.pushNamed(context, CalendarScreen.id);
   }
 
   void choicesAction(String choice) {

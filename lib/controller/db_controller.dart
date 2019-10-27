@@ -387,4 +387,16 @@ class DBController {
       'itcs': FieldValue.arrayRemove([holder])
     });
   }
+
+  addAbsenceShift(String docID, String holder, String shiftType) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      '$shiftType': FieldValue.arrayUnion([holder])
+    });
+  }
+
+  removeAbsenceShift(String docID, String holder, String shiftType) async {
+    await _fireStore.collection('days').document(docID).updateData({
+      '$shiftType': FieldValue.arrayRemove([holder])
+    });
+  }
 }

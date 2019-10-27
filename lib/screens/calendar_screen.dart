@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
+import 'package:paybis_com_shifts/ui_parts/calendar_widgets.dart';
 
 import 'login_screen.dart';
 import 'shifts_screen.dart';
@@ -16,8 +17,9 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class CalendarState extends State<CalendarScreen> {
+  String parkingStatus = 'free';
   final FirebaseAuth _auth = FirebaseAuth.instance;
-//  final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+//  final FirebaseMessaging _firebaseMessaging =  FirebaseMessaging();
   QuerySnapshot _userEventSnapshot;
   int _beginMonthPadding = 0;
 
@@ -68,8 +70,7 @@ class CalendarState extends State<CalendarScreen> {
   }
 
   void setMonthPadding() {
-    _beginMonthPadding =
-        new DateTime(dateTime.year, dateTime.month, 1).weekday - 1;
+    _beginMonthPadding = DateTime(dateTime.year, dateTime.month, 1).weekday - 1;
     _beginMonthPadding == 7 ? (_beginMonthPadding = 0) : _beginMonthPadding;
   }
 
@@ -81,7 +82,7 @@ class CalendarState extends State<CalendarScreen> {
 //          .collection('calendar_events')
 //          .where('time',
 //              isGreaterThanOrEqualTo:
-//                  new DateTime(dateTime.year, dateTime.month))
+//                   DateTime(dateTime.year, dateTime.month))
 //          .where('email', isEqualTo: currentUser.email)
 //          .getDocuments();
 //
@@ -103,9 +104,9 @@ class CalendarState extends State<CalendarScreen> {
 //  void _onDayTapped(int day) {
 //    Navigator.push(
 //        context,
-//        new MaterialPageRoute(
-//            builder: (BuildContext context) => new EventsView(
-//                new DateTime(dateTime.year, dateTime.month, day))));
+//         MaterialPageRoute(
+//            builder: (BuildContext context) =>  EventsView(
+//                 DateTime(dateTime.year, dateTime.month, day))));
 //  }
 
   @override
@@ -125,12 +126,12 @@ class CalendarState extends State<CalendarScreen> {
         6;
     final double itemWidth = size.width / numWeekDays;
 
-    return new Scaffold(
-        backgroundColor: Colors.white,
-        appBar: new AppBar(
-          title: new FittedBox(
+    return Scaffold(
+        drawerScrimColor: Colors.white,
+        appBar: AppBar(
+          title: FittedBox(
               fit: BoxFit.contain,
-              child: new Text(
+              child: Text(
                 getMonthName(dateTime.month) + " " + dateTime.year.toString(),
               )),
           actions: <Widget>[
@@ -168,6 +169,15 @@ class CalendarState extends State<CalendarScreen> {
             stream:
                 dbController.createDaysStream(dateTime.year, dateTime.month),
             builder: (context, snapshot) {
+              List emptyDay = [];
+              List mgmt = [];
+              List itcs = [];
+              List vacations = [];
+              for (int i = 0; i < _beginMonthPadding; i++) {
+                mgmt.add(emptyDay);
+                itcs.add(emptyDay);
+                vacations.add(emptyDay);
+              }
               if (!snapshot.hasData) {
                 return circularProgress();
               }
@@ -192,6 +202,30 @@ class CalendarState extends State<CalendarScreen> {
                 Map<dynamic, dynamic> shift8 = day.data['8'];
                 Map<dynamic, dynamic> shift9 = day.data['9'];
 
+                if (employee.hasCar) {
+                  List mgmtDay = day.data['mgmt'];
+                  List itcsDay = day.data['itcs'];
+                  if (mgmtDay != null) {
+                    mgmt.add(mgmtDay);
+                  } else
+                    mgmt.add(emptyDay);
+                  if (itcsDay != null) {
+                    itcs.add(itcsDay);
+                  } else
+                    itcs.add(emptyDay);
+                }
+                List vacation = [];
+                if (employee.department == kSupportDepartment) {
+                  vacation = day.data['vacations'];
+                }
+                if (employee.department == kITDepartment) {
+                  vacation = day.data['ITVacations'];
+                }
+                if (vacation != null) {
+                  vacations.add(vacation);
+                } else
+                  vacations.add(emptyDay);
+
                 final dayWithShifts = Day(
                     dayDay,
                     dayMonth,
@@ -214,37 +248,37 @@ class CalendarState extends State<CalendarScreen> {
               }
               return Column(
                 children: <Widget>[
-                  new Row(
+                  Row(
                     children: <Widget>[
-                      new Expanded(
-                          child: new Text('Mon',
+                      Expanded(
+                          child: Text('Mon',
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.headline)),
-                      new Expanded(
-                          child: new Text('Tue',
+                      Expanded(
+                          child: Text('Tue',
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.headline)),
-                      new Expanded(
-                          child: new Text('Wed',
+                      Expanded(
+                          child: Text('Wed',
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.headline)),
-                      new Expanded(
-                          child: new Text('Thu',
+                      Expanded(
+                          child: Text('Thu',
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.headline)),
-                      new Expanded(
-                          child: new Text('Fri',
+                      Expanded(
+                          child: Text('Fri',
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.headline)),
-                      new Expanded(
-                          child: new Text('Sat',
+                      Expanded(
+                          child: Text('Sat',
                               textAlign: TextAlign.center,
                               style: Theme.of(context)
                                   .textTheme
                                   .headline
                                   .copyWith(color: accentColor))),
-                      new Expanded(
-                          child: new Text('Sun',
+                      Expanded(
+                          child: Text('Sun',
                               textAlign: TextAlign.center,
                               style: Theme.of(context)
                                   .textTheme
@@ -253,7 +287,7 @@ class CalendarState extends State<CalendarScreen> {
                     ],
                     mainAxisSize: MainAxisSize.min,
                   ),
-                  new GridView.count(
+                  GridView.count(
                     crossAxisCount: numWeekDays,
                     childAspectRatio: (itemWidth / itemHeight),
                     shrinkWrap: true,
@@ -261,18 +295,48 @@ class CalendarState extends State<CalendarScreen> {
                     children: List.generate(
                         getNumberOfDaysInMonth(dateTime.month), (index) {
                       int dayNumber = index + 1;
-                      return new GestureDetector(
+                      return GestureDetector(
                           // Used for handling tap on each day view
 //                    onTap: () => _onDayTapped(dayNumber - _beginMonthPadding),
-                          child: new Container(
-                              margin: const EdgeInsets.all(2.0),
+                          child: Container(
+                              margin: const EdgeInsets.all(1.0),
                               padding: const EdgeInsets.all(1.0),
-                              decoration: new BoxDecoration(
-                                  border: new Border.all(color: Colors.grey)),
-                              child: new Column(
+                              decoration: BoxDecoration(
+                                gradient: RadialGradient(
+                                    colors: [primaryColor, darkPrimaryColor]),
+                                color: ((dayNumber - _beginMonthPadding) ==
+                                            DateTime.now().day &&
+                                        dateTime.month ==
+                                            DateTime.now().month &&
+                                        dateTime.year == DateTime.now().year)
+                                    ? darkPrimaryColor
+                                    : (dayNumber - _beginMonthPadding <= 0)
+                                        ? Colors.transparent
+                                        : darkPrimaryColor.withOpacity(0.1),
+                                border: Border.all(color: Colors.grey),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0)),
+                              ),
+                              child: Column(
                                 children: <Widget>[
                                   buildDayNumberWidget(dayNumber),
-                                  buildDayEventInfoWidget(dayNumber)
+                                  ((employee.hasCar) &&
+                                          mgmt.length > index &&
+                                          vacations.length > index)
+                                      ? buildDayEventInfoWidget(
+                                          dayNumber,
+                                          mgmt[index],
+                                          itcs[index],
+                                          vacations[index])
+                                      : (!employee.hasCar &&
+                                              vacations.length > index)
+                                          ? buildDayEventInfoWidget(
+                                              dayNumber,
+                                              emptyDay,
+                                              emptyDay,
+                                              vacations[index])
+                                          : buildDayEventInfoWidget(dayNumber,
+                                              emptyDay, emptyDay, emptyDay)
                                 ],
                               )));
                     }),
@@ -292,14 +356,10 @@ class CalendarState extends State<CalendarScreen> {
         alignment: Alignment.topLeft,
         child: Container(
           width: 40.0, // Should probably calculate these values
-          height: 40.0,
+          height: 35.0,
           padding: EdgeInsets.all(5.0),
-          decoration: BoxDecoration(
-//            shape: BoxShape.circle,
-            color: secondaryColor,
-            border: Border.all(),
-          ),
-          child: new Text(
+          decoration: BoxDecoration(),
+          child: Text(
             (dayNumber - _beginMonthPadding).toString(),
             textAlign: TextAlign.center,
             style: Theme.of(context)
@@ -317,7 +377,7 @@ class CalendarState extends State<CalendarScreen> {
           width: 35.0, // Should probably calculate these values
           height: 35.0,
           padding: EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),
-          child: new Text(
+          child: Text(
             dayNumber <= _beginMonthPadding
                 ? ' '
                 : (dayNumber - _beginMonthPadding).toString(),
@@ -334,7 +394,7 @@ class CalendarState extends State<CalendarScreen> {
                           dayNumber == 34 ||
                           dayNumber == 35)
                       ? accentColor
-                      : Colors.black,
+                      : textPrimaryColor,
                 ),
           ),
         ),
@@ -342,103 +402,271 @@ class CalendarState extends State<CalendarScreen> {
     }
   }
 
-  Widget buildDayEventInfoWidget(int dayNumber) {
+  Widget buildDayEventInfoWidget(
+      int dayNumber, List mgmt, List itcs, List vacations) {
     int shiftCount = 0;
     String shiftType;
+    List<String> shifts = [];
     DateTime eventDate;
-    for (Day day in daysWithShiftsForCountThisMonth) {
-      if (day.s1.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.day == dayNumber - _beginMonthPadding) {
-        shiftCount++;
-        shiftType = 'Night....';
-      }
-      if (day.s2.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.day == dayNumber - _beginMonthPadding) {
-        shiftCount++;
-        shiftType = 'Night....';
-      }
+    bool vacationStatus = false;
+    parkingStatus = 'free';
 
-      if (day.s3.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.day == dayNumber - _beginMonthPadding) {
-        shiftCount++;
-        shiftType = 'Night....';
-      }
+    if (employee.department == kSupportDepartment) {
+      for (Day day in daysWithShiftsForCountThisMonth) {
+        if (day.s1.containsValue(employee.initial) &&
+            day.month == dateTime.month &&
+            day.day == dayNumber - _beginMonthPadding) {
+          shiftCount++;
+          shiftType = 'Night';
+          shifts.add(shiftType);
+        }
+        if (day.s2.containsValue(employee.initial) &&
+            day.month == dateTime.month &&
+            day.day == dayNumber - _beginMonthPadding) {
+          shiftCount++;
+          shiftType = 'Night';
+          shifts.add(shiftType);
+        }
 
-      if (day.s4.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.day == dayNumber - _beginMonthPadding) {
-        shiftCount++;
-        shiftType = 'Morning';
-      }
+        if (day.s3.containsValue(employee.initial) &&
+            day.month == dateTime.month &&
+            day.day == dayNumber - _beginMonthPadding) {
+          shiftCount++;
+          shiftType = 'Night';
+          shifts.add(shiftType);
+        }
 
-      if (day.s5.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.day == dayNumber - _beginMonthPadding) {
-        shiftCount++;
-        shiftType = 'Morning';
-      }
+        if (day.s4.containsValue(employee.initial) &&
+            day.month == dateTime.month &&
+            day.day == dayNumber - _beginMonthPadding) {
+          shiftCount++;
+          shiftType = 'Morning';
+          shifts.add(shiftType);
+        }
 
-      if (day.s6.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.day == dayNumber - _beginMonthPadding) {
-        shiftCount++;
-        shiftType = 'Morning';
-      }
+        if (day.s5.containsValue(employee.initial) &&
+            day.month == dateTime.month &&
+            day.day == dayNumber - _beginMonthPadding) {
+          shiftCount++;
+          shiftType = 'Morning';
+          shifts.add(shiftType);
+        }
 
-      if (day.s7.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.day == dayNumber - _beginMonthPadding) {
-        shiftCount++;
-        shiftType = 'Evening';
-      }
+        if (day.s6.containsValue(employee.initial) &&
+            day.month == dateTime.month &&
+            day.day == dayNumber - _beginMonthPadding) {
+          shiftCount++;
+          shiftType = 'Morning';
+          shifts.add(shiftType);
+        }
 
-      if (day.s8.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.day == dayNumber - _beginMonthPadding) {
-        shiftCount++;
-        shiftType = 'Evening';
-      }
+        if (day.s7.containsValue(employee.initial) &&
+            day.month == dateTime.month &&
+            day.day == dayNumber - _beginMonthPadding) {
+          shiftCount++;
+          shiftType = 'Evening';
+          shifts.add(shiftType);
+        }
 
-      if (day.s9.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.day == dayNumber - _beginMonthPadding) {
-        shiftCount++;
-        shiftType = 'Evening';
+        if (day.s8.containsValue(employee.initial) &&
+            day.month == dateTime.month &&
+            day.day == dayNumber - _beginMonthPadding) {
+          shiftCount++;
+          shiftType = 'Evening';
+          shifts.add(shiftType);
+        }
+
+        if (day.s9.containsValue(employee.initial) &&
+            day.month == dateTime.month &&
+            day.day == dayNumber - _beginMonthPadding) {
+          shiftCount++;
+          shiftType = 'Evening';
+          shifts.add(shiftType);
+        }
       }
     }
 
-//
-//    _userEventSnapshot.documents.forEach((doc) {
-//      eventDate = DateTime(doc.data['time']);
-//      if (eventDate != null &&
-//          eventDate.day == dayNumber - _beginMonthPadding &&
-//          eventDate.month == dateTime.month &&
-//          eventDate.year == dateTime.year) {
-//        eventCount++;
-//      }
-//    });
+    if (mgmt != null) {
+      if (mgmt.length >= 0) {
+        for (int i = 0; i < mgmt.length; i++) {
+          String mgmtConverted = mgmt[i];
+          List<String> splitted = mgmtConverted.split(' ');
+          if (splitted[0] == employee.initial) {
+            parkingStatus = 'reserved';
+          }
+        }
+      }
+    }
+    if (itcs != null) {
+      if (itcs.length >= 0) {
+        for (int i = 0; i < itcs.length; i++) {
+          String itcsConverted = itcs[i];
+          List<String> splitted = itcsConverted.split(' ');
+          if (splitted[0] == employee.initial) {
+            parkingStatus = 'reserved';
+          }
+        }
+      }
+    }
+    if (itcs != null && mgmt != null) {
+      if (mgmt.isNotEmpty && itcs.isNotEmpty) {
+        if (parkingStatus == 'free' && mgmt.length == 3 && itcs.length == 6) {
+          parkingStatus = 'busy';
+        }
+      }
+    }
+    if (vacations != null) {
+      if (vacations.length >= 0) {
+        for (int i = 0; i < vacations.length; i++) {
+          if (vacations[i] == employee.initial) {
+            vacationStatus = true;
+          }
+        }
+      }
+    }
 
-    if (shiftCount > 0) {
-      return new Expanded(
-        child: FittedBox(
-          alignment: Alignment.topLeft,
-          fit: BoxFit.contain,
-          child: new Text(
-            shiftType,
-            maxLines: 1,
-            style: new TextStyle(
-                fontSize: 7.0,
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                background: Paint()..color = textIconColor),
-          ),
+    if (employee.department == kSupportDepartment && shiftCount > 0) {
+      return Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Padding(
+              padding: (shifts[0] == 'Night')
+                  ? const EdgeInsets.only(right: 15.0)
+                  : const EdgeInsets.only(left: 0.0),
+              child: Text(
+                shifts[0],
+                maxLines: 1,
+                style: TextStyle(
+                    fontSize: 13.0,
+                    color: textPrimaryColor,
+                    fontWeight: FontWeight.bold,
+                    background: Paint()..color = Colors.transparent),
+              ),
+            ),
+            (shiftCount == 2)
+                ? Padding(
+                    padding: (shifts[1] == 'Night')
+                        ? const EdgeInsets.only(right: 15.0)
+                        : const EdgeInsets.only(left: 0.0),
+                    child: Text(
+                      shifts[1],
+                      maxLines: 1,
+                      style: TextStyle(
+                          fontSize: 13.0,
+                          color: textPrimaryColor,
+                          fontWeight: FontWeight.bold,
+                          background: Paint()..color = Colors.transparent),
+                    ))
+                : SizedBox(
+                    height: 1.0,
+                  ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                (employee.hasCar &&
+                        parkingStatus == 'reserved' &&
+                        (((dayNumber - _beginMonthPadding) >=
+                                    DateTime.now().day &&
+                                dateTime.month == DateTime.now().month) ||
+                            (dateTime.month > DateTime.now().month &&
+                                (dayNumber - _beginMonthPadding) < 5)))
+                    ? ParkingWidget(Colors.lightGreenAccent)
+                    : SizedBox(
+                        height: 1.0,
+                      ),
+                (employee.hasCar &&
+                        parkingStatus == 'free' &&
+                        (((dayNumber - _beginMonthPadding) >=
+                                    DateTime.now().day &&
+                                dateTime.month == DateTime.now().month) ||
+                            (dateTime.month > DateTime.now().month &&
+                                (dayNumber - _beginMonthPadding) < 5)))
+                    ? ParkingWidget(Colors.yellowAccent)
+                    : SizedBox(
+                        height: 1.0,
+                      ),
+                (employee.hasCar &&
+                        parkingStatus == 'busy' &&
+                        (((dayNumber - _beginMonthPadding) >=
+                                    DateTime.now().day &&
+                                dateTime.month == DateTime.now().month) ||
+                            (dateTime.month > DateTime.now().month &&
+                                (dayNumber - _beginMonthPadding) < 5)))
+                    ? ParkingWidget(Colors.red)
+                    : SizedBox(
+                        height: 1.0,
+                      ),
+                (vacationStatus)
+                    ? VacationWidget()
+                    : SizedBox(
+                        height: 1.0,
+                      ),
+              ],
+            ),
+          ],
+        ),
+      );
+    } else if ((shiftCount == 0 && vacationStatus) ||
+        employee.department == kITDepartment ||
+        employee.department == kMarketingDepartment ||
+        employee.department == kManagement) {
+      return Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                (employee.hasCar &&
+                        parkingStatus == 'reserved' &&
+                        (((dayNumber - _beginMonthPadding) >=
+                                    DateTime.now().day &&
+                                dateTime.month == DateTime.now().month) ||
+                            (dateTime.month > DateTime.now().month &&
+                                (dayNumber - _beginMonthPadding) < 5)))
+                    ? ParkingWidget(Colors.lightGreenAccent)
+                    : SizedBox(
+                        height: 1.0,
+                      ),
+                (employee.hasCar &&
+                        parkingStatus == 'free' &&
+                        (((dayNumber - _beginMonthPadding) >=
+                                    DateTime.now().day &&
+                                dateTime.month == DateTime.now().month) ||
+                            (dateTime.month > DateTime.now().month &&
+                                (dayNumber - _beginMonthPadding) < 5)))
+                    ? ParkingWidget(Colors.yellowAccent)
+                    : SizedBox(
+                        height: 1.0,
+                      ),
+                (employee.hasCar &&
+                        parkingStatus == 'busy' &&
+                        (((dayNumber - _beginMonthPadding) >=
+                                    DateTime.now().day &&
+                                dateTime.month == DateTime.now().month) ||
+                            (dateTime.month > DateTime.now().month &&
+                                (dayNumber - _beginMonthPadding) < 5)))
+                    ? ParkingWidget(Colors.red)
+                    : SizedBox(
+                        height: 1.0,
+                      ),
+                (vacationStatus)
+                    ? VacationWidget()
+                    : SizedBox(
+                        height: 1.0,
+                      ),
+              ],
+            ),
+          ],
         ),
       );
     } else {
-      return new Container();
+      return Container();
     }
   }
 

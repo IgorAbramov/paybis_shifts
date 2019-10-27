@@ -26,9 +26,10 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
   String selectedSupportPosition = listWithEmployees.first.position;
   Color pickerColor = convertColor(listWithEmployees.first.empColor);
   Color currentColor = convertColor(listWithEmployees.first.empColor);
-  bool hasCar = listWithEmployees.first.hasCar;
-  String cardId = listWithEmployees.first.cardId;
-  String carInfo = listWithEmployees.first.carInfo;
+  static bool hasCar = listWithEmployees.first.hasCar;
+  String cardId = (!hasCar) ? listWithEmployees.first.cardId : 'Type card ID';
+  String carInfo =
+      (!hasCar) ? listWithEmployees.first.carInfo : 'Type car info';
 
   @override
   void initState() {

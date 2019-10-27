@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
@@ -85,6 +86,8 @@ class _ShiftScreenState extends State<ShiftScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
+    ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
     daysWithShiftsForCountThisMonth.clear();
 //    print("Parent build method invoked");
     return Scaffold(
@@ -531,6 +534,29 @@ class DaysStream extends StatelessWidget {
           currentDocument = day;
           final String dayDocumentID = day.documentID;
 
+          List nightAbsent = day.data[kNight];
+          List morningAbsent = day.data[kMorning];
+          List eveningAbsent = day.data[kEvening];
+          bool isAbsentNight = false;
+          bool isAbsentMorning = false;
+          bool isAbsentEvening = false;
+
+          if (nightAbsent != null) {
+            if (nightAbsent.contains(employee.initial)) {
+              isAbsentNight = true;
+            }
+          }
+          if (morningAbsent != null) {
+            if (morningAbsent.contains(employee.initial)) {
+              isAbsentMorning = true;
+            }
+          }
+          if (eveningAbsent != null) {
+            if (eveningAbsent.contains(employee.initial)) {
+              isAbsentEvening = true;
+            }
+          }
+
           Map<dynamic, dynamic> shift1 = day.data['1'];
           Map<dynamic, dynamic> shift2 = day.data['2'];
           Map<dynamic, dynamic> shift3 = day.data['3'];
@@ -588,11 +614,12 @@ class DaysStream extends StatelessWidget {
                       color: Colors.indigo.shade100,
                       child: GestureDetector(
                         onLongPress: () async {
+                          currentDocument =
+                              await dbController.getDocument(dayDocumentID);
+
                           if (employee.department == kAdmin ||
                               employee.department == kSuperAdmin) {
                             if (dayWithShifts.s1['holder'] == '') {
-                              currentDocument =
-                                  await dbController.getDocument(dayDocumentID);
                               await dbController.updateWholeShiftHolders(
                                   currentDocument, copiedShift, 1, 2, 3);
                             } else {
@@ -603,6 +630,19 @@ class DaysStream extends StatelessWidget {
                               print(copiedShift);
 
                               showCopyMessage();
+                            }
+                          }
+                          if (isAbsentNight) {
+                            if (employee.department == kSupportDepartment &&
+                                !nightAbsent.contains(employee.initial)) {
+                              dbController.addAbsenceShift(
+                                  dayDocumentID, employee.initial, kNight);
+                              showAbsentMessage();
+                            }
+                            if (employee.department == kSupportDepartment &&
+                                nightAbsent.contains(employee.initial)) {
+                              dbController.removeAbsenceShift(
+                                  dayDocumentID, employee.initial, kNight);
                             }
                           }
                         },
@@ -620,6 +660,7 @@ class DaysStream extends StatelessWidget {
                               workingHours: dayWithShifts.s1['hours'],
                               documentID: dayDocumentID,
                               number: 1,
+                              absent: isAbsentNight,
                             ),
                             ShiftsRoundButton(
                               key: ObjectKey(idNightShift1),
@@ -631,6 +672,7 @@ class DaysStream extends StatelessWidget {
                               workingHours: dayWithShifts.s2['hours'],
                               documentID: dayDocumentID,
                               number: 2,
+                              absent: isAbsentNight,
                             ),
                             ShiftsRoundButton(
                               key: ObjectKey(idNightShift2),
@@ -642,6 +684,7 @@ class DaysStream extends StatelessWidget {
                               workingHours: dayWithShifts.s3['hours'],
                               documentID: dayDocumentID,
                               number: 3,
+                              absent: isAbsentNight,
                             ),
                           ],
                         ),
@@ -651,11 +694,11 @@ class DaysStream extends StatelessWidget {
                   TableCell(
                     child: GestureDetector(
                       onLongPress: () async {
+                        currentDocument =
+                            await dbController.getDocument(dayDocumentID);
                         if (employee.department == kAdmin ||
                             employee.department == kSuperAdmin) {
                           if (dayWithShifts.s4['holder'] == '') {
-                            currentDocument =
-                                await dbController.getDocument(dayDocumentID);
                             await dbController.updateWholeShiftHolders(
                                 currentDocument, copiedShift, 4, 5, 6);
                           } else {
@@ -665,6 +708,19 @@ class DaysStream extends StatelessWidget {
                             copiedShift.add(dayWithShifts.s6['holder']);
                             showCopyMessage();
                             print(copiedShift);
+                          }
+                        }
+                        if (isAbsentMorning) {
+                          if (employee.department == kSupportDepartment &&
+                              !morningAbsent.contains(employee.initial)) {
+                            dbController.addAbsenceShift(
+                                dayDocumentID, employee.initial, kMorning);
+                            showAbsentMessage();
+                          }
+                          if (employee.department == kSupportDepartment &&
+                              morningAbsent.contains(employee.initial)) {
+                            dbController.removeAbsenceShift(
+                                dayDocumentID, employee.initial, kMorning);
                           }
                         }
                       },
@@ -682,6 +738,7 @@ class DaysStream extends StatelessWidget {
                             workingHours: dayWithShifts.s4['hours'],
                             documentID: dayDocumentID,
                             number: 4,
+                            absent: isAbsentMorning,
                           ),
                           ShiftsRoundButton(
                             key: ObjectKey(idMorningShift1),
@@ -693,6 +750,7 @@ class DaysStream extends StatelessWidget {
                             workingHours: dayWithShifts.s5['hours'],
                             documentID: dayDocumentID,
                             number: 5,
+                            absent: isAbsentMorning,
                           ),
                           ShiftsRoundButton(
                             key: ObjectKey(idMorningShift2),
@@ -704,6 +762,7 @@ class DaysStream extends StatelessWidget {
                             workingHours: dayWithShifts.s6['hours'],
                             documentID: dayDocumentID,
                             number: 6,
+                            absent: isAbsentMorning,
                           ),
                         ],
                       ),
@@ -712,11 +771,11 @@ class DaysStream extends StatelessWidget {
                   TableCell(
                     child: GestureDetector(
                       onLongPress: () async {
+                        currentDocument =
+                            await dbController.getDocument(dayDocumentID);
                         if (employee.department == kAdmin ||
                             employee.department == kSuperAdmin) {
                           if (dayWithShifts.s7['holder'] == '') {
-                            currentDocument =
-                                await dbController.getDocument(dayDocumentID);
                             await dbController.updateWholeShiftHolders(
                                 currentDocument, copiedShift, 7, 8, 9);
                           } else {
@@ -727,6 +786,19 @@ class DaysStream extends StatelessWidget {
                             print(copiedShift);
 
                             showCopyMessage();
+                          }
+                        }
+                        if (isAbsentEvening) {
+                          if (employee.department == kSupportDepartment &&
+                              !eveningAbsent.contains(employee.initial)) {
+                            dbController.addAbsenceShift(
+                                dayDocumentID, employee.initial, kEvening);
+                            showAbsentMessage();
+                          }
+                          if (employee.department == kSupportDepartment &&
+                              eveningAbsent.contains(employee.initial)) {
+                            dbController.removeAbsenceShift(
+                                dayDocumentID, employee.initial, kEvening);
                           }
                         }
                       },
@@ -744,6 +816,7 @@ class DaysStream extends StatelessWidget {
                             workingHours: dayWithShifts.s7['hours'],
                             documentID: dayDocumentID,
                             number: 7,
+                            absent: isAbsentEvening,
                           ),
                           ShiftsRoundButton(
                             key: ObjectKey(idEveningShift1),
@@ -755,6 +828,7 @@ class DaysStream extends StatelessWidget {
                             workingHours: dayWithShifts.s8['hours'],
                             documentID: dayDocumentID,
                             number: 8,
+                            absent: isAbsentEvening,
                           ),
                           ShiftsRoundButton(
                             key: ObjectKey(idEveningShift2),
@@ -766,6 +840,7 @@ class DaysStream extends StatelessWidget {
                             workingHours: dayWithShifts.s9['hours'],
                             documentID: dayDocumentID,
                             number: 9,
+                            absent: isAbsentEvening,
                           ),
                         ],
                       ),
@@ -851,6 +926,7 @@ class ShiftsRoundButton extends StatefulWidget {
   final String documentID;
   final int workingHours;
   final int year;
+  final bool absent;
 
   ShiftsRoundButton(
       {@required Key key,
@@ -861,7 +937,8 @@ class ShiftsRoundButton extends StatefulWidget {
       @required this.number,
       @required this.text,
       @required this.documentID,
-      @required this.workingHours})
+      @required this.workingHours,
+      this.absent})
       : super(key: ObjectKey(id));
 
   @override
@@ -1017,25 +1094,39 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 
                 //If Emp is NOT chosen
 
-                ? MaterialButton(
-                    //  onPressed: () {
-                    //  },
-
-                    color: primaryColor,
-                    shape: CircleBorder(),
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
-                      child: Text(
-                        '',
-                        style: TextStyle(
-                          fontSize: size,
-                          color: textIconColor,
+                ? (widget.absent)
+                    ? MaterialButton(
+                        onPressed: () {},
+                        color: accentColor,
+                        shape: CircleBorder(),
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
+                          child: Text(
+                            '',
+                            style: TextStyle(
+                              fontSize: size,
+                              color: textIconColor,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    padding: EdgeInsets.all(0.0),
-                    minWidth: 10.0,
-                  )
+                        padding: EdgeInsets.all(0.0),
+                        minWidth: 10.0,
+                      )
+                    : MaterialButton(
+//              onPressed: () {},
+                        shape: CircleBorder(),
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
+                          child: Text(
+                            '',
+                            style: TextStyle(
+                              fontSize: size,
+                              color: textIconColor,
+                            ),
+                          ),
+                        ),
+                        minWidth: 10.0,
+                      )
 
                 //If Emp is chosen
                 : Padding(
@@ -1200,7 +1291,10 @@ showAdminAlertDialog(
               Center(
                 child: Text(
                   'Who is going to work?',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                  ),
                 ),
               ),
               SizedBox(
@@ -1315,7 +1409,10 @@ showAdminMarkerAlertDialog(
               Center(
                 child: Text(
                   'Who is going to work?',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                  ),
                 ),
               ),
               SizedBox(
@@ -1419,7 +1516,9 @@ openPersonalShiftAlertBox(BuildContext context, String id, String docID,
                   children: <Widget>[
                     Text(
                       title,
-                      style: TextStyle(fontSize: 24.0),
+                      style: TextStyle(
+                        fontSize: 24.0,
+                      ),
                     ),
                   ],
                 ),
@@ -1511,7 +1610,9 @@ openChangeShiftsConfirmationAlertBox(BuildContext context, String id,
                   children: <Widget>[
                     Text(
                       title,
-                      style: TextStyle(fontSize: 24.0),
+                      style: TextStyle(
+                        fontSize: 24.0,
+                      ),
                     ),
                   ],
                 ),
@@ -1770,6 +1871,13 @@ void showCancelMessage() {
 void showCopyMessage() {
   shiftsScaffoldKey.currentState.showSnackBar(new SnackBar(
     content: new Text("Shift coppied"),
+    duration: Duration(seconds: 2),
+  ));
+}
+
+void showAbsentMessage() {
+  shiftsScaffoldKey.currentState.showSnackBar(new SnackBar(
+    content: new Text("Marked as not recommended for you"),
     duration: Duration(seconds: 2),
   ));
 }

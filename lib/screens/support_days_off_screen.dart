@@ -220,7 +220,7 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
 
         if (choiceOfEmployee == 'none') {
           setState(() {
-            _markerInitials = 'X';
+            _markerInitials = '';
           });
         } else
           setState(() {
