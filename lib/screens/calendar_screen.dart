@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
 import 'package:paybis_com_shifts/ui_parts/calendar_widgets.dart';
@@ -29,6 +31,7 @@ class CalendarState extends State<CalendarScreen> {
 
   @override
   void initState() {
+    SystemChrome.setEnabledSystemUIOverlays([]);
     super.initState();
 
 //    _firebaseMessaging.configure(
@@ -111,6 +114,8 @@ class CalendarState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
+    ScreenUtil.instance = ScreenUtil(width: 1080, height: 2220)..init(context);
     final int numWeekDays = 7;
     var size = MediaQuery.of(context).size;
 
@@ -189,19 +194,12 @@ class CalendarState extends State<CalendarScreen> {
                 final int dayDay = day.data['day'];
                 final int dayMonth = day.data['month'];
                 final int dayYear = day.data['year'];
-                final int dayId = day.data['id'];
+                final bool dayIsHoliday = day.data['isHoliday'];
+                final List nightShifts = day.data['night'];
+                final List morningShifts = day.data['morning'];
+                final List eveningShifts = day.data['evening'];
                 currentDocument = day;
-
-                Map<dynamic, dynamic> shift1 = day.data['1'];
-                Map<dynamic, dynamic> shift2 = day.data['2'];
-                Map<dynamic, dynamic> shift3 = day.data['3'];
-                Map<dynamic, dynamic> shift4 = day.data['4'];
-                Map<dynamic, dynamic> shift5 = day.data['5'];
-                Map<dynamic, dynamic> shift6 = day.data['6'];
-                Map<dynamic, dynamic> shift7 = day.data['7'];
-                Map<dynamic, dynamic> shift8 = day.data['8'];
-                Map<dynamic, dynamic> shift9 = day.data['9'];
-
+//
                 if (employee.hasCar) {
                   List mgmtDay = day.data['mgmt'];
                   List itcsDay = day.data['itcs'];
@@ -226,20 +224,8 @@ class CalendarState extends State<CalendarScreen> {
                 } else
                   vacations.add(emptyDay);
 
-                final dayWithShifts = Day(
-                    dayDay,
-                    dayMonth,
-                    dayYear,
-                    dayId,
-                    shift1,
-                    shift2,
-                    shift3,
-                    shift4,
-                    shift5,
-                    shift6,
-                    shift7,
-                    shift8,
-                    shift9);
+                final dayWithShifts = Day(dayDay, dayMonth, dayYear,
+                    dayIsHoliday, nightShifts, morningShifts, eveningShifts);
 
                 if (!daysWithShiftsForCountThisMonth.contains(dayWithShifts) &&
                     daysWithShiftsForCountThisMonth.length <
@@ -355,8 +341,8 @@ class CalendarState extends State<CalendarScreen> {
       return Align(
         alignment: Alignment.topLeft,
         child: Container(
-          width: 40.0, // Should probably calculate these values
-          height: 35.0,
+          width: ScreenUtil().setWidth(120),
+          height: ScreenUtil().setHeight(110),
           padding: EdgeInsets.all(5.0),
           decoration: BoxDecoration(),
           child: Text(
@@ -374,8 +360,8 @@ class CalendarState extends State<CalendarScreen> {
       return Align(
         alignment: Alignment.topLeft,
         child: Container(
-          width: 35.0, // Should probably calculate these values
-          height: 35.0,
+          width: ScreenUtil().setWidth(110),
+          height: ScreenUtil().setHeight(110),
           padding: EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),
           child: Text(
             dayNumber <= _beginMonthPadding
@@ -405,7 +391,6 @@ class CalendarState extends State<CalendarScreen> {
   Widget buildDayEventInfoWidget(
       int dayNumber, List mgmt, List itcs, List vacations) {
     int shiftCount = 0;
-    String shiftType;
     List<String> shifts = [];
     DateTime eventDate;
     bool vacationStatus = false;
@@ -413,75 +398,29 @@ class CalendarState extends State<CalendarScreen> {
 
     if (employee.department == kSupportDepartment) {
       for (Day day in daysWithShiftsForCountThisMonth) {
-        if (day.s1.containsValue(employee.initial) &&
-            day.month == dateTime.month &&
-            day.day == dayNumber - _beginMonthPadding) {
-          shiftCount++;
-          shiftType = 'Night';
-          shifts.add(shiftType);
+        for (int i = 0; i < day.night.length; i++) {
+          if (day.night[i].containsValue(employee.initial) &&
+              day.month == dateTime.month &&
+              day.day == dayNumber - _beginMonthPadding) {
+            shiftCount++;
+            shifts.add(kNight);
+          }
         }
-        if (day.s2.containsValue(employee.initial) &&
-            day.month == dateTime.month &&
-            day.day == dayNumber - _beginMonthPadding) {
-          shiftCount++;
-          shiftType = 'Night';
-          shifts.add(shiftType);
+        for (int i = 0; i < day.morning.length; i++) {
+          if (day.morning[i].containsValue(employee.initial) &&
+              day.month == dateTime.month &&
+              day.day == dayNumber - _beginMonthPadding) {
+            shiftCount++;
+            shifts.add(kMorning);
+          }
         }
-
-        if (day.s3.containsValue(employee.initial) &&
-            day.month == dateTime.month &&
-            day.day == dayNumber - _beginMonthPadding) {
-          shiftCount++;
-          shiftType = 'Night';
-          shifts.add(shiftType);
-        }
-
-        if (day.s4.containsValue(employee.initial) &&
-            day.month == dateTime.month &&
-            day.day == dayNumber - _beginMonthPadding) {
-          shiftCount++;
-          shiftType = 'Morning';
-          shifts.add(shiftType);
-        }
-
-        if (day.s5.containsValue(employee.initial) &&
-            day.month == dateTime.month &&
-            day.day == dayNumber - _beginMonthPadding) {
-          shiftCount++;
-          shiftType = 'Morning';
-          shifts.add(shiftType);
-        }
-
-        if (day.s6.containsValue(employee.initial) &&
-            day.month == dateTime.month &&
-            day.day == dayNumber - _beginMonthPadding) {
-          shiftCount++;
-          shiftType = 'Morning';
-          shifts.add(shiftType);
-        }
-
-        if (day.s7.containsValue(employee.initial) &&
-            day.month == dateTime.month &&
-            day.day == dayNumber - _beginMonthPadding) {
-          shiftCount++;
-          shiftType = 'Evening';
-          shifts.add(shiftType);
-        }
-
-        if (day.s8.containsValue(employee.initial) &&
-            day.month == dateTime.month &&
-            day.day == dayNumber - _beginMonthPadding) {
-          shiftCount++;
-          shiftType = 'Evening';
-          shifts.add(shiftType);
-        }
-
-        if (day.s9.containsValue(employee.initial) &&
-            day.month == dateTime.month &&
-            day.day == dayNumber - _beginMonthPadding) {
-          shiftCount++;
-          shiftType = 'Evening';
-          shifts.add(shiftType);
+        for (int i = 0; i < day.evening.length; i++) {
+          if (day.evening[i].containsValue(employee.initial) &&
+              day.month == dateTime.month &&
+              day.day == dayNumber - _beginMonthPadding) {
+            shiftCount++;
+            shifts.add(kEvening);
+          }
         }
       }
     }
@@ -527,86 +466,94 @@ class CalendarState extends State<CalendarScreen> {
 
     if (employee.department == kSupportDepartment && shiftCount > 0) {
       return Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Padding(
-              padding: (shifts[0] == 'Night')
-                  ? const EdgeInsets.only(right: 15.0)
-                  : const EdgeInsets.only(left: 0.0),
-              child: Text(
-                shifts[0],
-                maxLines: 1,
-                style: TextStyle(
-                    fontSize: 13.0,
-                    color: textPrimaryColor,
-                    fontWeight: FontWeight.bold,
-                    background: Paint()..color = Colors.transparent),
+        child: FittedBox(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Padding(
+                padding: (shifts[0] == 'Night')
+                    ? const EdgeInsets.only(right: 15.0)
+                    : const EdgeInsets.only(left: 0.0),
+                child: Text(
+                  shifts[0],
+                  maxLines: 1,
+                  style: TextStyle(
+                      fontSize: 13.0,
+                      color: textPrimaryColor,
+                      fontWeight: FontWeight.bold,
+                      background: Paint()..color = Colors.transparent),
+                ),
               ),
-            ),
-            (shiftCount == 2)
-                ? Padding(
-                    padding: (shifts[1] == 'Night')
-                        ? const EdgeInsets.only(right: 15.0)
-                        : const EdgeInsets.only(left: 0.0),
-                    child: Text(
-                      shifts[1],
-                      maxLines: 1,
-                      style: TextStyle(
-                          fontSize: 13.0,
-                          color: textPrimaryColor,
-                          fontWeight: FontWeight.bold,
-                          background: Paint()..color = Colors.transparent),
-                    ))
-                : SizedBox(
-                    height: 1.0,
-                  ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                (employee.hasCar &&
-                        parkingStatus == 'reserved' &&
-                        (((dayNumber - _beginMonthPadding) >=
-                                    DateTime.now().day &&
-                                dateTime.month == DateTime.now().month) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 5)))
-                    ? ParkingWidget(Colors.lightGreenAccent)
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-                (employee.hasCar &&
-                        parkingStatus == 'free' &&
-                        (((dayNumber - _beginMonthPadding) >=
-                                    DateTime.now().day &&
-                                dateTime.month == DateTime.now().month) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 5)))
-                    ? ParkingWidget(Colors.yellowAccent)
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-                (employee.hasCar &&
-                        parkingStatus == 'busy' &&
-                        (((dayNumber - _beginMonthPadding) >=
-                                    DateTime.now().day &&
-                                dateTime.month == DateTime.now().month) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 5)))
-                    ? ParkingWidget(Colors.red)
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-                (vacationStatus)
-                    ? VacationWidget()
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-              ],
-            ),
-          ],
+              (shiftCount == 2)
+                  ? Padding(
+                      padding: (shifts[1] == 'Night')
+                          ? const EdgeInsets.only(right: 15.0)
+                          : const EdgeInsets.only(left: 0.0),
+                      child: Text(
+                        shifts[1],
+                        maxLines: 1,
+                        style: TextStyle(
+                            fontSize: 13.0,
+                            color: textPrimaryColor,
+                            fontWeight: FontWeight.bold,
+                            background: Paint()..color = Colors.transparent),
+                      ))
+                  : SizedBox(
+                      height: 1.0,
+                    ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  (employee.hasCar &&
+                          parkingStatus == 'reserved' &&
+                          (((dayNumber - _beginMonthPadding) >=
+                                      DateTime.now().day &&
+                                  dateTime.month == DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) <=
+                                      DateTime.now().day + 7) ||
+                              (dateTime.month > DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) < 7)))
+                      ? ParkingWidget(Colors.lightGreenAccent)
+                      : SizedBox(
+                          height: 1.0,
+                        ),
+                  (employee.hasCar &&
+                          parkingStatus == 'free' &&
+                          (((dayNumber - _beginMonthPadding) >=
+                                      DateTime.now().day &&
+                                  dateTime.month == DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) <=
+                                      DateTime.now().day + 7) ||
+                              (dateTime.month > DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) < 7)))
+                      ? ParkingWidget(Colors.yellowAccent)
+                      : SizedBox(
+                          height: 1.0,
+                        ),
+                  (employee.hasCar &&
+                          parkingStatus == 'busy' &&
+                          (((dayNumber - _beginMonthPadding) >=
+                                      DateTime.now().day &&
+                                  dateTime.month == DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) <=
+                                      DateTime.now().day + 7) ||
+                              (dateTime.month > DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) < 7)))
+                      ? ParkingWidget(Colors.red)
+                      : SizedBox(
+                          height: 1.0,
+                        ),
+                  (vacationStatus)
+                      ? VacationWidget()
+                      : SizedBox(
+                          height: 1.0,
+                        ),
+                ],
+              ),
+            ],
+          ),
         ),
       );
     } else if ((shiftCount == 0 && vacationStatus) ||
@@ -614,55 +561,66 @@ class CalendarState extends State<CalendarScreen> {
         employee.department == kMarketingDepartment ||
         employee.department == kManagement) {
       return Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                (employee.hasCar &&
-                        parkingStatus == 'reserved' &&
-                        (((dayNumber - _beginMonthPadding) >=
-                                    DateTime.now().day &&
-                                dateTime.month == DateTime.now().month) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 5)))
-                    ? ParkingWidget(Colors.lightGreenAccent)
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-                (employee.hasCar &&
-                        parkingStatus == 'free' &&
-                        (((dayNumber - _beginMonthPadding) >=
-                                    DateTime.now().day &&
-                                dateTime.month == DateTime.now().month) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 5)))
-                    ? ParkingWidget(Colors.yellowAccent)
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-                (employee.hasCar &&
-                        parkingStatus == 'busy' &&
-                        (((dayNumber - _beginMonthPadding) >=
-                                    DateTime.now().day &&
-                                dateTime.month == DateTime.now().month) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 5)))
-                    ? ParkingWidget(Colors.red)
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-                (vacationStatus)
-                    ? VacationWidget()
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-              ],
-            ),
-          ],
+        child: FittedBox(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  (employee.department != kSupportDepartment &&
+                          employee.hasCar &&
+                          parkingStatus == 'reserved' &&
+                          (((dayNumber - _beginMonthPadding) >=
+                                      DateTime.now().day &&
+                                  dateTime.month == DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) <=
+                                      DateTime.now().day + 7) ||
+                              (dateTime.month > DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) < 7)))
+                      ? ParkingWidget(Colors.lightGreenAccent)
+                      : SizedBox(
+                          height: 1.0,
+                        ),
+                  (employee.department != kSupportDepartment &&
+                          employee.hasCar &&
+                          parkingStatus == 'free' &&
+                          (((dayNumber - _beginMonthPadding) >=
+                                      DateTime.now().day &&
+                                  dateTime.month == DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) <=
+                                      DateTime.now().day + 7) ||
+                              (dateTime.month > DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) < 7)))
+                      ? ParkingWidget(Colors.yellowAccent)
+                      : SizedBox(
+                          height: 1.0,
+                        ),
+                  (employee.department != kSupportDepartment &&
+                          employee.hasCar &&
+                          parkingStatus == 'busy' &&
+                          (((dayNumber - _beginMonthPadding) >=
+                                      DateTime.now().day &&
+                                  dateTime.month == DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) <=
+                                      DateTime.now().day + 7) ||
+                              (dateTime.month > DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) < 7)))
+                      ? ParkingWidget(Colors.red)
+                      : SizedBox(
+                          height: 1.0,
+                        ),
+                  (vacationStatus)
+                      ? VacationWidget()
+                      : SizedBox(
+                          height: 1.0,
+                        ),
+                ],
+              ),
+            ],
+          ),
         ),
       );
     } else {

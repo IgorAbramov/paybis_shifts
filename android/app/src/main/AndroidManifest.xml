@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pb.shifts.paybis_com_shifts">
+    package="com.pb.shifts.paybis_com_shifts"
+    android:versionCode="2"
+    android:versionName="1.2.0">
 
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.

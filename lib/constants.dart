@@ -23,6 +23,10 @@ const String kTeamLeadSupport = 'Team Lead Support';
 const String kNight = 'night';
 const String kMorning = 'morning';
 const String kEvening = 'evening';
+const String kDaysCollection = 'daysNew';
+const String kUsersCollection = 'users';
+const String kFeedItemsCollection = 'feedItems';
+const String kChangesCollection = 'changes';
 
 const List<String> kAdminChoicesPopupMenu = [
   kChangeRequests,

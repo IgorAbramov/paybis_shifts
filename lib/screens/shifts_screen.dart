@@ -21,16 +21,12 @@ import 'parking_screen.dart';
 import 'settings_screen.dart';
 import 'stats_screen.dart';
 
-//TODO implement ability to show holidays
-//TODO Implement push notifications when shift is being changed or removed
-//TODO Implement the ability for employees to mark shifts in the future they are not able to attend
-//TODO Create calendar page with Vacations and Sick days for employees
 FirebaseUser loggedInUser;
 DocumentSnapshot currentDocument;
 String shiftDocIDContainer1ForShiftExchange;
 String shiftDocIDContainer2ForShiftExchange;
-int shiftNumberContainer1ForShiftExchange;
-int shiftNumberContainer2ForShiftExchange;
+String shiftPositionContainer1ForShiftExchange;
+String shiftPositionContainer2ForShiftExchange;
 String shiftHolderContainer1ForShiftExchange;
 String shiftHolderContainer2ForShiftExchange;
 String shiftDateContainer1ForShiftExchange;
@@ -41,7 +37,7 @@ String shiftTypeContainer2ForShiftExchange;
 int _beginMonthPadding = 0;
 DateTime timestamp = DateTime.now();
 DateTime dateTime = DateTime(timestamp.year, timestamp.month);
-int workingHours;
+double workingHours;
 String shiftExchangeMessage = '';
 String highlighted = '';
 List<Day> daysWithShiftsForCountThisMonth = List<Day>();
@@ -50,10 +46,11 @@ final shiftsScreenKey = new GlobalKey<_ShiftScreenState>();
 TextEditingController reasonTextInputController;
 ScrollController scrollController;
 String _markerInitials = '';
-List<String> copiedShift = [];
+List copiedShift = [];
+List emptyList = [];
 
 class ShiftScreen extends StatefulWidget {
-  static const String id = 'shifts_screen';
+  static const String id = 'shifts_screen_new';
   const ShiftScreen({Key key}) : super(key: key);
   @override
   _ShiftScreenState createState() => _ShiftScreenState();
@@ -63,6 +60,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
   final _auth = FirebaseAuth.instance;
   @override
   void initState() {
+    SystemChrome.setEnabledSystemUIOverlays([]);
     super.initState();
     reasonTextInputController = new TextEditingController();
     scrollController = new ScrollController();
@@ -87,7 +85,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
+    ScreenUtil.instance = ScreenUtil(width: 1080, height: 2220)..init(context);
     daysWithShiftsForCountThisMonth.clear();
 //    print("Parent build method invoked");
     return Scaffold(
@@ -133,12 +131,15 @@ class _ShiftScreenState extends State<ShiftScreen> {
                         ),
                       ),
                     )
-              : IconButton(
-                  icon: Icon(
-                    Icons.today,
-                    color: Colors.white,
-                  ),
-                  onPressed: goToCalendar),
+              : SizedBox(
+                  height: 1.0,
+                ),
+          IconButton(
+              icon: Icon(
+                Icons.today,
+                color: Colors.white,
+              ),
+              onPressed: goToCalendar),
           (employee.department != kAdmin && employee.department != kSuperAdmin)
               ? (employee.hasCar)
                   ? PopupMenuButton<String>(
@@ -328,114 +329,27 @@ class _ShiftScreenState extends State<ShiftScreen> {
               ),
 
 //ADD MONTH Button
-//              Padding(
-//                padding: const EdgeInsets.all(8.0),
-//                child: MaterialButton(
-//                  onPressed: () {
-//                    setState(() async {
-//                      for (int i = 1;
-//                          i <= getNumberOfDaysInMonth(timestamp.month + 1);
-//                          i++) {
-//                        Day newDay = new Day(i, 11, 19, 211119, {
-//                          'holder': '',
-//                          'id': '${i}061',
-//                          'type': 'night',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${i}062',
-//                          'type': 'night',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${i}063',
-//                          'type': 'night',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${i}064',
-//                          'type': 'morning',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${i}065',
-//                          'type': 'morning',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${i}066',
-//                          'type': 'morning',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${i}067',
-//                          'type': 'evening',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${i}068',
-//                          'type': 'evening',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${i}069',
-//                          'type': 'evening',
-//                          'hours': 8
-//                        });
-//                        Map dayMap = newDay.buildMap(i, 11, 2019, 211019, {
-//                          'holder': '',
-//                          'id': '${newDay.day}${newDay.month}${newDay.year}1',
-//                          'type': 'night',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${newDay.day}${newDay.month}${newDay.year}2',
-//                          'type': 'night',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${newDay.day}${newDay.month}${newDay.year}3',
-//                          'type': 'night',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${newDay.day}${newDay.month}${newDay.year}4',
-//                          'type': 'morning',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${newDay.day}${newDay.month}${newDay.year}5',
-//                          'type': 'morning',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${newDay.day}${newDay.month}${newDay.year}6',
-//                          'type': 'morning',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${newDay.day}${newDay.month}${newDay.year}7',
-//                          'type': 'evening',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${newDay.day}${newDay.month}${newDay.year}8',
-//                          'type': 'evening',
-//                          'hours': 8
-//                        }, {
-//                          'holder': '',
-//                          'id': '${newDay.day}${newDay.month}${newDay.year}9',
-//                          'type': 'evening',
-//                          'hours': 8
-//                        });
-//                        await dbController.addMonth(dayMap);
-//                      }
-//                    });
-//                  },
-//                  color: Colors.lightBlue,
-//                  child: Text(
-//                    'add month',
-//                    style: kHeaderFontStyle,
+//              Expanded(
+//                flex: 9,
+//                child: Padding(
+//                  padding: const EdgeInsets.all(8.0),
+//                  child: MaterialButton(
+//                    onPressed: () {
+//                      setState(() async {
+////                        dbController.deleteMonth();
+//                        for (int i = 1; i <= getNumberOfDaysInMonth(1); i++) {
+//                          Day newDay = new Day(i, 1, 20, false, [], [], []);
+//                          Map dayMap =
+//                              newDay.buildMap(i, 1, 2020, false, [], [], []);
+//                          await dbController.addMonth(dayMap);
+//                        }
+//                      });
+//                    },
+//                    color: Colors.lightBlue,
+//                    child: Text(
+//                      'add month',
+//                      style: kHeaderFontStyle,
+//                    ),
 //                  ),
 //                ),
 //              ),
@@ -470,7 +384,11 @@ class _ShiftScreenState extends State<ShiftScreen> {
   }
 
   void goToCalendar() {
-    Navigator.pushNamed(context, CalendarScreen.id);
+    if (employee.department == kAdmin || employee.department == kSuperAdmin) {
+      Navigator.pushNamed(context, CalendarScreen.id);
+    } else {
+      Navigator.pushNamed(context, CalendarScreen.id);
+    }
   }
 
   void choicesAction(String choice) {
@@ -518,6 +436,7 @@ class DaysStream extends StatelessWidget {
 //    print("Child build method invoked");
     if (daysWithShiftsForCountThisMonth.isNotEmpty)
       daysWithShiftsForCountThisMonth.clear();
+
     return StreamBuilder<QuerySnapshot>(
       stream: dbController.createDaysStream(year, month),
       builder: (context, snapshot) {
@@ -527,16 +446,21 @@ class DaysStream extends StatelessWidget {
         final days = snapshot.data.documents;
         List<Widget> daysWithShifts = [];
         for (var day in days) {
+//          print(day.data);
+//          print(day.documentID);
           final int dayDay = day.data['day'];
           final int dayMonth = day.data['month'];
           final int dayYear = day.data['year'];
-          final int dayId = day.data['id'];
-          currentDocument = day;
           final String dayDocumentID = day.documentID;
+          final bool dayIsHoliday = day.data['isHoliday'];
+          final List nightShifts = day.data[kNight];
+          final List morningShifts = day.data[kMorning];
+          final List eveningShifts = day.data[kEvening];
+          currentDocument = day;
 
-          List nightAbsent = day.data[kNight];
-          List morningAbsent = day.data[kMorning];
-          List eveningAbsent = day.data[kEvening];
+          List nightAbsent = day.data['abscent$kNight'];
+          List morningAbsent = day.data['abscent$kMorning'];
+          List eveningAbsent = day.data['abscent$kEvening'];
           bool isAbsentNight = false;
           bool isAbsentMorning = false;
           bool isAbsentEvening = false;
@@ -557,28 +481,8 @@ class DaysStream extends StatelessWidget {
             }
           }
 
-          Map<dynamic, dynamic> shift1 = day.data['1'];
-          Map<dynamic, dynamic> shift2 = day.data['2'];
-          Map<dynamic, dynamic> shift3 = day.data['3'];
-          Map<dynamic, dynamic> shift4 = day.data['4'];
-          Map<dynamic, dynamic> shift5 = day.data['5'];
-          Map<dynamic, dynamic> shift6 = day.data['6'];
-          Map<dynamic, dynamic> shift7 = day.data['7'];
-          Map<dynamic, dynamic> shift8 = day.data['8'];
-          Map<dynamic, dynamic> shift9 = day.data['9'];
-
-          String idNightShift0 = day.data['1']['id'];
-          String idNightShift1 = day.data['2']['id'];
-          String idNightShift2 = day.data['3']['id'];
-          String idMorningShift0 = day.data['4']['id'];
-          String idMorningShift1 = day.data['5']['id'];
-          String idMorningShift2 = day.data['6']['id'];
-          String idEveningShift0 = day.data['7']['id'];
-          String idEveningShift1 = day.data['8']['id'];
-          String idEveningShift2 = day.data['9']['id'];
-
-          final dayWithShifts = Day(dayDay, dayMonth, dayYear, dayId, shift1,
-              shift2, shift3, shift4, shift5, shift6, shift7, shift8, shift9);
+          final dayWithShifts = Day(dayDay, dayMonth, dayYear, dayIsHoliday,
+              nightShifts, morningShifts, eveningShifts);
 
           if (!daysWithShiftsForCountThisMonth.contains(dayWithShifts) &&
               daysWithShiftsForCountThisMonth.length <
@@ -608,10 +512,16 @@ class DaysStream extends StatelessWidget {
                     day: dayWithShifts.day,
                     month: dayWithShifts.month,
                     year: dayWithShifts.year,
+                    dayDocumentID: dayDocumentID,
+                    isHoliday: dayIsHoliday,
                   ),
                   TableCell(
                     child: Container(
-                      color: Colors.indigo.shade100,
+                      color: dayIsHoliday != null
+                          ? dayIsHoliday
+                              ? Colors.indigo.shade200
+                              : Colors.indigo.shade100
+                          : Colors.indigo.shade100,
                       child: GestureDetector(
                         onLongPress: () async {
                           currentDocument =
@@ -619,230 +529,191 @@ class DaysStream extends StatelessWidget {
 
                           if (employee.department == kAdmin ||
                               employee.department == kSuperAdmin) {
-                            if (dayWithShifts.s1['holder'] == '') {
-                              await dbController.updateWholeShiftHolders(
-                                  currentDocument, copiedShift, 1, 2, 3);
+                            if (dayWithShifts.night.isEmpty) {
+                              await dbController.createWholeShiftCopy(
+                                  currentDocument, copiedShift, kNight);
                             } else {
                               copiedShift.clear();
-                              copiedShift.add(dayWithShifts.s1['holder']);
-                              copiedShift.add(dayWithShifts.s2['holder']);
-                              copiedShift.add(dayWithShifts.s3['holder']);
+                              for (int i = 0;
+                                  i < dayWithShifts.night.length;
+                                  i++) {
+                                copiedShift.add(dayWithShifts.night[i]);
+                              }
                               print(copiedShift);
 
                               showCopyMessage();
                             }
                           }
-                          if (isAbsentNight) {
+                          if (nightAbsent != null &&
+                              employee.department == kSupportDepartment) {
+                            if (isAbsentNight) {
+                              if (employee.department == kSupportDepartment &&
+                                  nightAbsent.contains(employee.initial)) {
+                                dbController.removeAbsenceShift(
+                                    dayDocumentID, employee.initial, kNight);
+                              }
+                            }
                             if (employee.department == kSupportDepartment &&
                                 !nightAbsent.contains(employee.initial)) {
                               dbController.addAbsenceShift(
                                   dayDocumentID, employee.initial, kNight);
                               showAbsentMessage();
                             }
-                            if (employee.department == kSupportDepartment &&
-                                nightAbsent.contains(employee.initial)) {
-                              dbController.removeAbsenceShift(
+                          } else {
+                            if (employee.department == kSupportDepartment) {
+                              dbController.addAbsenceShift(
                                   dayDocumentID, employee.initial, kNight);
+                              showAbsentMessage();
                             }
                           }
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            ShiftsRoundButton(
-                              key: ObjectKey(idNightShift0),
-                              day: dayWithShifts.day,
-                              month: dayWithShifts.month,
-                              year: dayWithShifts.year,
-                              id: dayWithShifts.s1['id'],
-                              text: dayWithShifts.s1['holder'],
-                              workingHours: dayWithShifts.s1['hours'],
-                              documentID: dayDocumentID,
-                              number: 1,
-                              absent: isAbsentNight,
-                            ),
-                            ShiftsRoundButton(
-                              key: ObjectKey(idNightShift1),
-                              day: dayWithShifts.day,
-                              month: dayWithShifts.month,
-                              year: dayWithShifts.year,
-                              id: dayWithShifts.s2['id'],
-                              text: dayWithShifts.s2['holder'],
-                              workingHours: dayWithShifts.s2['hours'],
-                              documentID: dayDocumentID,
-                              number: 2,
-                              absent: isAbsentNight,
-                            ),
-                            ShiftsRoundButton(
-                              key: ObjectKey(idNightShift2),
-                              day: dayWithShifts.day,
-                              month: dayWithShifts.month,
-                              year: dayWithShifts.year,
-                              id: dayWithShifts.s3['id'],
-                              text: dayWithShifts.s3['holder'],
-                              workingHours: dayWithShifts.s3['hours'],
-                              documentID: dayDocumentID,
-                              number: 3,
-                              absent: isAbsentNight,
-                            ),
-                          ],
+                          children: listShifts(
+                              dayWithShifts.day,
+                              dayWithShifts.month,
+                              dayWithShifts.year,
+                              nightShifts,
+                              kNight,
+                              dayDocumentID,
+                              isAbsentNight,
+                              nightAbsent),
                         ),
                       ),
                     ),
                   ),
                   TableCell(
-                    child: GestureDetector(
-                      onLongPress: () async {
-                        currentDocument =
-                            await dbController.getDocument(dayDocumentID);
-                        if (employee.department == kAdmin ||
-                            employee.department == kSuperAdmin) {
-                          if (dayWithShifts.s4['holder'] == '') {
-                            await dbController.updateWholeShiftHolders(
-                                currentDocument, copiedShift, 4, 5, 6);
+                    child: Container(
+                      color: dayIsHoliday != null
+                          ? dayIsHoliday
+                              ? Colors.red.shade100
+                              : Colors.transparent
+                          : Colors.transparent,
+                      child: GestureDetector(
+                        onLongPress: () async {
+                          currentDocument =
+                              await dbController.getDocument(dayDocumentID);
+                          if (employee.department == kAdmin ||
+                              employee.department == kSuperAdmin) {
+                            if (dayWithShifts.morning.isEmpty) {
+                              await dbController.createWholeShiftCopy(
+                                  currentDocument, copiedShift, kMorning);
+                            } else {
+                              copiedShift.clear();
+                              for (int i = 0;
+                                  i < dayWithShifts.morning.length;
+                                  i++) {
+                                copiedShift.add(dayWithShifts.morning[i]);
+                              }
+                              print(copiedShift);
+
+                              showCopyMessage();
+                            }
+                          }
+                          if (morningAbsent != null &&
+                              employee.department == kSupportDepartment) {
+                            if (isAbsentMorning) {
+                              if (employee.department == kSupportDepartment &&
+                                  morningAbsent.contains(employee.initial)) {
+                                dbController.removeAbsenceShift(
+                                    dayDocumentID, employee.initial, kMorning);
+                              }
+                            }
+                            if (employee.department == kSupportDepartment &&
+                                !morningAbsent.contains(employee.initial)) {
+                              dbController.addAbsenceShift(
+                                  dayDocumentID, employee.initial, kMorning);
+                              showAbsentMessage();
+                            }
                           } else {
-                            copiedShift.clear();
-                            copiedShift.add(dayWithShifts.s4['holder']);
-                            copiedShift.add(dayWithShifts.s5['holder']);
-                            copiedShift.add(dayWithShifts.s6['holder']);
-                            showCopyMessage();
-                            print(copiedShift);
+                            if (employee.department == kSupportDepartment) {
+                              dbController.addAbsenceShift(
+                                  dayDocumentID, employee.initial, kMorning);
+                              showAbsentMessage();
+                            }
                           }
-                        }
-                        if (isAbsentMorning) {
-                          if (employee.department == kSupportDepartment &&
-                              !morningAbsent.contains(employee.initial)) {
-                            dbController.addAbsenceShift(
-                                dayDocumentID, employee.initial, kMorning);
-                            showAbsentMessage();
-                          }
-                          if (employee.department == kSupportDepartment &&
-                              morningAbsent.contains(employee.initial)) {
-                            dbController.removeAbsenceShift(
-                                dayDocumentID, employee.initial, kMorning);
-                          }
-                        }
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          ShiftsRoundButton(
-                            key: ObjectKey(idMorningShift0),
-                            day: dayWithShifts.day,
-                            month: dayWithShifts.month,
-                            year: dayWithShifts.year,
-                            id: dayWithShifts.s4['id'],
-                            text: dayWithShifts.s4['holder'],
-                            workingHours: dayWithShifts.s4['hours'],
-                            documentID: dayDocumentID,
-                            number: 4,
-                            absent: isAbsentMorning,
-                          ),
-                          ShiftsRoundButton(
-                            key: ObjectKey(idMorningShift1),
-                            day: dayWithShifts.day,
-                            month: dayWithShifts.month,
-                            year: dayWithShifts.year,
-                            id: dayWithShifts.s5['id'],
-                            text: dayWithShifts.s5['holder'],
-                            workingHours: dayWithShifts.s5['hours'],
-                            documentID: dayDocumentID,
-                            number: 5,
-                            absent: isAbsentMorning,
-                          ),
-                          ShiftsRoundButton(
-                            key: ObjectKey(idMorningShift2),
-                            day: dayWithShifts.day,
-                            month: dayWithShifts.month,
-                            year: dayWithShifts.year,
-                            id: dayWithShifts.s6['id'],
-                            text: dayWithShifts.s6['holder'],
-                            workingHours: dayWithShifts.s6['hours'],
-                            documentID: dayDocumentID,
-                            number: 6,
-                            absent: isAbsentMorning,
-                          ),
-                        ],
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: listShifts(
+                              dayWithShifts.day,
+                              dayWithShifts.month,
+                              dayWithShifts.year,
+                              morningShifts,
+                              kMorning,
+                              dayDocumentID,
+                              isAbsentMorning,
+                              morningAbsent),
+                        ),
                       ),
                     ),
                   ),
                   TableCell(
-                    child: GestureDetector(
-                      onLongPress: () async {
-                        currentDocument =
-                            await dbController.getDocument(dayDocumentID);
-                        if (employee.department == kAdmin ||
-                            employee.department == kSuperAdmin) {
-                          if (dayWithShifts.s7['holder'] == '') {
-                            await dbController.updateWholeShiftHolders(
-                                currentDocument, copiedShift, 7, 8, 9);
-                          } else {
-                            copiedShift.clear();
-                            copiedShift.add(dayWithShifts.s7['holder']);
-                            copiedShift.add(dayWithShifts.s8['holder']);
-                            copiedShift.add(dayWithShifts.s9['holder']);
-                            print(copiedShift);
+                    child: Container(
+                      color: dayIsHoliday != null
+                          ? dayIsHoliday
+                              ? Colors.red.shade100
+                              : Colors.transparent
+                          : Colors.transparent,
+                      child: GestureDetector(
+                        onLongPress: () async {
+                          currentDocument =
+                              await dbController.getDocument(dayDocumentID);
+                          if (employee.department == kAdmin ||
+                              employee.department == kSuperAdmin) {
+                            if (dayWithShifts.evening.isEmpty) {
+                              await dbController.createWholeShiftCopy(
+                                  currentDocument, copiedShift, kEvening);
+                            } else {
+                              copiedShift.clear();
+                              for (int i = 0;
+                                  i < dayWithShifts.evening.length;
+                                  i++) {
+                                copiedShift.add(dayWithShifts.evening[i]);
+                              }
+                              print(copiedShift);
 
-                            showCopyMessage();
+                              showCopyMessage();
+                            }
                           }
-                        }
-                        if (isAbsentEvening) {
-                          if (employee.department == kSupportDepartment &&
-                              !eveningAbsent.contains(employee.initial)) {
-                            dbController.addAbsenceShift(
-                                dayDocumentID, employee.initial, kEvening);
-                            showAbsentMessage();
+                          if (eveningAbsent != null &&
+                              employee.department == kSupportDepartment) {
+                            if (isAbsentEvening) {
+                              if (employee.department == kSupportDepartment &&
+                                  eveningAbsent.contains(employee.initial)) {
+                                dbController.removeAbsenceShift(
+                                    dayDocumentID, employee.initial, kEvening);
+                              }
+                            }
+                            if (employee.department == kSupportDepartment &&
+                                !eveningAbsent.contains(employee.initial)) {
+                              dbController.addAbsenceShift(
+                                  dayDocumentID, employee.initial, kEvening);
+                              showAbsentMessage();
+                            }
+                          } else {
+                            if (employee.department == kSupportDepartment) {
+                              dbController.addAbsenceShift(
+                                  dayDocumentID, employee.initial, kEvening);
+                              showAbsentMessage();
+                            }
                           }
-                          if (employee.department == kSupportDepartment &&
-                              eveningAbsent.contains(employee.initial)) {
-                            dbController.removeAbsenceShift(
-                                dayDocumentID, employee.initial, kEvening);
-                          }
-                        }
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          ShiftsRoundButton(
-                            key: ObjectKey(idEveningShift0),
-                            day: dayWithShifts.day,
-                            month: dayWithShifts.month,
-                            year: dayWithShifts.year,
-                            id: dayWithShifts.s7['id'],
-                            text: dayWithShifts.s7['holder'],
-                            workingHours: dayWithShifts.s7['hours'],
-                            documentID: dayDocumentID,
-                            number: 7,
-                            absent: isAbsentEvening,
-                          ),
-                          ShiftsRoundButton(
-                            key: ObjectKey(idEveningShift1),
-                            day: dayWithShifts.day,
-                            month: dayWithShifts.month,
-                            year: dayWithShifts.year,
-                            id: dayWithShifts.s8['id'],
-                            text: dayWithShifts.s8['holder'],
-                            workingHours: dayWithShifts.s8['hours'],
-                            documentID: dayDocumentID,
-                            number: 8,
-                            absent: isAbsentEvening,
-                          ),
-                          ShiftsRoundButton(
-                            key: ObjectKey(idEveningShift2),
-                            day: dayWithShifts.day,
-                            month: dayWithShifts.month,
-                            year: dayWithShifts.year,
-                            id: dayWithShifts.s9['id'],
-                            text: dayWithShifts.s9['holder'],
-                            workingHours: dayWithShifts.s9['hours'],
-                            documentID: dayDocumentID,
-                            number: 9,
-                            absent: isAbsentEvening,
-                          ),
-                        ],
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: listShifts(
+                              dayWithShifts.day,
+                              dayWithShifts.month,
+                              dayWithShifts.year,
+                              eveningShifts,
+                              kEvening,
+                              dayDocumentID,
+                              isAbsentEvening,
+                              eveningAbsent),
+                        ),
                       ),
                     ),
                   ),
@@ -869,15 +740,79 @@ class DaysStream extends StatelessWidget {
       },
     );
   }
+
+  listShifts(int day, int month, int year, List shifts, String shiftType,
+      String documentID, bool absent, List absentList) {
+    List<ShiftsRoundButton> list = [];
+    if (shifts != null && shifts.isNotEmpty) {
+      if (shifts.length > 0 || shifts.isEmpty) {
+        for (int i = 0; i < shifts.length; i++) {
+          list.add(ShiftsRoundButton(
+            day: day,
+            month: month,
+            year: year,
+            shift: Shift(shifts[i]['holder'], shifts[i]['hours'].toDouble(),
+                shifts[i]['position'], shifts[i]['type']),
+            shiftType: shiftType,
+            text: shifts[i]['holder'],
+            workingHours: shifts[i]['hours'].toDouble(),
+            documentID: documentID,
+            absent: absent,
+            absentList: absentList,
+          ));
+        }
+        if ((employee.department == kAdmin ||
+                employee.department == kSuperAdmin) &&
+//            ((day > DateTime.now().day - 2 &&
+//                    month >= DateTime.now().month &&
+//                    year == DateTime.now().year) ||
+//                (month > DateTime.now().month && year == DateTime.now().year) ||
+//                (year > DateTime.now().year)) &&
+            list.length < 4)
+          list.add(ShiftsRoundButton(
+            day: day,
+            month: month,
+            year: year,
+            shiftType: shiftType,
+            shift: Shift('', 8.0, '', shiftType),
+            text: '',
+            workingHours: 8.0,
+            documentID: documentID,
+            absent: absent,
+            absentList: absentList,
+          ));
+        return list;
+      }
+    } else
+      list.add(ShiftsRoundButton(
+        day: day,
+        month: month,
+        year: year,
+        shiftType: shiftType,
+        shift: Shift('', 8.0, '', shiftType),
+        text: '',
+        workingHours: 8.0,
+        documentID: documentID,
+        absent: absent,
+        absentList: absentList,
+      ));
+    return list;
+  }
 }
 
 class DateTableCell extends StatelessWidget {
   final int day;
   final int month;
   final int year;
+  final String dayDocumentID;
+  final bool isHoliday;
 
   DateTableCell(
-      {@required this.day, @required this.month, @required this.year});
+      {@required this.day,
+      @required this.month,
+      @required this.year,
+      @required this.dayDocumentID,
+      @required this.isHoliday});
 
   @override
   Widget build(BuildContext context) {
@@ -887,59 +822,72 @@ class DateTableCell extends StatelessWidget {
     if (weekDay == 6 || weekDay == 7) isWeekend = true;
     return TableCell(
       verticalAlignment: TableCellVerticalAlignment.middle,
-      child: Column(
-        children: <Widget>[
-          Transform.rotate(
-            angle: pi * 1.5,
-            child: Text(
-              '$month',
-              style: TextStyle(
-                fontSize: 11.0,
-                fontWeight: FontWeight.bold,
-                color: isWeekend ? accentColor : textPrimaryColor,
+      child: GestureDetector(
+        onLongPress: () async {
+          if (employee.department == kSuperAdmin) {
+            if (isHoliday == false) {
+              await dbController.changeHolidayStatus(dayDocumentID, true);
+            } else {
+              await dbController.changeHolidayStatus(dayDocumentID, false);
+            }
+          }
+        },
+        child: Container(
+          child: Column(
+            children: <Widget>[
+              Transform.rotate(
+                angle: pi * 1.5,
+                child: Text(
+                  '$month',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(28),
+                    fontWeight: FontWeight.bold,
+                    color: isWeekend ? accentColor : textPrimaryColor,
+                  ),
+                ),
               ),
-            ),
-          ),
-          Transform.rotate(
-            angle: pi * 1.5,
-            child: Text(
-              '$day.',
-              style: TextStyle(
-                fontSize: 11.0,
-                fontWeight: FontWeight.bold,
-                color: isWeekend ? accentColor : textPrimaryColor,
+              Transform.rotate(
+                angle: pi * 1.5,
+                child: Text(
+                  '$day.',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(28),
+                    fontWeight: FontWeight.bold,
+                    color: isWeekend ? accentColor : textPrimaryColor,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
 class ShiftsRoundButton extends StatefulWidget {
-  final String id;
   final int day;
   final int month;
-  final int number;
+  final String shiftType;
+  final Shift shift;
   final String text;
   final String documentID;
-  final int workingHours;
+  final double workingHours;
   final int year;
   final bool absent;
+  final List absentList;
 
   ShiftsRoundButton(
-      {@required Key key,
-      @required this.id,
-      @required this.day,
+      {@required this.day,
       @required this.month,
       @required this.year,
-      @required this.number,
+      @required this.shiftType,
+      @required this.shift,
       @required this.text,
       @required this.documentID,
       @required this.workingHours,
-      this.absent})
-      : super(key: ObjectKey(id));
+      this.absent,
+      this.absentList});
 
   @override
   _ShiftsRoundButtonState createState() => _ShiftsRoundButtonState();
@@ -955,7 +903,6 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
   bool employeeChosen = false;
   String id;
   String documentID;
-  int number;
   String date;
   bool isPast = false;
 //  PopupEmployeesLayout popupEmployeesLayout = PopupEmployeesLayout();
@@ -963,10 +910,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
   @override
   Widget build(BuildContext context) {
     bool isLong = false;
-    id = widget.id;
     date = '${widget.day}.${widget.month}';
     documentID = widget.documentID;
-    number = widget.number;
     widget.text == '' ? employeeChosen = false : employeeChosen = true;
     if (widget.text.length == 3) isLong = true;
     if ((widget.day < DateTime.now().day - 2 &&
@@ -984,8 +929,9 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 
 // if USER is Admin "and not in the Past" build this
     return ((employee.department == kAdmin ||
-                employee.department == kSuperAdmin) &&
-            isPast == false)
+            employee.department == kSuperAdmin)
+//        && isPast == false
+        )
         ? SizedBox(
             width: 30.0,
             child: employeeChosen == false
@@ -996,15 +942,30 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                     onPressed: () {
                       setState(() async {
                         if (_markerInitials == '') {
-                          showAdminAlertDialog(context, widget.id, documentID,
-                              number, widget.workingHours, "Who's gonna work?");
+                          showAdminAlertDialog(
+                              context,
+                              documentID,
+                              widget.shift,
+                              "Who's gonna work?",
+                              widget.absentList);
                         } else if (_markerInitials == 'X') {
                         } else {
                           currentDocument =
                               await dbController.getDocument(documentID);
 
-                          await dbController.updateHolder(
-                              currentDocument, number, _markerInitials);
+                          String position;
+                          for (Employee emp in listWithEmployees) {
+                            if (emp.initial == _markerInitials) {
+                              position = emp.position;
+                            }
+                          }
+                          Shift newShift = Shift(_markerInitials, 8.0, position,
+                              widget.shift.type);
+                          await dbController.createShift(
+                              currentDocument,
+                              newShift.type,
+                              newShift.buildMap(newShift.holder, newShift.hours,
+                                  newShift.position, newShift.type));
                         }
                       });
                     },
@@ -1030,19 +991,46 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                     onPressed: () {
                       setState(() async {
                         if (_markerInitials == '') {
-                          showAdminAlertDialog(context, widget.id, documentID,
-                              number, widget.workingHours, "Who's gonna work?");
+                          showAdminAlertDialog(
+                              context,
+                              documentID,
+                              widget.shift,
+                              "Who's gonna work?",
+                              widget.absentList);
                         } else if (_markerInitials == 'X') {
                           currentDocument =
                               await dbController.getDocument(documentID);
-                          await dbController.updateHolderToNone(
-                              currentDocument, number);
+                          await dbController.deleteShift(
+                              currentDocument,
+                              widget.shiftType,
+                              widget.shift.buildMap(
+                                  widget.shift.holder,
+                                  widget.shift.hours,
+                                  widget.shift.position,
+                                  widget.shift.type));
                         } else {
                           currentDocument =
                               await dbController.getDocument(documentID);
 
-                          await dbController.updateHolder(
-                              currentDocument, number, _markerInitials);
+                          String position;
+                          for (Employee emp in listWithEmployees) {
+                            if (emp.initial == _markerInitials) {
+                              position = emp.position;
+                            }
+                          }
+                          Shift newShift = Shift(_markerInitials, 8.0, position,
+                              widget.shift.type);
+
+                          await dbController.updateShift(
+                              currentDocument,
+                              widget.shift.type,
+                              widget.shift.buildMap(
+                                  widget.shift.holder,
+                                  widget.shift.hours,
+                                  widget.shift.position,
+                                  widget.shift.type),
+                              newShift.buildMap(newShift.holder, newShift.hours,
+                                  newShift.position, newShift.type));
                         }
                       });
                     },
@@ -1113,7 +1101,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                         minWidth: 10.0,
                       )
                     : MaterialButton(
-//              onPressed: () {},
+//                        onPressed: () {},
                         shape: CircleBorder(),
                         child: Padding(
                           padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
@@ -1130,7 +1118,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 
                 //If Emp is chosen
                 : Padding(
-                    padding: EdgeInsets.symmetric(vertical: 1.8),
+                    padding: EdgeInsets.symmetric(vertical: 0.1),
                     child: Material(
                         color: (employee != null)
                             ? (widget.text == employee.initial)
@@ -1145,29 +1133,34 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                   isPast == false &&
                                   shiftDocIDContainer1ForShiftExchange ==
                                       null &&
-                                  shiftNumberContainer1ForShiftExchange ==
+                                  shiftPositionContainer1ForShiftExchange ==
                                       null &&
                                   shiftHolderContainer1ForShiftExchange ==
                                       null) {
-                                openPersonalShiftAlertBox(context, widget.id,
-                                    documentID, number, date, 'Exchange?');
+                                openPersonalShiftAlertBox(
+                                    context,
+                                    documentID,
+                                    widget.shift.position,
+                                    date,
+                                    'Exchange?',
+                                    widget.shiftType);
                               }
                               if (isPast == false &&
                                   widget.text != employee.initial &&
                                   shiftDocIDContainer1ForShiftExchange !=
                                       null &&
-                                  shiftNumberContainer1ForShiftExchange !=
+                                  shiftPositionContainer1ForShiftExchange !=
                                       null &&
                                   shiftHolderContainer1ForShiftExchange !=
                                       null) {
                                 openChangeShiftsConfirmationAlertBox(
                                   context,
-                                  widget.id,
                                   documentID,
-                                  number,
+                                  widget.shift.position,
                                   date,
                                   'Exchange with ${widget.text}?',
                                   widget.text,
+                                  widget.shiftType,
                                 );
                               }
 
@@ -1175,7 +1168,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                   highlighted == '' &&
                                   shiftDocIDContainer1ForShiftExchange ==
                                       null &&
-                                  shiftNumberContainer1ForShiftExchange ==
+                                  shiftPositionContainer1ForShiftExchange ==
                                       null &&
                                   shiftHolderContainer1ForShiftExchange ==
                                       null) {
@@ -1259,8 +1252,8 @@ void updateShiftExchangeValuesToNull() {
   shiftDocIDContainer2ForShiftExchange = null;
   shiftHolderContainer1ForShiftExchange = null;
   shiftHolderContainer2ForShiftExchange = null;
-  shiftNumberContainer1ForShiftExchange = null;
-  shiftNumberContainer2ForShiftExchange = null;
+  shiftPositionContainer1ForShiftExchange = null;
+  shiftPositionContainer2ForShiftExchange = null;
   shiftDateContainer1ForShiftExchange = null;
   shiftDateContainer2ForShiftExchange = null;
   shiftTypeContainer1ForShiftExchange = null;
@@ -1273,11 +1266,10 @@ void updateShiftExchangeValuesToNull() {
 ///
 showAdminAlertDialog(
   BuildContext context,
-  String id,
   String docID,
-  int number,
-  int workingHoursFromWidget,
+  Shift shift,
   String title,
+  List absent,
 ) {
   final result = showDialog(
     context: context,
@@ -1303,7 +1295,7 @@ showAdminAlertDialog(
               Wrap(
                 alignment: WrapAlignment.spaceEvenly,
                 crossAxisAlignment: WrapCrossAlignment.center,
-                children: listMyWidgets(context),
+                children: listMyWidgets(context, absent),
               ),
               Padding(
                 padding: const EdgeInsets.all(20.0),
@@ -1320,7 +1312,7 @@ showAdminAlertDialog(
                         padding: const EdgeInsets.only(
                             left: 15.0, top: 8.0, right: 4.0, bottom: 18.0),
                         child: Text(
-                          'Update working hours for this shift (at this moment: $workingHoursFromWidget)',
+                          'Update working hours for this shift (at this moment: ${shift.hours})',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16.0,
@@ -1333,13 +1325,13 @@ showAdminAlertDialog(
                         child: TextFormField(
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.center,
-                          maxLength: 2,
+                          maxLength: 4,
                           decoration: kTextFieldDecoration.copyWith(
-                            hintText: '$workingHoursFromWidget',
+                            hintText: '${shift.hours}',
                           ),
                           onChanged: (value) {
                             //Do something with the user input.
-                            workingHours = int.parse(value);
+                            workingHours = double.parse(value);
                           },
                         ),
                       ),
@@ -1361,7 +1353,12 @@ showAdminAlertDialog(
                               currentDocument =
                                   await dbController.getDocument(docID);
                               await dbController.updateHours(
-                                  currentDocument, number, workingHours);
+                                  currentDocument,
+                                  shift.type,
+                                  shift.buildMap(shift.holder, shift.hours,
+                                      shift.position, shift.type),
+                                  shift.buildMap(shift.holder, workingHours,
+                                      shift.position, shift.type));
                               Navigator.pop(context);
                             },
                           ),
@@ -1386,17 +1383,40 @@ showAdminAlertDialog(
       String choiceOfEmployee = result.toString();
 
       if (choiceOfEmployee == 'none') {
-        await dbController.updateHolderToNone(currentDocument, number);
-      } else
-        await dbController.updateHolder(
-            currentDocument, number, choiceOfEmployee);
+        await dbController.deleteShift(
+            currentDocument,
+            shift.type,
+            shift.buildMap(
+                shift.holder, shift.hours, shift.position, shift.type));
+      } else {
+        String position;
+        for (Employee emp in listWithEmployees) {
+          if (emp.initial == choiceOfEmployee) {
+            position = emp.position;
+          }
+        }
+        Shift newShift = Shift(choiceOfEmployee, 8.0, position, shift.type);
+        if (shift.holder != null) {
+          await dbController.updateShift(
+              currentDocument,
+              shift.type,
+              shift.buildMap(
+                  shift.holder, shift.hours, shift.position, shift.type),
+              newShift.buildMap(newShift.holder, newShift.hours,
+                  newShift.position, newShift.type));
+        } else {
+          await dbController.createShift(
+              currentDocument,
+              newShift.type,
+              newShift.buildMap(newShift.holder, newShift.hours,
+                  newShift.position, newShift.type));
+        }
+      }
     }
   });
 }
 
-showAdminMarkerAlertDialog(
-  BuildContext context,
-) {
+showAdminMarkerAlertDialog(BuildContext context) {
   final result = showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -1421,7 +1441,7 @@ showAdminMarkerAlertDialog(
               Wrap(
                 alignment: WrapAlignment.spaceEvenly,
                 crossAxisAlignment: WrapCrossAlignment.center,
-                children: listMyWidgets(context),
+                children: listMyWidgets(context, emptyList),
               ),
             ],
           ),
@@ -1445,16 +1465,26 @@ showAdminMarkerAlertDialog(
   });
 }
 
-List<Widget> listMyWidgets(BuildContext context) {
+List<Widget> listMyWidgets(BuildContext context, List absent) {
   List<Widget> list = List();
   for (Employee emp in listWithEmployees) {
     if (emp.department == kSupportDepartment) {
+      bool isAbsent = false;
+      if (absent != null) {
+        for (int i = 0; i < absent.length; i++) {
+          if (absent[i] == emp.initial) {
+            isAbsent = true;
+          }
+        }
+      }
       list.add(
         Padding(
           padding: const EdgeInsets.all(2.0),
           child: Material(
             elevation: 5.0,
-            color: convertColor(emp.empColor),
+            color: isAbsent
+                ? convertColor(emp.empColor).withOpacity(0.25)
+                : convertColor(emp.empColor),
             borderRadius: BorderRadius.circular(15.0),
             child: MaterialButton(
               minWidth: 100.0,
@@ -1465,7 +1495,7 @@ List<Widget> listMyWidgets(BuildContext context) {
                 emp.name,
                 style: TextStyle(
                   fontSize: (emp.name.length <= 7) ? 17.0 : 14.0,
-                  color: textIconColor,
+                  color: isAbsent ? textPrimaryColor : textIconColor,
                 ),
               ),
             ),
@@ -1494,8 +1524,8 @@ List<Widget> listMyWidgets(BuildContext context) {
   return list;
 }
 
-openPersonalShiftAlertBox(BuildContext context, String id, String docID,
-    int number, String date, String title) {
+openPersonalShiftAlertBox(BuildContext context, String docID, String position,
+    String date, String title, String shiftType) {
   return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1548,18 +1578,12 @@ openPersonalShiftAlertBox(BuildContext context, String id, String docID,
                     Navigator.pop(context);
                     chooseShiftToExchange();
                     shiftDocIDContainer1ForShiftExchange = docID;
-                    shiftNumberContainer1ForShiftExchange = number;
+                    shiftPositionContainer1ForShiftExchange = position;
                     shiftHolderContainer1ForShiftExchange = employee.initial;
                     shiftDateContainer1ForShiftExchange = date;
                     shiftExchangeMessage = reasonTextInputController.text;
                     reasonTextInputController.clear();
-                    if (number < 4) {
-                      shiftTypeContainer1ForShiftExchange = 'night';
-                    } else if (number > 5) {
-                      shiftTypeContainer1ForShiftExchange = 'evening';
-                    } else {
-                      shiftTypeContainer1ForShiftExchange = 'morning';
-                    }
+                    shiftTypeContainer1ForShiftExchange = shiftType;
                   },
                   child: InkWell(
                     child: Container(
@@ -1588,8 +1612,14 @@ openPersonalShiftAlertBox(BuildContext context, String id, String docID,
       });
 }
 
-openChangeShiftsConfirmationAlertBox(BuildContext context, String id,
-    String docID, int number, String date, String title, String initials) {
+openChangeShiftsConfirmationAlertBox(
+    BuildContext context,
+    String docID,
+    String position,
+    String date,
+    String title,
+    String initials,
+    String shiftType) {
   return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1629,21 +1659,15 @@ openChangeShiftsConfirmationAlertBox(BuildContext context, String id,
                       child: GestureDetector(
                         onTap: () {
                           shiftDocIDContainer2ForShiftExchange = docID;
-                          shiftNumberContainer2ForShiftExchange = number;
+                          shiftPositionContainer2ForShiftExchange = position;
                           shiftHolderContainer2ForShiftExchange = initials;
+                          shiftTypeContainer2ForShiftExchange = shiftType;
                           shiftDateContainer2ForShiftExchange = date;
-                          if (number < 4) {
-                            shiftTypeContainer2ForShiftExchange = 'night';
-                          } else if (number > 5) {
-                            shiftTypeContainer2ForShiftExchange = 'evening';
-                          } else {
-                            shiftTypeContainer2ForShiftExchange = 'morning';
-                          }
                           dbController.addChangeRequestToFeed(
                               shiftDocIDContainer1ForShiftExchange,
                               shiftDocIDContainer2ForShiftExchange,
-                              shiftNumberContainer1ForShiftExchange,
-                              shiftNumberContainer2ForShiftExchange,
+                              shiftPositionContainer1ForShiftExchange,
+                              shiftPositionContainer2ForShiftExchange,
                               shiftHolderContainer1ForShiftExchange,
                               shiftHolderContainer2ForShiftExchange,
                               shiftDateContainer1ForShiftExchange,
@@ -1714,41 +1738,50 @@ openChangeShiftsConfirmationAlertBox(BuildContext context, String id,
       });
 }
 
+class Shift {
+  String holder;
+  double hours;
+  String position;
+  String type;
+
+  Shift(this.holder, this.hours, this.position, this.type);
+
+  Map buildMap(String holder, double hours, String position, String type) {
+    Map map = {
+      'holder': holder,
+      'hours': hours,
+      'position': position,
+      'type': type,
+    };
+
+    return map;
+  }
+}
+
 class Day {
   int day;
   int month;
   int year;
   int id;
-  Map s1 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
-  Map s2 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
-  Map s3 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
-  Map s4 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
-  Map s5 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
-  Map s6 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
-  Map s7 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
-  Map s8 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
-  Map s9 = {'holder': '', 'id': '', 'type': '', 'hours': 8};
+  bool isHoliday;
+  List night;
+  List morning;
+  List evening;
 
-  Day(this.day, this.month, this.year, this.id, this.s1, this.s2, this.s3,
-      this.s4, this.s5, this.s6, this.s7, this.s8, this.s9);
+  Day(this.day, this.month, this.year, this.isHoliday, this.night, this.morning,
+      this.evening);
   Day.year(this.year);
 
-  Map buildMap(int day, int month, int year, int id, Map s1, Map s2, Map s3,
-      Map s4, Map s5, Map s6, Map s7, Map s8, Map s9) {
+  Map buildMap(int day, int month, int year, bool isHoliday, List night,
+      List morning, List evening) {
     Map map = {
-      'id': id,
       'day': day,
       'month': month,
       'year': year,
-      '1': s1,
-      '2': s2,
-      '3': s3,
-      '4': s4,
-      '5': s5,
-      '6': s6,
-      '7': s7,
-      '8': s8,
-      '9': s9
+      'isHoliday': isHoliday,
+      'night': night,
+      'morning': morning,
+      'evening': evening,
     };
 
     return map;
@@ -1887,25 +1920,6 @@ Color convertColor(String color) {
   Color otherColor = new Color(colorValueInt);
   return otherColor;
 }
-//
-//class Shift extends StatefulWidget {
-//  final String type;
-//  final String day;
-//  final String month;
-//  final String year;
-//
-//  Shift(this.type, this.day, this.month, this.year);
-//
-//  @override
-//  _ShiftState createState() => _ShiftState();
-//}
-//
-//class _ShiftState extends State<Shift> {
-//  @override
-//  Widget build(BuildContext context) {
-//    return Container();
-//  }
-//}
 
 void previousMonthSelected() {
   if (dateTime.month == DateTime.january) {

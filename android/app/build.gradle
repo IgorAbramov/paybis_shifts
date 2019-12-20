@@ -42,8 +42,8 @@ android {
         applicationId "com.paybis.shifts"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        versionCode 2
+        versionName "1.5.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -56,17 +56,8 @@ android {
         }
     }
     buildTypes {
-
         release {
-
-//            signingConfig signingConfigs.release
-//
-//            minifyEnabled false
-//            useProguard false
-//
-//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -78,7 +69,7 @@ flutter {
 dependencies {
     testImplementation 'junit:junit:4.12'
 
-    implementation 'com.google.firebase:firebase-core:17.2.0'
+    implementation 'com.google.firebase:firebase-core:17.2.1'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }

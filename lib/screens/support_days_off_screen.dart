@@ -204,7 +204,7 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
                 Wrap(
                   alignment: WrapAlignment.spaceEvenly,
                   crossAxisAlignment: WrapCrossAlignment.center,
-                  children: listMyWidgets(context),
+                  children: listMyWidgets(context, emptyList),
                 ),
               ],
             ),
@@ -252,25 +252,20 @@ class DaysOffStream extends StatelessWidget {
           final int dayDay = day.data['day'];
           final int dayMonth = day.data['month'];
           final int dayYear = day.data['year'];
-          final int dayId = day.data['id'];
+          final bool dayIsHoliday = day.data['isHoliday'];
+          final List nightShifts = day.data['night'];
+          final List morningShifts = day.data['morning'];
+          final List eveningShifts = day.data['evening'];
+
           currentDocument = day;
           final String dayDocumentID = day.documentID;
 
-          Map<dynamic, dynamic> shift1 = day.data['1'];
-          Map<dynamic, dynamic> shift2 = day.data['2'];
-          Map<dynamic, dynamic> shift3 = day.data['3'];
-          Map<dynamic, dynamic> shift4 = day.data['4'];
-          Map<dynamic, dynamic> shift5 = day.data['5'];
-          Map<dynamic, dynamic> shift6 = day.data['6'];
-          Map<dynamic, dynamic> shift7 = day.data['7'];
-          Map<dynamic, dynamic> shift8 = day.data['8'];
-          Map<dynamic, dynamic> shift9 = day.data['9'];
-
           List vacations = day.data['vacations'];
           List sickLeaves = day.data['sick'];
+          print('$dayDay.$dayMonth : vacations: $vacations');
 
-          final dayWithShifts = Day(dayDay, dayMonth, dayYear, dayId, shift1,
-              shift2, shift3, shift4, shift5, shift6, shift7, shift8, shift9);
+          final dayWithShifts = Day(dayDay, dayMonth, dayYear, dayIsHoliday,
+              nightShifts, morningShifts, eveningShifts);
 
           final dayWithShiftsUI = Table(
             border: TableBorder.all(
@@ -710,7 +705,7 @@ showAdminAlertDialogDaysOff(
               Wrap(
                 alignment: WrapAlignment.spaceEvenly,
                 crossAxisAlignment: WrapCrossAlignment.center,
-                children: listMyWidgets(context),
+                children: listMyWidgets(context, emptyList),
               ),
             ],
           ),

@@ -111,8 +111,8 @@ class FeedItem extends StatelessWidget {
   final String type;
   final String docID1;
   final String docID2;
-  final int number1;
-  final int number2;
+  final String position1;
+  final String position2;
   final String emp1;
   final String emp2;
   final String date1;
@@ -127,10 +127,10 @@ class FeedItem extends StatelessWidget {
       {this.type,
       this.docID1,
       this.docID2,
-      this.number1,
-      this.number2,
       this.emp1,
       this.emp2,
+      this.position1,
+      this.position2,
       this.date1,
       this.date2,
       this.shiftType1,
@@ -144,8 +144,8 @@ class FeedItem extends StatelessWidget {
       type: doc['type'],
       docID1: doc['docID1'],
       docID2: doc['docID2'],
-      number1: doc['number1'],
-      number2: doc['number2'],
+      position1: doc['position1'],
+      position2: doc['position2'],
       emp1: doc['emp1'],
       emp2: doc['emp2'],
       date1: doc['date1'],
@@ -234,10 +234,21 @@ class FeedItem extends StatelessWidget {
                       )
                     : GestureDetector(
                         onTap: () async {
+                          Shift shift1 =
+                              Shift(emp1, 8.0, position1, shiftType1);
+                          Shift shift2 =
+                              Shift(emp2, 8.0, position2, shiftType2);
                           if (employee.department == kAdmin ||
                               employee.department == kSuperAdmin) {
                             await dbController.changeShiftHolders(
-                                docID1, docID2, number1, number2, emp1, emp2);
+                                docID1,
+                                docID2,
+                                shiftType1,
+                                shiftType2,
+                                shift1.buildMap(shift1.holder, shift1.hours,
+                                    shift1.position, shift1.type),
+                                shift2.buildMap(shift2.holder, shift2.hours,
+                                    shift2.position, shift2.type));
                             await dbController.removeChangeRequestFromFeed(id);
                             await dbController.addChangeToRecentChanges(
                                 emp1,

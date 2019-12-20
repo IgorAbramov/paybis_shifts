@@ -1,9 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
+import 'package:paybis_com_shifts/models/progress.dart';
 
 import 'login_screen.dart';
 import 'shifts_screen.dart';
+
+List<Day> daysWithInfo = [];
 
 class StatsScreen extends StatefulWidget {
   static const String id = 'stats_screen';
@@ -13,13 +17,15 @@ class StatsScreen extends StatefulWidget {
 
 class _StatsScreenState extends State<StatsScreen> {
   int amountOfShiftsThisMonth = 0;
-//  int amountOfShiftsLastMonth = 0;
   int nightShiftsCountThisMonth = 0;
   int morningShiftsCountThisMonth = 0;
   int eveningShiftsCountThisMonth = 0;
   double nightShiftHoursCountThisMonth = 0;
   double morningShiftHoursCountThisMonth = 0;
   double eveningShiftHoursCountThisMonth = 0;
+  double nightSalary = 0;
+  double morningSalary = 0;
+  double eveningSalary = 0;
   double salary = 0;
 
   void getAllPersonalData(Employee employee) {
@@ -30,9 +36,12 @@ class _StatsScreenState extends State<StatsScreen> {
     nightShiftHoursCountThisMonth = 0;
     morningShiftHoursCountThisMonth = 0;
     eveningShiftHoursCountThisMonth = 0;
+    nightSalary = 0;
+    morningSalary = 0;
+    eveningSalary = 0;
     salary = 0;
 
-//    print(daysWithShiftsForCountThisMonth.length);
+//    print(daysWithInfo.length);
 
     calculateAmountOfShifts(employee);
     calculateAmountOfNightShifts(employee);
@@ -44,6 +53,7 @@ class _StatsScreenState extends State<StatsScreen> {
   @override
   void initState() {
     super.initState();
+    daysWithInfo.clear();
   }
 
   @override
@@ -120,11 +130,48 @@ class _StatsScreenState extends State<StatsScreen> {
                       ),
                     ],
                   ),
-                  Expanded(
-                    child: ListView(
-                      children: listStatsObjects(),
-                    ),
-                  ),
+                  StreamBuilder<QuerySnapshot>(
+                      stream: dbController.createDaysStream(
+                          dateTime.year, dateTime.month),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return circularProgress();
+                        }
+                        final days = snapshot.data.documents;
+
+                        for (var day in days) {
+                          final int dayDay = day.data['day'];
+                          final int dayMonth = day.data['month'];
+                          final int dayYear = day.data['year'];
+                          final bool dayIsHoliday = day.data['isHoliday'];
+                          final List nightShifts = day.data['night'];
+                          final List morningShifts = day.data['morning'];
+                          final List eveningShifts = day.data['evening'];
+                          currentDocument = day;
+                          final String dayDocumentID = day.documentID;
+
+                          final dayWithInfo = Day(
+                              dayDay,
+                              dayMonth,
+                              dayYear,
+                              dayIsHoliday,
+                              nightShifts,
+                              morningShifts,
+                              eveningShifts);
+
+//                          print(dayWithInfo);
+
+                          if (!daysWithInfo.contains(dayWithInfo) &&
+                              daysWithInfo.length <
+                                  getNumberOfDaysInMonth(dateTime.month))
+                            daysWithInfo.add(dayWithInfo);
+                        }
+                        return Expanded(
+                          child: ListView(
+                            children: listStatsObjects(),
+                          ),
+                        );
+                      }),
                 ],
               ),
             ),
@@ -136,48 +183,47 @@ class _StatsScreenState extends State<StatsScreen> {
             ),
             body: Padding(
               padding: const EdgeInsets.all(15.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  RichText(
-                    text: TextSpan(
-                      text: 'Amount of shifts: ',
-                      style: kPersonalPageDataTextStyle,
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: ' $amountOfShiftsThisMonth',
-                          style: TextStyle(
-                              color: darkPrimaryColor, fontSize: 22.0),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text('Amount of night shifts: $nightShiftsCountThisMonth',
-                      style: kPersonalPageDataTextStyle),
-                  Text('Amount of morning shifts: $morningShiftsCountThisMonth',
-                      style: kPersonalPageDataTextStyle),
-                  Text('Amount of evening shifts: $eveningShiftsCountThisMonth',
-                      style: kPersonalPageDataTextStyle),
-                  Text(
-                      'Amount of evening and morning hours: ${eveningShiftHoursCountThisMonth + morningShiftHoursCountThisMonth}',
-                      style: kPersonalPageDataTextStyle),
-                  Text('Amount of night hours: $nightShiftHoursCountThisMonth',
-                      style: kPersonalPageDataTextStyle),
-                  RichText(
-                    text: TextSpan(
-                      text: 'Salary: ',
-                      style: kPersonalPageDataTextStyle,
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: ' ${salary.toStringAsFixed(2)}',
-                          style: TextStyle(
-                              color: darkPrimaryColor, fontSize: 22.0),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              child: StreamBuilder<QuerySnapshot>(
+                  stream: dbController.createDaysStream(
+                      dateTime.year, dateTime.month),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return circularProgress();
+                    }
+                    final days = snapshot.data.documents;
+
+                    for (var day in days) {
+                      final int dayDay = day.data['day'];
+                      final int dayMonth = day.data['month'];
+                      final int dayYear = day.data['year'];
+                      final bool dayIsHoliday = day.data['isHoliday'];
+                      final List nightShifts = day.data['night'];
+                      final List morningShifts = day.data['morning'];
+                      final List eveningShifts = day.data['evening'];
+                      currentDocument = day;
+                      final String dayDocumentID = day.documentID;
+
+                      final dayWithInfo = Day(
+                          dayDay,
+                          dayMonth,
+                          dayYear,
+                          dayIsHoliday,
+                          nightShifts,
+                          morningShifts,
+                          eveningShifts);
+
+                      if (daysWithInfo.contains(dayWithInfo) ||
+                          daysWithInfo.length ==
+                              getNumberOfDaysInMonth(dateTime.month)) {
+                        daysWithInfo.clear();
+                      }
+                      if (!daysWithInfo.contains(dayWithInfo) &&
+                          daysWithInfo.length <
+                              getNumberOfDaysInMonth(dateTime.month))
+                        daysWithInfo.add(dayWithInfo);
+                    }
+                    return listStatsForEmp();
+                  }),
             ),
           );
   }
@@ -185,277 +231,129 @@ class _StatsScreenState extends State<StatsScreen> {
   int index = 2;
 
   calculateAmountOfShifts(Employee employee) {
-    for (Day day in daysWithShiftsForCountThisMonth) {
-      if (day.s1.containsValue(employee.initial) && day.month == dateTime.month)
-        amountOfShiftsThisMonth++;
-      if (day.s2.containsValue(employee.initial) && day.month == dateTime.month)
-        amountOfShiftsThisMonth++;
-      if (day.s3.containsValue(employee.initial) && day.month == dateTime.month)
-        amountOfShiftsThisMonth++;
-      if (day.s4.containsValue(employee.initial) && day.month == dateTime.month)
-        amountOfShiftsThisMonth++;
-      if (day.s5.containsValue(employee.initial) && day.month == dateTime.month)
-        amountOfShiftsThisMonth++;
-      if (day.s6.containsValue(employee.initial) && day.month == dateTime.month)
-        amountOfShiftsThisMonth++;
-      if (day.s7.containsValue(employee.initial) && day.month == dateTime.month)
-        amountOfShiftsThisMonth++;
-      if (day.s8.containsValue(employee.initial) && day.month == dateTime.month)
-        amountOfShiftsThisMonth++;
-      if (day.s9.containsValue(employee.initial) && day.month == dateTime.month)
-        amountOfShiftsThisMonth++;
+    for (Day day in daysWithInfo) {
+      for (int i = 0; i < day.night.length; i++) {
+        if (day.night[i].containsValue(employee.initial) &&
+            day.month == dateTime.month) amountOfShiftsThisMonth++;
+      }
+      for (int i = 0; i < day.morning.length; i++) {
+        if (day.morning[i].containsValue(employee.initial) &&
+            day.month == dateTime.month) amountOfShiftsThisMonth++;
+      }
+      for (int i = 0; i < day.evening.length; i++) {
+        if (day.evening[i].containsValue(employee.initial) &&
+            day.month == dateTime.month) amountOfShiftsThisMonth++;
+      }
     }
   }
 
   calculateAmountOfNightShifts(Employee employee) {
-    for (Day day in daysWithShiftsForCountThisMonth) {
-      if (day.s1.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s1.containsValue('night')) {
-        nightShiftsCountThisMonth++;
-        nightShiftHoursCountThisMonth =
-            nightShiftHoursCountThisMonth + day.s1['hours'];
-      }
-      if (day.s2.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s2.containsValue('night')) {
-        nightShiftsCountThisMonth++;
-        nightShiftHoursCountThisMonth =
-            nightShiftHoursCountThisMonth + day.s2['hours'];
-      }
-      if (day.s3.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s3.containsValue('night')) {
-        nightShiftsCountThisMonth++;
-        nightShiftHoursCountThisMonth =
-            nightShiftHoursCountThisMonth + day.s3['hours'];
-      }
-      if (day.s4.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s4.containsValue('night')) {
-        nightShiftsCountThisMonth++;
-        nightShiftHoursCountThisMonth =
-            nightShiftHoursCountThisMonth + day.s4['hours'];
-      }
-      if (day.s5.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s5.containsValue('night')) {
-        nightShiftsCountThisMonth++;
-        nightShiftHoursCountThisMonth =
-            nightShiftHoursCountThisMonth + day.s5['hours'];
-      }
-      if (day.s6.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s6.containsValue('night')) {
-        nightShiftsCountThisMonth++;
-        nightShiftHoursCountThisMonth =
-            nightShiftHoursCountThisMonth + day.s6['hours'];
-      }
-      if (day.s7.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s7.containsValue('night')) {
-        nightShiftsCountThisMonth++;
-        nightShiftHoursCountThisMonth =
-            nightShiftHoursCountThisMonth + day.s7['hours'];
-      }
-      if (day.s8.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s8.containsValue('night')) {
-        nightShiftsCountThisMonth++;
-        nightShiftHoursCountThisMonth =
-            nightShiftHoursCountThisMonth + day.s8['hours'];
-      }
-      if (day.s9.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s9.containsValue('night')) {
-        nightShiftsCountThisMonth++;
-        nightShiftHoursCountThisMonth =
-            nightShiftHoursCountThisMonth + day.s9['hours'];
+    for (Day day in daysWithInfo) {
+      for (int i = 0; i < day.night.length; i++) {
+        if (day.night[i].containsValue(employee.initial)) {
+          nightShiftsCountThisMonth++;
+          if (day.isHoliday) {
+            nightShiftHoursCountThisMonth =
+                nightShiftHoursCountThisMonth + (day.night[i]['hours']) * 2;
+            nightSalary = nightSalary +
+                2 *
+                    calculateSalary(day.night[i]['hours'].toDouble(),
+                        day.night[i]['position'], day.night[i]['type']);
+          } else {
+            nightShiftHoursCountThisMonth =
+                nightShiftHoursCountThisMonth + day.night[i]['hours'];
+            nightSalary = nightSalary +
+                calculateSalary(day.night[i]['hours'].toDouble(),
+                    day.night[i]['position'], day.night[i]['type']);
+          }
+        }
       }
     }
   }
 
   calculateAmountOfMorningShifts(Employee employee) {
-    for (Day day in daysWithShiftsForCountThisMonth) {
-      if (day.s1.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s1.containsValue('morning')) {
-        morningShiftsCountThisMonth++;
-
-        morningShiftHoursCountThisMonth =
-            morningShiftHoursCountThisMonth + day.s1['hours'];
-      }
-      if (day.s2.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s2.containsValue('morning')) {
-        morningShiftsCountThisMonth++;
-
-        morningShiftHoursCountThisMonth =
-            morningShiftHoursCountThisMonth + day.s2['hours'];
-      }
-      if (day.s3.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s3.containsValue('morning')) {
-        morningShiftsCountThisMonth++;
-
-        morningShiftHoursCountThisMonth =
-            morningShiftHoursCountThisMonth + day.s3['hours'];
-      }
-      if (day.s4.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s4.containsValue('morning')) {
-        morningShiftsCountThisMonth++;
-
-        morningShiftHoursCountThisMonth =
-            morningShiftHoursCountThisMonth + day.s4['hours'];
-      }
-      if (day.s5.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s5.containsValue('morning')) {
-        morningShiftsCountThisMonth++;
-
-        morningShiftHoursCountThisMonth =
-            morningShiftHoursCountThisMonth + day.s5['hours'];
-      }
-      if (day.s6.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s6.containsValue('morning')) {
-        morningShiftsCountThisMonth++;
-
-        morningShiftHoursCountThisMonth =
-            morningShiftHoursCountThisMonth + day.s6['hours'];
-      }
-      if (day.s7.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s7.containsValue('morning')) {
-        morningShiftsCountThisMonth++;
-
-        morningShiftHoursCountThisMonth =
-            morningShiftHoursCountThisMonth + day.s7['hours'];
-      }
-      if (day.s8.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s8.containsValue('morning')) {
-        morningShiftsCountThisMonth++;
-
-        morningShiftHoursCountThisMonth =
-            morningShiftHoursCountThisMonth + day.s8['hours'];
-      }
-      if (day.s9.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s9.containsValue('morning')) {
-        morningShiftsCountThisMonth++;
-
-        morningShiftHoursCountThisMonth =
-            morningShiftHoursCountThisMonth + day.s9['hours'];
+    for (Day day in daysWithInfo) {
+      for (int i = 0; i < day.morning.length; i++) {
+        if (day.morning[i].containsValue(employee.initial)) {
+          morningShiftsCountThisMonth++;
+          if (day.isHoliday) {
+            morningShiftHoursCountThisMonth = morningShiftHoursCountThisMonth +
+                (day.morning[i]['hours'].toDouble()) * 2;
+            morningSalary = morningSalary +
+                2 *
+                    calculateSalary(day.morning[i]['hours'].toDouble(),
+                        day.morning[i]['position'], day.morning[i]['type']);
+          } else {
+            morningShiftHoursCountThisMonth =
+                morningShiftHoursCountThisMonth + day.morning[i]['hours'];
+            morningSalary = morningSalary +
+                calculateSalary(day.morning[i]['hours'].toDouble(),
+                    day.morning[i]['position'], day.morning[i]['type']);
+          }
+        }
       }
     }
   }
 
   calculateAmountOfEveningShifts(Employee employee) {
-    for (Day day in daysWithShiftsForCountThisMonth) {
-      if (day.s1.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s1.containsValue('evening')) {
-        eveningShiftsCountThisMonth++;
-
-        eveningShiftHoursCountThisMonth =
-            eveningShiftHoursCountThisMonth + day.s1['hours'];
-      }
-      if (day.s2.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s2.containsValue('evening')) {
-        eveningShiftsCountThisMonth++;
-
-        eveningShiftHoursCountThisMonth =
-            eveningShiftHoursCountThisMonth + day.s2['hours'];
-      }
-      if (day.s3.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s3.containsValue('evening')) {
-        eveningShiftsCountThisMonth++;
-
-        eveningShiftHoursCountThisMonth =
-            eveningShiftHoursCountThisMonth + day.s3['hours'];
-      }
-      if (day.s4.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s4.containsValue('evening')) {
-        eveningShiftsCountThisMonth++;
-
-        eveningShiftHoursCountThisMonth =
-            eveningShiftHoursCountThisMonth + day.s4['hours'];
-      }
-      if (day.s5.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s5.containsValue('evening')) {
-        eveningShiftsCountThisMonth++;
-
-        eveningShiftHoursCountThisMonth =
-            eveningShiftHoursCountThisMonth + day.s5['hours'];
-      }
-      if (day.s6.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s6.containsValue('evening')) {
-        eveningShiftsCountThisMonth++;
-
-        eveningShiftHoursCountThisMonth =
-            eveningShiftHoursCountThisMonth + day.s6['hours'];
-      }
-      if (day.s7.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s7.containsValue('evening')) {
-        eveningShiftsCountThisMonth++;
-
-        eveningShiftHoursCountThisMonth =
-            eveningShiftHoursCountThisMonth + day.s7['hours'];
-      }
-      if (day.s8.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s8.containsValue('evening')) {
-        eveningShiftsCountThisMonth++;
-
-        eveningShiftHoursCountThisMonth =
-            eveningShiftHoursCountThisMonth + day.s8['hours'];
-      }
-      if (day.s9.containsValue(employee.initial) &&
-          day.month == dateTime.month &&
-          day.s9.containsValue('evening')) {
-        eveningShiftsCountThisMonth++;
-
-        eveningShiftHoursCountThisMonth =
-            eveningShiftHoursCountThisMonth + day.s9['hours'];
+    for (Day day in daysWithInfo) {
+      for (int i = 0; i < day.evening.length; i++) {
+        if (day.evening[i].containsValue(employee.initial)) {
+          eveningShiftsCountThisMonth++;
+          if (day.isHoliday) {
+            eveningShiftHoursCountThisMonth =
+                eveningShiftHoursCountThisMonth + (day.evening[i]['hours']) * 2;
+            eveningSalary = eveningSalary +
+                2 *
+                    calculateSalary(day.evening[i]['hours'].toDouble(),
+                        day.evening[i]['position'], day.evening[i]['type']);
+          } else {
+            eveningShiftHoursCountThisMonth =
+                eveningShiftHoursCountThisMonth + day.evening[i]['hours'];
+            eveningSalary = eveningSalary +
+                calculateSalary(day.evening[i]['hours'].toDouble(),
+                    day.evening[i]['position'], day.evening[i]['type']);
+          }
+        }
       }
     }
   }
 
-  calculateSalaryThisMonth(Employee employee) {
-    if (employee.position == kJuniorSupport) {
-      salary =
-          ((eveningShiftHoursCountThisMonth + morningShiftHoursCountThisMonth) *
-                  kJuniorSupportSalary[0]) +
-              (nightShiftHoursCountThisMonth * kJuniorSupportSalary[1]);
-    } else if (employee.position == kMiddleSupport) {
-      salary =
-          ((eveningShiftHoursCountThisMonth + morningShiftHoursCountThisMonth) *
-                  kMiddleSupportSalary[0]) +
-              (nightShiftHoursCountThisMonth * kMiddleSupportSalary[1]);
-    } else if (employee.position == kSeniorSupport) {
-      salary =
-          ((eveningShiftHoursCountThisMonth + morningShiftHoursCountThisMonth) *
-                  kSeniorSupportSalary[0]) +
-              (nightShiftHoursCountThisMonth * kSeniorSupportSalary[1]);
-    } else if (employee.position == kAMLCertifiedSupport) {
-      salary =
-          ((eveningShiftHoursCountThisMonth + morningShiftHoursCountThisMonth) *
-                  kAMLCertifiedSupportSalary[0]) +
-              (nightShiftHoursCountThisMonth * kAMLCertifiedSupportSalary[1]);
-    } else if (employee.position == kTeamLeadSupport) {
-      salary =
-          ((eveningShiftHoursCountThisMonth + morningShiftHoursCountThisMonth) *
-                  kTeamLeadSupportSalary[0]) +
-              (nightShiftHoursCountThisMonth * kTeamLeadSupportSalary[1]);
+  double calculateSalary(double hours, String position, String shiftType) {
+    double addSalary;
+    if (position == kJuniorSupport) {
+      if (shiftType == kNight)
+        return addSalary = hours * kJuniorSupportSalary[1];
+      else
+        return addSalary = hours * kJuniorSupportSalary[0];
+    } else if (position == kMiddleSupport) {
+      if (shiftType == kNight)
+        return addSalary = hours * kMiddleSupportSalary[1];
+      else
+        return addSalary = hours * kMiddleSupportSalary[0];
+    } else if (position == kSeniorSupport) {
+      if (shiftType == kNight)
+        return addSalary = hours * kSeniorSupportSalary[1];
+      else
+        return addSalary = hours * kSeniorSupportSalary[0];
+    } else if (position == kAMLCertifiedSupport) {
+      if (shiftType == kNight)
+        return addSalary = hours * kAMLCertifiedSupportSalary[1];
+      else
+        return addSalary = hours * kAMLCertifiedSupportSalary[0];
+    } else if (position == kTeamLeadSupport) {
+      if (shiftType == kNight)
+        return addSalary = hours * kTeamLeadSupportSalary[1];
+      else
+        return addSalary = hours * kTeamLeadSupportSalary[0];
     }
+  }
+
+  calculateSalaryThisMonth(Employee employee) {
+//    print('evening: $eveningSalary');
+//    print('morning: $morningSalary');
+//    print('night: $nightSalary');
+    salary = eveningSalary + nightSalary + morningSalary;
   }
 
   List<StatsObject> listStatsObjects() {
@@ -480,6 +378,90 @@ class _StatsScreenState extends State<StatsScreen> {
     }
 
     return list;
+  }
+
+  Widget listStatsForEmp() {
+    getAllPersonalData(employee);
+
+    StatsForTheEmp statsObjectForEmp = StatsForTheEmp(
+        employee.name,
+        salary,
+        nightShiftHoursCountThisMonth,
+        morningShiftHoursCountThisMonth,
+        eveningShiftHoursCountThisMonth,
+        amountOfShiftsThisMonth,
+        nightShiftsCountThisMonth,
+        morningShiftsCountThisMonth,
+        eveningShiftsCountThisMonth);
+
+    return statsObjectForEmp;
+  }
+}
+
+class StatsForTheEmp extends StatelessWidget {
+  final String name;
+  final double salary;
+  final double eveningShiftHoursCountThisMonth;
+  final double morningShiftHoursCountThisMonth;
+  final double nightShiftHoursCountThisMonth;
+  final int amountOfShiftsThisMonth;
+  final int nightShiftsCountThisMonth;
+  final int morningShiftsCountThisMonth;
+  final int eveningShiftsCountThisMonth;
+
+  StatsForTheEmp(
+      this.name,
+      this.salary,
+      this.nightShiftHoursCountThisMonth,
+      this.morningShiftHoursCountThisMonth,
+      this.eveningShiftHoursCountThisMonth,
+      this.amountOfShiftsThisMonth,
+      this.nightShiftsCountThisMonth,
+      this.morningShiftsCountThisMonth,
+      this.eveningShiftsCountThisMonth);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        RichText(
+          text: TextSpan(
+            text: 'Amount of shifts: ',
+            style: kPersonalPageDataTextStyle,
+            children: <TextSpan>[
+              TextSpan(
+                text: ' $amountOfShiftsThisMonth',
+                style: TextStyle(color: darkPrimaryColor, fontSize: 22.0),
+              ),
+            ],
+          ),
+        ),
+        Text('Amount of night shifts: $nightShiftsCountThisMonth',
+            style: kPersonalPageDataTextStyle),
+        Text('Amount of morning shifts: $morningShiftsCountThisMonth',
+            style: kPersonalPageDataTextStyle),
+        Text('Amount of evening shifts: $eveningShiftsCountThisMonth',
+            style: kPersonalPageDataTextStyle),
+        Text(
+            'Amount of evening and morning hours: ${eveningShiftHoursCountThisMonth + morningShiftHoursCountThisMonth}',
+            style: kPersonalPageDataTextStyle),
+        Text('Amount of night hours: $nightShiftHoursCountThisMonth',
+            style: kPersonalPageDataTextStyle),
+        RichText(
+          text: TextSpan(
+            text: 'Salary: ',
+            style: kPersonalPageDataTextStyle,
+            children: <TextSpan>[
+              TextSpan(
+                text: ' ${salary.toStringAsFixed(2)}',
+                style: TextStyle(color: darkPrimaryColor, fontSize: 22.0),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -589,125 +571,6 @@ class StatsObject extends StatelessWidget {
           ],
         ),
       ),
-
-//      Row(
-//        children: <Widget>[
-//          Text(
-//            name,
-//          ),
-//          Text('${salary.toStringAsFixed(2)}'),
-//          Text('s. $amountOfShifts'),
-//          Column(children: <Widget>[
-//            Text('n. $amountOfNightShifts'),
-//            Text('h. $nightHours'),
-//          ]),
-//          Column(children: <Widget>[
-//            Text('m. $amountOfMorningShifts'),
-//            Text('h. $morningHours'),
-//          ]),
-//          Column(children: <Widget>[
-//            Text('e. $amountOfEveningShifts'),
-//            Text('h. $eveningHours'),
-//          ]),
-//        ],
-//      ),
-    );
-  }
-
-  @override
-  Widget build1(BuildContext context) {
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 2.0),
-        child: DataTable(
-          onSelectAll: (b) {},
-          columns: <DataColumn>[
-            DataColumn(
-              label: Text(
-                name,
-                style: kButtonFontStyle,
-                textAlign: TextAlign.center,
-              ),
-              numeric: false,
-              onSort: (i, b) {},
-            ),
-            DataColumn(
-              label: Text(
-                '${salary.toStringAsFixed(2)}',
-                style: kButtonFontStyle,
-                textAlign: TextAlign.center,
-              ),
-              numeric: true,
-              onSort: (i, b) {},
-            ),
-            DataColumn(
-              label: Column(children: <Widget>[
-                Text(
-                  '$amountOfNightShifts',
-                  style: kButtonFontStyle,
-                ),
-                Text(
-                  '($nightHours)',
-                  style: kButtonFontStyle,
-                ),
-              ]),
-              numeric: true,
-              onSort: (i, b) {},
-            ),
-            DataColumn(
-              label: Column(children: <Widget>[
-                Text(
-                  '$amountOfMorningShifts',
-                  style: kButtonFontStyle,
-                ),
-                Text(
-                  '($morningHours)',
-                  style: kButtonFontStyle,
-                ),
-              ]),
-              numeric: true,
-              onSort: (i, b) {},
-            ),
-            DataColumn(
-              label: Column(children: <Widget>[
-                Text(
-                  '$amountOfEveningShifts',
-                  style: kButtonFontStyle,
-                ),
-                Text(
-                  '($eveningHours)',
-                  style: kButtonFontStyle,
-                ),
-              ]),
-              numeric: true,
-              onSort: (i, b) {},
-            ),
-          ],
-          rows: <DataRow>[],
-        ),
-      ),
-
-//      Row(
-//        children: <Widget>[
-//          Text(
-//            name,
-//          ),
-//          Text('${salary.toStringAsFixed(2)}'),
-//          Text('s. $amountOfShifts'),
-//          Column(children: <Widget>[
-//            Text('n. $amountOfNightShifts'),
-//            Text('h. $nightHours'),
-//          ]),
-//          Column(children: <Widget>[
-//            Text('m. $amountOfMorningShifts'),
-//            Text('h. $morningHours'),
-//          ]),
-//          Column(children: <Widget>[
-//            Text('e. $amountOfEveningShifts'),
-//            Text('h. $eveningHours'),
-//          ]),
-//        ],
-//      ),
     );
   }
 }

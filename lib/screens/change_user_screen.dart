@@ -59,11 +59,13 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
   DropdownButton<String> androidDropdownName() {
     List<DropdownMenuItem<String>> dropdownItems = [];
     for (Employee emp in listWithEmployees) {
-      var newItem = DropdownMenuItem(
-        child: Text(emp.name),
-        value: emp.name,
-      );
-      dropdownItems.add(newItem);
+      if (emp.department != kSuperAdmin) {
+        var newItem = DropdownMenuItem(
+          child: Text(emp.name),
+          value: emp.name,
+        );
+        dropdownItems.add(newItem);
+      }
     }
     return DropdownButton<String>(
         value: selectedEmp,
@@ -79,7 +81,9 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
   CupertinoPicker iOSPickerName() {
     List<Text> pickerItems = [];
     for (Employee emp in listWithEmployees) {
-      pickerItems.add(Text(emp.name));
+      if (emp.department != kSuperAdmin) {
+        pickerItems.add(Text(emp.name));
+      }
     }
 
     return CupertinoPicker(
