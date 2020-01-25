@@ -18,6 +18,7 @@ class ChangeUserScreen extends StatefulWidget {
 
 class _ChangeUserScreenState extends State<ChangeUserScreen> {
   String selectedEmp = listWithEmployees.first.name;
+  String id = listWithEmployees.first.id;
   String name = listWithEmployees.first.name;
   String email = listWithEmployees.first.email;
   String password = '';
@@ -43,6 +44,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
   void fillForms(String selectedEmployee) {
     for (Employee emp in listWithEmployees) {
       if (emp.name == selectedEmployee) {
+        id = emp.id;
         name = emp.name;
         email = emp.email;
         initials = emp.initial;
@@ -398,6 +400,7 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
 
                   Employee newEmployee = new Employee();
                   Map empToChange = newEmployee.buildMap(
+                    id,
                     name,
                     email,
                     initials,

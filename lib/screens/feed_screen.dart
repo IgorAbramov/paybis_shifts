@@ -264,6 +264,15 @@ class FeedItem extends StatelessWidget {
                               employee.initial == emp2) {
                             await dbController
                                 .setChangeRequestStateToConfirmed(id);
+                            for (Employee emp in listWithEmployees) {
+                              if (emp.department == kAdmin ||
+                                  emp.department == kSuperAdmin) {
+                                dbController.addUserFeedItemToNotify(
+                                    emp.id,
+                                    'Exchange Request',
+                                    '$emp1 wants to exchange with $emp2, please review');
+                              }
+                            }
                           }
                         },
                         child: CircleAvatar(

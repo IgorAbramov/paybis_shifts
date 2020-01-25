@@ -3,14 +3,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:paybis_com_shifts/constants.dart';
+import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
-import 'package:paybis_com_shifts/ui_parts/calendar_widgets.dart';
 
 import 'login_screen.dart';
 import 'shifts_screen.dart';
 
+String _btnDepartmentText = 'SUP';
+String _btnTypeText = 'Vacations';
+final adminCalendarScreenKey = new GlobalKey<AdminCalendarState>();
+
 class AdminCalendarScreen extends StatefulWidget {
   static const String id = 'admin_calendar_screen';
+  const AdminCalendarScreen({Key key}) : super(key: key);
   @override
   State<StatefulWidget> createState() {
     return AdminCalendarState();
@@ -26,6 +31,10 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
 
   CalendarState() {
     setMonthPadding();
+  }
+
+  void rebuild() {
+    setState(() {});
   }
 
   @override
@@ -113,7 +122,7 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    ScreenUtil.instance = ScreenUtil(width: 1080, height: 2220)..init(context);
+    ScreenUtil.init(context, width: 1080, height: 2220, allowFontScaling: true);
     final int numWeekDays = 7;
     var size = MediaQuery.of(context).size;
 
@@ -130,232 +139,285 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
     final double itemWidth = size.width / numWeekDays;
 
     return Scaffold(
-        drawerScrimColor: Colors.white,
-        drawer: Drawer(
-          child: ListView(
-            // Important: Remove any padding from the ListView.
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                child: Text('Drawer Header'),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                ),
-              ),
-              ListTile(
-                title: Text('Item 1'),
-                onTap: () {
-                  // Update the state of the app.
-                  // ...
-                },
-              ),
-              ListTile(
-                title: Text('Item 2'),
-                onTap: () {
-                  // Update the state of the app.
-                  // ...
-                },
-              ),
-            ],
-          ),
-        ),
-        appBar: AppBar(
-          title: FittedBox(
-              fit: BoxFit.contain,
-              child: Text(
-                getMonthName(dateTime.month) + " " + dateTime.year.toString(),
-              )),
-          actions: <Widget>[
-//            IconButton(
-//                icon: Icon(
-//                  Icons.today,
-//                  color: Colors.white,
+      drawerScrimColor: Colors.white,
+//        drawer: Drawer(
+//          child: ListView(
+//            // Important: Remove any padding from the ListView.
+//            padding: EdgeInsets.zero,
+//            children: <Widget>[
+//              DrawerHeader(
+//                child: Text('Drawer Header'),
+//                decoration: BoxDecoration(
+//                  color: Colors.blue,
 //                ),
-//                onPressed: _goToToday),
-            IconButton(
-                icon: Icon(
-                  Icons.chevron_left,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  setState(() {
-                    previousMonthSelected();
-                    setMonthPadding();
-                  });
-                }),
-            IconButton(
-                icon: Icon(
-                  Icons.chevron_right,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  setState(() {
-                    nextMonthSelected();
-                    setMonthPadding();
-                  });
-                }),
-          ],
-        ),
-        body: StreamBuilder(
-            stream:
-                dbController.createDaysStream(dateTime.year, dateTime.month),
-            builder: (context, snapshot) {
-              List emptyDay = [];
-              List mgmt = [];
-              List itcs = [];
-              List vacations = [];
-              for (int i = 0; i < _beginMonthPadding; i++) {
-                mgmt.add(emptyDay);
-                itcs.add(emptyDay);
-                vacations.add(emptyDay);
-              }
-              if (!snapshot.hasData) {
-                return circularProgress();
-              }
-              if (daysWithShiftsForCountThisMonth.isNotEmpty)
-                daysWithShiftsForCountThisMonth.clear();
-
-              final days = snapshot.data.documents;
-              for (var day in days) {
-                final int dayDay = day.data['day'];
-                final int dayMonth = day.data['month'];
-                final int dayYear = day.data['year'];
-                final bool dayIsHoliday = day.data['isHoliday'];
-                final List nightShifts = day.data['night'];
-                final List morningShifts = day.data['morning'];
-                final List eveningShifts = day.data['evening'];
-                currentDocument = day;
-
-                if (employee.hasCar) {
-                  List mgmtDay = day.data['mgmt'];
-                  List itcsDay = day.data['itcs'];
-                  if (mgmtDay != null) {
-                    mgmt.add(mgmtDay);
+//              ),
+//              ListTile(
+//                title: Text('Item 1'),
+//                onTap: () {
+//                  // Update the state of the app.
+//                  // ...
+//                },
+//              ),
+//              ListTile(
+//                title: Text('Item 2'),
+//                onTap: () {
+//                  // Update the state of the app.
+//                  // ...
+//                },
+//              ),
+//            ],
+//          ),
+//        ),
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+        actions: <Widget>[
+          Material(
+            elevation: 0.0,
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(30.0),
+            child: MaterialButton(
+              onPressed: () {
+                setState(() {
+                  if (_btnTypeText == 'Vacations') {
+                    _btnTypeText = 'Sick Leaves';
                   } else
-                    mgmt.add(emptyDay);
-                  if (itcsDay != null) {
-                    itcs.add(itcsDay);
+                    _btnTypeText = 'Vacations';
+                });
+              },
+              minWidth: 26.0,
+              height: 26.0,
+              child: Text(
+                _btnTypeText,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18.0,
+                ),
+              ),
+            ),
+          ),
+          Material(
+            elevation: 0.0,
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(30.0),
+            child: MaterialButton(
+              onPressed: () {
+                setState(() {
+                  if (_btnDepartmentText == 'SUP') {
+                    _btnDepartmentText = 'IT';
                   } else
-                    itcs.add(emptyDay);
-                }
-                List vacation = [];
-                if (employee.department == kSupportDepartment) {
-                  vacation = day.data['vacations'];
-                }
-                if (employee.department == kITDepartment) {
-                  vacation = day.data['ITVacations'];
-                }
-                if (vacation != null) {
-                  vacations.add(vacation);
-                } else
-                  vacations.add(emptyDay);
-
-                final dayWithShifts = Day(dayDay, dayMonth, dayYear,
-                    dayIsHoliday, nightShifts, morningShifts, eveningShifts);
-
-                if (!daysWithShiftsForCountThisMonth.contains(dayWithShifts) &&
-                    daysWithShiftsForCountThisMonth.length <
-                        getNumberOfDaysInMonth(dateTime.month))
-                  daysWithShiftsForCountThisMonth.add(dayWithShifts);
-              }
-              return Column(
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                          child: Text('Mon',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline)),
-                      Expanded(
-                          child: Text('Tue',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline)),
-                      Expanded(
-                          child: Text('Wed',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline)),
-                      Expanded(
-                          child: Text('Thu',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline)),
-                      Expanded(
-                          child: Text('Fri',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline)),
-                      Expanded(
-                          child: Text('Sat',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline
-                                  .copyWith(color: accentColor))),
-                      Expanded(
-                          child: Text('Sun',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline
-                                  .copyWith(color: accentColor))),
-                    ],
-                    mainAxisSize: MainAxisSize.min,
+                    _btnDepartmentText = 'SUP';
+                });
+              },
+              minWidth: 26.0,
+              height: 26.0,
+              child: Text(
+                _btnDepartmentText,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18.0,
+                ),
+              ),
+            ),
+          ),
+          IconButton(
+              icon: Icon(
+                Icons.chevron_left,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                setState(() {
+                  previousMonthSelected();
+                  setMonthPadding();
+                });
+              }),
+          IconButton(
+              icon: Icon(
+                Icons.chevron_right,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                setState(() {
+                  nextMonthSelected();
+                  setMonthPadding();
+                });
+              }),
+        ],
+      ),
+      body: Column(
+        children: <Widget>[
+          FittedBox(
+              fit: BoxFit.contain,
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Text(
+                  getMonthName(dateTime.month) + " " + dateTime.year.toString(),
+                  style: TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.bold,
                   ),
-                  GridView.count(
-                    crossAxisCount: numWeekDays,
-                    childAspectRatio: (itemWidth / itemHeight),
-                    shrinkWrap: true,
-                    scrollDirection: Axis.vertical,
-                    children: List.generate(
-                        getNumberOfDaysInMonth(dateTime.month), (index) {
-                      int dayNumber = index + 1;
-                      return GestureDetector(
-                          // Used for handling tap on each day view
+                ),
+              )),
+          StreamBuilder(
+              stream:
+                  dbController.createDaysStream(dateTime.year, dateTime.month),
+              builder: (context, snapshot) {
+                List emptyDay = [];
+                List daysOff = [];
+
+                for (int i = 0; i < _beginMonthPadding; i++) {
+                  daysOff.add(emptyDay);
+                }
+                if (!snapshot.hasData) {
+                  return circularProgress();
+                }
+                if (daysWithShiftsForCountThisMonth.isNotEmpty)
+                  daysWithShiftsForCountThisMonth.clear();
+
+                final days = snapshot.data.documents;
+                for (var day in days) {
+                  final int dayDay = day.data['day'];
+                  final int dayMonth = day.data['month'];
+                  final int dayYear = day.data['year'];
+                  final bool dayIsHoliday = day.data['isHoliday'];
+                  final List nightShifts = [];
+                  final List morningShifts = [];
+                  final List eveningShifts = [];
+                  if (_btnDepartmentText == 'SUP' &&
+                      _btnTypeText == 'Vacations') {
+                    final List vacation = day.data['vacations'];
+                    if (vacation != null) {
+                      daysOff.add(vacation);
+                    } else
+                      daysOff.add(emptyDay);
+                  }
+                  if (_btnDepartmentText == 'IT' &&
+                      _btnTypeText == 'Vacations') {
+                    final List vacation = day.data['ITVacations'];
+                    if (vacation != null) {
+                      daysOff.add(vacation);
+                    } else
+                      daysOff.add(emptyDay);
+                  }
+                  if (_btnDepartmentText == 'SUP' &&
+                      _btnTypeText == 'Sick Leaves') {
+                    final List vacation = day.data['sick'];
+                    if (vacation != null) {
+                      daysOff.add(vacation);
+                    } else
+                      daysOff.add(emptyDay);
+                  }
+                  if (_btnDepartmentText == 'IT' &&
+                      _btnTypeText == 'Sick Leaves') {
+                    final List vacation = day.data['ITSick'];
+                    if (vacation != null) {
+                      daysOff.add(vacation);
+                    } else
+                      daysOff.add(emptyDay);
+                  }
+
+                  currentDocument = day;
+
+//                print(dayMonth);
+//                print(dayYear);
+//                print(supportVacation);
+//              print(supportVacations.length);
+//                print(itVacation);
+//                print(itVacations);
+
+                  final dayWithShifts = Day(dayDay, dayMonth, dayYear,
+                      dayIsHoliday, nightShifts, morningShifts, eveningShifts);
+
+                  if (!daysWithShiftsForCountThisMonth
+                          .contains(dayWithShifts) &&
+                      daysWithShiftsForCountThisMonth.length <
+                          getNumberOfDaysInMonth(dateTime.month))
+                    daysWithShiftsForCountThisMonth.add(dayWithShifts);
+                }
+                return Column(
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                            child: Text('Mon',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.headline)),
+                        Expanded(
+                            child: Text('Tue',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.headline)),
+                        Expanded(
+                            child: Text('Wed',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.headline)),
+                        Expanded(
+                            child: Text('Thu',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.headline)),
+                        Expanded(
+                            child: Text('Fri',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.headline)),
+                        Expanded(
+                            child: Text('Sat',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headline
+                                    .copyWith(color: accentColor))),
+                        Expanded(
+                            child: Text('Sun',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headline
+                                    .copyWith(color: accentColor))),
+                      ],
+                      mainAxisSize: MainAxisSize.min,
+                    ),
+                    GridView.count(
+                      crossAxisCount: numWeekDays,
+                      childAspectRatio: (itemWidth / itemHeight),
+                      shrinkWrap: true,
+                      scrollDirection: Axis.vertical,
+                      children: List.generate(
+                          getNumberOfDaysInMonth(dateTime.month), (index) {
+                        int dayNumber = index + 1;
+                        return GestureDetector(
+                            // Used for handling tap on each day view
 //                    onTap: () => _onDayTapped(dayNumber - _beginMonthPadding),
-                          child: Container(
-                              margin: const EdgeInsets.all(1.0),
-                              padding: const EdgeInsets.all(1.0),
-                              decoration: BoxDecoration(
-                                gradient: RadialGradient(
-                                    colors: [primaryColor, darkPrimaryColor]),
-                                color: ((dayNumber - _beginMonthPadding) ==
-                                            DateTime.now().day &&
-                                        dateTime.month ==
-                                            DateTime.now().month &&
-                                        dateTime.year == DateTime.now().year)
-                                    ? darkPrimaryColor
-                                    : (dayNumber - _beginMonthPadding <= 0)
-                                        ? Colors.transparent
-                                        : darkPrimaryColor.withOpacity(0.1),
-                                border: Border.all(color: Colors.grey),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10.0)),
-                              ),
-                              child: Column(
-                                children: <Widget>[
-                                  buildDayNumberWidget(dayNumber),
-                                  ((employee.hasCar) &&
-                                          mgmt.length > index &&
-                                          vacations.length > index)
-                                      ? buildDayEventInfoWidget(
-                                          dayNumber,
-                                          mgmt[index],
-                                          itcs[index],
-                                          vacations[index])
-                                      : (!employee.hasCar &&
-                                              vacations.length > index)
-                                          ? buildDayEventInfoWidget(
-                                              dayNumber,
-                                              emptyDay,
-                                              emptyDay,
-                                              vacations[index])
-                                          : buildDayEventInfoWidget(dayNumber,
-                                              emptyDay, emptyDay, emptyDay)
-                                ],
-                              )));
-                    }),
-                  )
-                ],
-              );
-            }));
+                            child: Container(
+                                margin: const EdgeInsets.all(1.0),
+                                padding: const EdgeInsets.all(1.0),
+                                decoration: BoxDecoration(
+                                  gradient: RadialGradient(
+                                      colors: [primaryColor, darkPrimaryColor]),
+                                  color: ((dayNumber - _beginMonthPadding) ==
+                                              DateTime.now().day &&
+                                          dateTime.month ==
+                                              DateTime.now().month &&
+                                          dateTime.year == DateTime.now().year)
+                                      ? darkPrimaryColor
+                                      : (dayNumber - _beginMonthPadding <= 0)
+                                          ? Colors.transparent
+                                          : darkPrimaryColor.withOpacity(0.1),
+                                  border: Border.all(color: Colors.grey),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10.0)),
+                                ),
+                                child: Column(
+                                  children: <Widget>[
+                                    buildDayNumberWidget(dayNumber),
+                                    buildDayEventInfoWidget(dayNumber, daysOff)
+                                  ],
+                                )));
+                      }),
+                    ),
+                  ],
+                );
+              }),
+        ],
+      ),
+    );
   }
 
   Align buildDayNumberWidget(int dayNumber) {
@@ -414,272 +476,40 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
     }
   }
 
-  Widget buildDayEventInfoWidget(
-      int dayNumber, List mgmt, List itcs, List vacations) {
-    int shiftCount = 0;
-    String shiftType;
-    List<String> shifts = [];
-    DateTime eventDate;
-    bool vacationStatus = false;
-    parkingStatus = 'free';
+  Widget buildDayEventInfoWidget(int dayNumber, List vacations) {
+    return Container(
+      child: buildVacationInfoWidget(vacations[dayNumber - 1]),
+    );
+  }
 
-    if (employee.department == kSupportDepartment) {
-//      for (Day day in daysWithShiftsForCountThisMonth) {
-//        if (day.s1.containsValue(employee.initial) &&
-//            day.month == dateTime.month &&
-//            day.day == dayNumber - _beginMonthPadding) {
-//          shiftCount++;
-//          shiftType = 'Night';
-//          shifts.add(shiftType);
-//        }
-//        if (day.s2.containsValue(employee.initial) &&
-//            day.month == dateTime.month &&
-//            day.day == dayNumber - _beginMonthPadding) {
-//          shiftCount++;
-//          shiftType = 'Night';
-//          shifts.add(shiftType);
-//        }
-//
-//        if (day.s3.containsValue(employee.initial) &&
-//            day.month == dateTime.month &&
-//            day.day == dayNumber - _beginMonthPadding) {
-//          shiftCount++;
-//          shiftType = 'Night';
-//          shifts.add(shiftType);
-//        }
-//
-//        if (day.s4.containsValue(employee.initial) &&
-//            day.month == dateTime.month &&
-//            day.day == dayNumber - _beginMonthPadding) {
-//          shiftCount++;
-//          shiftType = 'Morning';
-//          shifts.add(shiftType);
-//        }
-//
-//        if (day.s5.containsValue(employee.initial) &&
-//            day.month == dateTime.month &&
-//            day.day == dayNumber - _beginMonthPadding) {
-//          shiftCount++;
-//          shiftType = 'Morning';
-//          shifts.add(shiftType);
-//        }
-//
-//        if (day.s6.containsValue(employee.initial) &&
-//            day.month == dateTime.month &&
-//            day.day == dayNumber - _beginMonthPadding) {
-//          shiftCount++;
-//          shiftType = 'Morning';
-//          shifts.add(shiftType);
-//        }
-//
-//        if (day.s7.containsValue(employee.initial) &&
-//            day.month == dateTime.month &&
-//            day.day == dayNumber - _beginMonthPadding) {
-//          shiftCount++;
-//          shiftType = 'Evening';
-//          shifts.add(shiftType);
-//        }
-//
-//        if (day.s8.containsValue(employee.initial) &&
-//            day.month == dateTime.month &&
-//            day.day == dayNumber - _beginMonthPadding) {
-//          shiftCount++;
-//          shiftType = 'Evening';
-//          shifts.add(shiftType);
-//        }
-//
-//        if (day.s9.containsValue(employee.initial) &&
-//            day.month == dateTime.month &&
-//            day.day == dayNumber - _beginMonthPadding) {
-//          shiftCount++;
-//          shiftType = 'Evening';
-//          shifts.add(shiftType);
-//        }
-//      }
-    }
+  Widget buildVacationInfoWidget(List vacations) {
+    List<Widget> vacationList = [];
+    Color color = Colors.transparent;
+    for (int i = 0; i < vacations.length; i++) {
+      for (Employee emp in listWithEmployees) {
+        if (emp.initial == vacations[i]) {
+          color = convertColor(emp.empColor);
+        }
+      }
 
-    if (mgmt != null) {
-      if (mgmt.length >= 0) {
-        for (int i = 0; i < mgmt.length; i++) {
-          String mgmtConverted = mgmt[i];
-          List<String> splitted = mgmtConverted.split(' ');
-          if (splitted[0] == employee.initial) {
-            parkingStatus = 'reserved';
-          }
-        }
-      }
-    }
-    if (itcs != null) {
-      if (itcs.length >= 0) {
-        for (int i = 0; i < itcs.length; i++) {
-          String itcsConverted = itcs[i];
-          List<String> splitted = itcsConverted.split(' ');
-          if (splitted[0] == employee.initial) {
-            parkingStatus = 'reserved';
-          }
-        }
-      }
-    }
-    if (itcs != null && mgmt != null) {
-      if (mgmt.isNotEmpty && itcs.isNotEmpty) {
-        if (parkingStatus == 'free' && mgmt.length == 3 && itcs.length == 6) {
-          parkingStatus = 'busy';
-        }
-      }
-    }
-    if (vacations != null) {
-      if (vacations.length >= 0) {
-        for (int i = 0; i < vacations.length; i++) {
-          if (vacations[i] == employee.initial) {
-            vacationStatus = true;
-          }
-        }
-      }
-    }
-
-    if (employee.department == kSupportDepartment && shiftCount > 0) {
-      return Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Padding(
-              padding: (shifts[0] == 'Night')
-                  ? const EdgeInsets.only(right: 15.0)
-                  : const EdgeInsets.only(left: 0.0),
-              child: Text(
-                shifts[0],
-                maxLines: 1,
-                style: TextStyle(
-                    fontSize: 13.0,
-                    color: textPrimaryColor,
-                    fontWeight: FontWeight.bold,
-                    background: Paint()..color = Colors.transparent),
-              ),
-            ),
-            (shiftCount == 2)
-                ? Padding(
-                    padding: (shifts[1] == 'Night')
-                        ? const EdgeInsets.only(right: 15.0)
-                        : const EdgeInsets.only(left: 0.0),
-                    child: Text(
-                      shifts[1],
-                      maxLines: 1,
-                      style: TextStyle(
-                          fontSize: 13.0,
-                          color: textPrimaryColor,
-                          fontWeight: FontWeight.bold,
-                          background: Paint()..color = Colors.transparent),
-                    ))
-                : SizedBox(
-                    height: 1.0,
-                  ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                (employee.hasCar &&
-                        parkingStatus == 'reserved' &&
-                        (((dayNumber - _beginMonthPadding) >=
-                                    DateTime.now().day &&
-                                dateTime.month == DateTime.now().month) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 5)))
-                    ? ParkingWidget(Colors.lightGreenAccent)
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-                (employee.hasCar &&
-                        parkingStatus == 'free' &&
-                        (((dayNumber - _beginMonthPadding) >=
-                                    DateTime.now().day &&
-                                dateTime.month == DateTime.now().month) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 5)))
-                    ? ParkingWidget(Colors.yellowAccent)
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-                (employee.hasCar &&
-                        parkingStatus == 'busy' &&
-                        (((dayNumber - _beginMonthPadding) >=
-                                    DateTime.now().day &&
-                                dateTime.month == DateTime.now().month) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 5)))
-                    ? ParkingWidget(Colors.red)
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-                (vacationStatus)
-                    ? VacationWidget()
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-              ],
-            ),
-          ],
+      Widget vacationText = Container(
+        width: 150.0,
+        decoration: BoxDecoration(
+          color: color,
+        ),
+        child: Text(
+          vacations[i],
+          style: TextStyle(
+            color: Colors.white,
+          ),
         ),
       );
-    } else if ((shiftCount == 0 && vacationStatus) ||
-        employee.department == kITDepartment ||
-        employee.department == kMarketingDepartment ||
-        employee.department == kManagement) {
-      return Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                (employee.hasCar &&
-                        parkingStatus == 'reserved' &&
-                        (((dayNumber - _beginMonthPadding) >=
-                                    DateTime.now().day &&
-                                dateTime.month == DateTime.now().month) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 5)))
-                    ? ParkingWidget(Colors.lightGreenAccent)
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-                (employee.hasCar &&
-                        parkingStatus == 'free' &&
-                        (((dayNumber - _beginMonthPadding) >=
-                                    DateTime.now().day &&
-                                dateTime.month == DateTime.now().month) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 5)))
-                    ? ParkingWidget(Colors.yellowAccent)
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-                (employee.hasCar &&
-                        parkingStatus == 'busy' &&
-                        (((dayNumber - _beginMonthPadding) >=
-                                    DateTime.now().day &&
-                                dateTime.month == DateTime.now().month) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 5)))
-                    ? ParkingWidget(Colors.red)
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-                (vacationStatus)
-                    ? VacationWidget()
-                    : SizedBox(
-                        height: 1.0,
-                      ),
-              ],
-            ),
-          ],
-        ),
-      );
-    } else {
-      return Container();
+      vacationList.add(vacationText);
     }
+
+    return Column(
+      children: vacationList,
+    );
   }
 
   int getNumberOfDaysInMonth(final int month) {

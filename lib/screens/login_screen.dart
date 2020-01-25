@@ -32,6 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future getCurrentUserAndLogin() async {
     try {
       final user = await _auth.currentUser();
+//      await dbController.changeUserId(loggedInUser.email);
       listWithEmployees.clear();
       await dbController.getUsers(listWithEmployees);
 //      isLoading = false;

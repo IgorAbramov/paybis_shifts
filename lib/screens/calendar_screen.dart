@@ -115,7 +115,7 @@ class CalendarState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    ScreenUtil.instance = ScreenUtil(width: 1080, height: 2220)..init(context);
+    ScreenUtil.init(context, width: 1080, height: 2220, allowFontScaling: true);
     final int numWeekDays = 7;
     var size = MediaQuery.of(context).size;
 

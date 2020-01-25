@@ -394,7 +394,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                     Employee newEmployee = new Employee();
 
+                    String id = '';
                     Map newEmpMap = newEmployee.buildMap(
+                        id,
                         name,
                         email,
                         initials,
@@ -405,7 +407,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         carInfo,
                         cardId);
                     if (!userExists) {
-                      dbController.createUser(newEmpMap);
+                      dbController.createUser(newEmpMap, email);
                       listWithEmployees.add(newEmployee);
                     }
                     if (newUser != null) {

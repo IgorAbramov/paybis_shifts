@@ -1,9 +1,11 @@
 import 'dart:core';
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -16,6 +18,7 @@ import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/screens/recent_changes_screen.dart';
 import 'package:paybis_com_shifts/screens/support_days_off_screen.dart';
 
+import 'admin_calendar_screen.dart';
 import 'feed_screen.dart';
 import 'parking_screen.dart';
 import 'settings_screen.dart';
@@ -45,6 +48,7 @@ final shiftsScaffoldKey = new GlobalKey<ScaffoldState>();
 final shiftsScreenKey = new GlobalKey<_ShiftScreenState>();
 TextEditingController reasonTextInputController;
 ScrollController scrollController;
+FirebaseMessaging firebaseMessaging = FirebaseMessaging();
 String _markerInitials = '';
 List copiedShift = [];
 List emptyList = [];
@@ -64,6 +68,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
     super.initState();
     reasonTextInputController = new TextEditingController();
     scrollController = new ScrollController();
+    configurePushNotifications();
 //    if (SchedulerBinding.instance.schedulerPhase ==
 //        SchedulerPhase.persistentCallbacks) {
 //      SchedulerBinding.instance.addPostFrameCallback((_) =>
@@ -85,7 +90,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    ScreenUtil.instance = ScreenUtil(width: 1080, height: 2220)..init(context);
+    ScreenUtil.init(context, width: 1080, height: 2220, allowFontScaling: true);
     daysWithShiftsForCountThisMonth.clear();
 //    print("Parent build method invoked");
     return Scaffold(
@@ -336,11 +341,11 @@ class _ShiftScreenState extends State<ShiftScreen> {
 //                  child: MaterialButton(
 //                    onPressed: () {
 //                      setState(() async {
-////                        dbController.deleteMonth();
-//                        for (int i = 1; i <= getNumberOfDaysInMonth(1); i++) {
-//                          Day newDay = new Day(i, 1, 20, false, [], [], []);
+////                        dbController.deleteMonth(2);
+//                        for (int i = 1; i <= getNumberOfDaysInMonth(7); i++) {
+//                          Day newDay = new Day(i, 7, 19, false, [], [], []);
 //                          Map dayMap =
-//                              newDay.buildMap(i, 1, 2020, false, [], [], []);
+//                              newDay.buildMap(i, 7, 2019, false, [], [], []);
 //                          await dbController.addMonth(dayMap);
 //                        }
 //                      });
@@ -383,9 +388,64 @@ class _ShiftScreenState extends State<ShiftScreen> {
     );
   }
 
+  void configurePushNotifications() {
+    if (Platform.isIOS) getiOSPermission();
+
+    firebaseMessaging.getToken().then((token) {
+      print("Firebase Messaging Token: $token\n");
+      dbController.configureToken(token);
+    });
+
+    firebaseMessaging.configure(
+      onLaunch: (Map<String, dynamic> message) async {
+        print("on Launch: $message\n");
+        final String recipientId = message['data']['recipient'];
+        final String body = message['notification']['body'];
+        if (recipientId == employee.id) {
+//          print("Notification shown!");
+          openNotificationAlertDialog(context, body, 'Change Request');
+        }
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("on Resume: $message\n");
+        final String recipientId = message['data']['recipient'];
+        final String body = message['notification']['body'];
+        if (recipientId == employee.id) {
+//          print("Notification shown!");
+          openNotificationAlertDialog(context, body, 'Change Request');
+        }
+      },
+      onMessage: (Map<String, dynamic> message) async {
+        print("on message: $message\n");
+        final String recipientId = message['data']['recipient'];
+        final String body = message['notification']['body'];
+        if (recipientId == employee.id) {
+//          print("Notification shown!");
+          openNotificationAlertDialog(context, body, 'Change Request');
+//          SnackBar snackbar = SnackBar(
+//              content: Text(
+//            body,
+//            overflow: TextOverflow.ellipsis,
+//          ));
+//          shiftsScaffoldKey.currentState.showSnackBar(snackbar);
+        }
+//        else
+//          print("Notification NOT shown");
+      },
+    );
+  }
+
+  getiOSPermission() {
+    firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(alert: true, badge: true, sound: true));
+    firebaseMessaging.onIosSettingsRegistered.listen((settings) {
+      // print("Settings registered: $settings");
+    });
+  }
+
   void goToCalendar() {
     if (employee.department == kAdmin || employee.department == kSuperAdmin) {
-      Navigator.pushNamed(context, CalendarScreen.id);
+      Navigator.pushNamed(context, AdminCalendarScreen.id);
     } else {
       Navigator.pushNamed(context, CalendarScreen.id);
     }
@@ -914,11 +974,16 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
     documentID = widget.documentID;
     widget.text == '' ? employeeChosen = false : employeeChosen = true;
     if (widget.text.length == 3) isLong = true;
+
+    isPast = false;
     if ((widget.day < DateTime.now().day - 2 &&
             widget.month <= DateTime.now().month &&
             widget.year <= DateTime.now().year) ||
         (widget.month < DateTime.now().month &&
             widget.year <= DateTime.now().year)) isPast = true;
+
+//    isPast = true;
+//    print(isPast);
 
     for (Employee emp in listWithEmployees) {
       //Converting String to Color
@@ -1676,7 +1741,16 @@ openChangeShiftsConfirmationAlertBox(
                               shiftTypeContainer2ForShiftExchange,
                               shiftExchangeMessage,
                               false);
-
+                          String uid;
+                          for (Employee emp in listWithEmployees) {
+                            if (emp.initial ==
+                                shiftHolderContainer2ForShiftExchange)
+                              uid = emp.id;
+                          }
+                          dbController.addUserFeedItemToNotify(
+                              uid,
+                              'Exchange Request',
+                              '${employee.name} wants to exchange with you!');
                           updateShiftExchangeValuesToNull();
                           Navigator.pop(context);
                           showConfirmationMessage();
@@ -1736,6 +1810,46 @@ openChangeShiftsConfirmationAlertBox(
           ),
         );
       });
+}
+
+openNotificationAlertDialog(
+    BuildContext context, String message, String title) {
+  return showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(32.0))),
+      content: ListTile(
+        title: Text(
+          title,
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+        ),
+        subtitle: Text(
+          message,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18.0,
+          ),
+        ),
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: Text(
+            'OK',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 22.0,
+            ),
+          ),
+          onPressed: () async {
+//            print(employee.id);
+//            await dbController.deleteUserFeedItems(employee.id);
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    ),
+  );
 }
 
 class Shift {

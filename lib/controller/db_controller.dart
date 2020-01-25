@@ -167,11 +167,19 @@ class DBController {
     });
   }
 
-  void createUser(Map emp) async {
+  void configureToken(String token) {
+    _fireStore
+        .collection(kUsersCollection)
+        .document(employee.id)
+        .updateData({"androidNotificationToken": token});
+  }
+
+  void createUser(Map emp, String email) async {
     await _fireStore
         .collection(kUsersCollection)
         .document()
         .setData(Map<String, dynamic>.from(emp));
+    await changeUserId(email);
   }
 
   void deleteUser(String email) async {
@@ -206,10 +214,25 @@ class DBController {
     }
   }
 
-  void deleteMonth() async {
+  changeUserId(String email) async {
+    final docs = await _fireStore
+        .collection(kUsersCollection)
+        .where('email', isEqualTo: email)
+        .getDocuments();
+    for (var doc in docs.documents) {
+      await _fireStore
+          .collection(kUsersCollection)
+          .document(doc.documentID)
+          .updateData({'id': doc.documentID}).catchError((e) {
+        print(e);
+      });
+    }
+  }
+
+  void deleteMonth(int month) async {
     final docs = await _fireStore
         .collection(kDaysCollection)
-        .where('month', isEqualTo: 1)
+        .where('month', isEqualTo: month)
         .getDocuments();
 
     for (var doc in docs.documents) {
@@ -287,6 +310,31 @@ class DBController {
         .where('emp1', isEqualTo: employee.initial)
         .orderBy('timestamp', descending: false)
         .snapshots();
+  }
+
+  addUserFeedItemToNotify(String uid, String title, String message) {
+    feedRef
+        .document(adminFeedDocID)
+        .collection('userFeed')
+        .document(uid)
+        .collection('userFeedItem')
+        .document()
+        .setData({
+      "title": title,
+      "message": message,
+    });
+  }
+
+  deleteUserFeedItems(String uid) async {
+    print('Deleting $uid');
+    await feedRef
+        .document(adminFeedDocID)
+        .collection('userFeed')
+        .document(uid)
+        .get()
+        .then((doc) {
+      doc.reference.delete();
+    });
   }
 
   addChangeRequestToFeed(
