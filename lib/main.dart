@@ -8,6 +8,7 @@ import 'package:paybis_com_shifts/screens/settings_screen.dart';
 import 'package:paybis_com_shifts/screens/shifts_screen.dart';
 import 'package:paybis_com_shifts/screens/welcome_screen.dart';
 
+import 'constants.dart';
 import 'screens/admin_calendar_screen.dart';
 import 'screens/feed_screen.dart';
 import 'screens/it_days_off_screen.dart';
@@ -21,6 +22,24 @@ import 'screens/welcome_screen.dart';
 
 FirebaseAuth _auth = FirebaseAuth.instance;
 void main() => runApp(PBShifts());
+
+final ThemeData _kPBShiftsTheme = _buildPBShiftsTheme();
+
+ThemeData _buildPBShiftsTheme() {
+  final ThemeData base = ThemeData.light();
+  return base.copyWith(
+    accentColor: accentColor,
+    primaryColor: primaryColor,
+    buttonTheme: base.buttonTheme.copyWith(
+      buttonColor: lightPrimaryColor,
+      textTheme: ButtonTextTheme.normal,
+    ),
+    scaffoldBackgroundColor: textIconColor,
+    cardColor: textIconColor,
+    textSelectionColor: textIconColor,
+    errorColor: accentColor,
+  );
+}
 
 class PBShifts extends StatelessWidget {
   @override
@@ -44,6 +63,7 @@ class PBShifts extends StatelessWidget {
         CalendarScreen.id: (context) => CalendarScreen(),
         AdminCalendarScreen.id: (context) => AdminCalendarScreen(),
       },
+      theme: _kPBShiftsTheme,
     );
   }
 

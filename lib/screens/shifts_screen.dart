@@ -52,6 +52,9 @@ FirebaseMessaging firebaseMessaging = FirebaseMessaging();
 String _markerInitials = '';
 List copiedShift = [];
 List emptyList = [];
+bool dragCompleted = false;
+Shift shiftOnDragComplete = Shift('', 8.0, '', '');
+DocumentSnapshot dragDocument;
 
 class ShiftScreen extends StatefulWidget {
   static const String id = 'shifts_screen_new';
@@ -66,6 +69,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
   void initState() {
     SystemChrome.setEnabledSystemUIOverlays([]);
     super.initState();
+
     reasonTextInputController = new TextEditingController();
     scrollController = new ScrollController();
     configurePushNotifications();
@@ -389,7 +393,9 @@ class _ShiftScreenState extends State<ShiftScreen> {
   }
 
   void configurePushNotifications() {
-    if (Platform.isIOS) getiOSPermission();
+    if (Platform.isIOS) {
+      getiOSPermission();
+    }
 
     firebaseMessaging.getToken().then((token) {
       print("Firebase Messaging Token: $token\n");
@@ -417,10 +423,13 @@ class _ShiftScreenState extends State<ShiftScreen> {
       },
       onMessage: (Map<String, dynamic> message) async {
         print("on message: $message\n");
+        print('Employee ${employee.id}');
         final String recipientId = message['data']['recipient'];
         final String body = message['notification']['body'];
+        print('Recipient $recipientId');
+        print('Employee ${employee.id}');
         if (recipientId == employee.id) {
-//          print("Notification shown!");
+          print("Notification shown!");
           openNotificationAlertDialog(context, body, 'Change Request');
 //          SnackBar snackbar = SnackBar(
 //              content: Text(
@@ -428,9 +437,8 @@ class _ShiftScreenState extends State<ShiftScreen> {
 //            overflow: TextOverflow.ellipsis,
 //          ));
 //          shiftsScaffoldKey.currentState.showSnackBar(snackbar);
-        }
-//        else
-//          print("Notification NOT shown");
+        } else
+          print("Notification NOT shown");
       },
     );
   }
@@ -546,7 +554,7 @@ class DaysStream extends StatelessWidget {
 
           if (!daysWithShiftsForCountThisMonth.contains(dayWithShifts) &&
               daysWithShiftsForCountThisMonth.length <
-                  getNumberOfDaysInMonth(dateTime.month))
+                  getNumberOfDaysInMonth(dateTime.month, dateTime.year))
             daysWithShiftsForCountThisMonth.add(dayWithShifts);
 
           final dayWithShiftsUI = Table(
@@ -1003,139 +1011,239 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 
                 //If Emp is NOT chosen
 
-                ? MaterialButton(
-                    onPressed: () {
-                      setState(() async {
-                        if (_markerInitials == '') {
-                          showAdminAlertDialog(
-                              context,
-                              documentID,
-                              widget.shift,
-                              "Who's gonna work?",
-                              widget.absentList);
-                        } else if (_markerInitials == 'X') {
-                        } else {
-                          currentDocument =
-                              await dbController.getDocument(documentID);
-
-                          String position;
-                          for (Employee emp in listWithEmployees) {
-                            if (emp.initial == _markerInitials) {
-                              position = emp.position;
-                            }
-                          }
-                          Shift newShift = Shift(_markerInitials, 8.0, position,
-                              widget.shift.type);
-                          await dbController.createShift(
-                              currentDocument,
-                              newShift.type,
-                              newShift.buildMap(newShift.holder, newShift.hours,
-                                  newShift.position, newShift.type));
-                        }
-                      });
+                ? DragTarget(
+                    onWillAccept: (shift) {
+//                      print('onWillAccept ');
+                      dragCompleted = true;
+                      return true;
                     },
-                    color: textIconColor,
-                    shape: CircleBorder(),
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 3.0, right: 0.0),
-                      child: Text(
-                        buttonText,
-                        style: TextStyle(
-                          fontSize: size,
-                          color: textPrimaryColor,
+                    onAccept: (Shift shift) async {
+//                      print('onACCEPT');
+                      shiftOnDragComplete.type = widget.shift.type;
+                      print(shiftOnDragComplete.type);
+                      dragDocument = await dbController.getDocument(documentID);
+                      print(shiftOnDragComplete.type);
+                      return dragCompleted = true;
+                    },
+                    onLeave: (shift) {
+//                      print('onLeave');
+                      return dragCompleted = false;
+                    },
+                    builder: (context, accepted, rejected) {
+                      return MaterialButton(
+                        onPressed: () {
+                          setState(() async {
+                            if (_markerInitials == '') {
+                              showAdminAlertDialog(
+                                  context,
+                                  documentID,
+                                  widget.shift,
+                                  "Who's gonna work?",
+                                  widget.absentList);
+                            } else if (_markerInitials == 'X') {
+                            } else {
+                              currentDocument =
+                                  await dbController.getDocument(documentID);
+
+                              String position;
+                              for (Employee emp in listWithEmployees) {
+                                if (emp.initial == _markerInitials) {
+                                  position = emp.position;
+                                }
+                              }
+                              Shift newShift = Shift(_markerInitials, 8.0,
+                                  position, widget.shift.type);
+                              await dbController.createShift(
+                                  currentDocument,
+                                  newShift.type,
+                                  newShift.buildMap(
+                                      newShift.holder,
+                                      newShift.hours,
+                                      newShift.position,
+                                      newShift.type));
+                            }
+                          });
+                        },
+                        color: textIconColor,
+                        shape: CircleBorder(),
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: 3.0, right: 0.0),
+                          child: Text(
+                            buttonText,
+                            style: TextStyle(
+                              fontSize: size,
+                              color: textPrimaryColor,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    padding: EdgeInsets.all(0.0),
-                    minWidth: 10.0,
+                        padding: EdgeInsets.all(0.0),
+                        minWidth: 10.0,
+                      );
+                    },
                   )
 
                 //If Emp is chosen
 
-                : MaterialButton(
-                    onPressed: () {
-                      setState(() async {
-                        if (_markerInitials == '') {
-                          showAdminAlertDialog(
-                              context,
-                              documentID,
-                              widget.shift,
-                              "Who's gonna work?",
-                              widget.absentList);
-                        } else if (_markerInitials == 'X') {
-                          currentDocument =
-                              await dbController.getDocument(documentID);
-                          await dbController.deleteShift(
-                              currentDocument,
-                              widget.shiftType,
-                              widget.shift.buildMap(
-                                  widget.shift.holder,
-                                  widget.shift.hours,
-                                  widget.shift.position,
-                                  widget.shift.type));
-                        } else {
-                          currentDocument =
-                              await dbController.getDocument(documentID);
-
-                          String position;
-                          for (Employee emp in listWithEmployees) {
-                            if (emp.initial == _markerInitials) {
-                              position = emp.position;
-                            }
-                          }
-                          Shift newShift = Shift(_markerInitials, 8.0, position,
-                              widget.shift.type);
-
-                          await dbController.updateShift(
-                              currentDocument,
-                              widget.shift.type,
-                              widget.shift.buildMap(
-                                  widget.shift.holder,
-                                  widget.shift.hours,
-                                  widget.shift.position,
-                                  widget.shift.type),
-                              newShift.buildMap(newShift.holder, newShift.hours,
-                                  newShift.position, newShift.type));
-                        }
-                      });
+                : Draggable(
+                    maxSimultaneousDrags: 1,
+                    affinity: Axis.horizontal,
+                    data: widget.shift,
+                    onDragCompleted: () async {
+                      print('drag completed: $dragCompleted');
+                      if (dragCompleted) {
+                        print(shiftOnDragComplete.type);
+                        currentDocument =
+                            await dbController.getDocument(documentID);
+                        print(shiftOnDragComplete.type);
+                        Shift newShift = Shift(widget.shift.holder, 8.0,
+                            widget.shift.position, shiftOnDragComplete.type);
+                        await dbController.deleteShift(
+                            currentDocument,
+                            widget.shiftType,
+                            widget.shift.buildMap(
+                                widget.shift.holder,
+                                widget.shift.hours,
+                                widget.shift.position,
+                                widget.shift.type));
+                        await dbController.createShift(
+                            dragDocument,
+                            newShift.type,
+                            newShift.buildMap(newShift.holder, newShift.hours,
+                                newShift.position, newShift.type));
+                        setState(() {});
+                      }
                     },
-                    color: color,
-                    shape: CircleBorder(),
-                    child: (widget.workingHours != 8)
-                        ? Stack(
-                            alignment: AlignmentDirectional.center,
-                            children: <Widget>[
-                              Text(
-                                widget.text,
-                                style: TextStyle(
-                                  fontSize: isLong ? 13.0 : 16.0,
-                                  color: textIconColor,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 24.0, left: 24.0),
-                                child: Text(
-                                  (widget.workingHours < 8) ? '-' : '+',
+                    feedback:
+                        //Container(),
+                        MaterialButton(
+                      onPressed: () {},
+                      color: color,
+                      shape: CircleBorder(),
+                      child: (widget.workingHours != 8)
+                          ? Stack(
+                              alignment: AlignmentDirectional.center,
+                              children: <Widget>[
+                                Text(
+                                  widget.text,
                                   style: TextStyle(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold,
-                                      color: (widget.workingHours < 8)
-                                          ? accentColor
-                                          : Colors.green),
+                                    fontSize: isLong ? 13.0 : 16.0,
+                                    color: textIconColor,
+                                  ),
                                 ),
-                              )
-                            ],
-                          )
-                        : Text(
-                            widget.text,
-                            style: TextStyle(
-                              fontSize: isLong ? 13.0 : 16.0,
-                              color: textIconColor,
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 24.0, left: 24.0),
+                                  child: Text(
+                                    (widget.workingHours < 8) ? '-' : '+',
+                                    style: TextStyle(
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: (widget.workingHours < 8)
+                                            ? accentColor
+                                            : Colors.green),
+                                  ),
+                                )
+                              ],
+                            )
+                          : Text(
+                              widget.text,
+                              style: TextStyle(
+                                fontSize: isLong ? 13.0 : 16.0,
+                                color: textIconColor,
+                              ),
                             ),
-                          ),
-                    padding: EdgeInsets.all(0.0),
-                    minWidth: 10.0,
+                      padding: EdgeInsets.all(0.0),
+                      minWidth: 30.0,
+                    ),
+                    childWhenDragging: Container(),
+                    child: MaterialButton(
+                      onPressed: () {
+                        setState(() async {
+                          if (_markerInitials == '') {
+                            showAdminAlertDialog(
+                                context,
+                                documentID,
+                                widget.shift,
+                                "Who's gonna work?",
+                                widget.absentList);
+                          } else if (_markerInitials == 'X') {
+                            currentDocument =
+                                await dbController.getDocument(documentID);
+                            await dbController.deleteShift(
+                                currentDocument,
+                                widget.shiftType,
+                                widget.shift.buildMap(
+                                    widget.shift.holder,
+                                    widget.shift.hours,
+                                    widget.shift.position,
+                                    widget.shift.type));
+                          } else {
+                            currentDocument =
+                                await dbController.getDocument(documentID);
+
+                            String position;
+                            for (Employee emp in listWithEmployees) {
+                              if (emp.initial == _markerInitials) {
+                                position = emp.position;
+                              }
+                            }
+                            Shift newShift = Shift(_markerInitials, 8.0,
+                                position, widget.shift.type);
+
+                            await dbController.updateShift(
+                                currentDocument,
+                                widget.shift.type,
+                                widget.shift.buildMap(
+                                    widget.shift.holder,
+                                    widget.shift.hours,
+                                    widget.shift.position,
+                                    widget.shift.type),
+                                newShift.buildMap(
+                                    newShift.holder,
+                                    newShift.hours,
+                                    newShift.position,
+                                    newShift.type));
+                          }
+                        });
+                      },
+                      color: color,
+                      shape: CircleBorder(),
+                      child: (widget.workingHours != 8)
+                          ? Stack(
+                              alignment: AlignmentDirectional.center,
+                              children: <Widget>[
+                                Text(
+                                  widget.text,
+                                  style: TextStyle(
+                                    fontSize: isLong ? 13.0 : 16.0,
+                                    color: textIconColor,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 24.0, left: 24.0),
+                                  child: Text(
+                                    (widget.workingHours < 8) ? '-' : '+',
+                                    style: TextStyle(
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: (widget.workingHours < 8)
+                                            ? accentColor
+                                            : Colors.green),
+                                  ),
+                                )
+                              ],
+                            )
+                          : Text(
+                              widget.text,
+                              style: TextStyle(
+                                fontSize: isLong ? 13.0 : 16.0,
+                                color: textIconColor,
+                              ),
+                            ),
+                      padding: EdgeInsets.all(0.0),
+                      minWidth: 10.0,
+                    ),
                   ),
           )
 
@@ -1417,13 +1525,15 @@ showAdminAlertDialog(
                             onPressed: () async {
                               currentDocument =
                                   await dbController.getDocument(docID);
-                              await dbController.updateHours(
-                                  currentDocument,
-                                  shift.type,
-                                  shift.buildMap(shift.holder, shift.hours,
-                                      shift.position, shift.type),
-                                  shift.buildMap(shift.holder, workingHours,
-                                      shift.position, shift.type));
+                              if (workingHours != null) {
+                                await dbController.updateHours(
+                                    currentDocument,
+                                    shift.type,
+                                    shift.buildMap(shift.holder, shift.hours,
+                                        shift.position, shift.type),
+                                    shift.buildMap(shift.holder, workingHours,
+                                        shift.position, shift.type));
+                              }
                               Navigator.pop(context);
                             },
                           ),
@@ -1910,7 +2020,7 @@ String getEmployeeName(String initials) {
   return result;
 }
 
-int getNumberOfDaysInMonth(final int month) {
+int getNumberOfDaysInMonth(final int month, final int year) {
   int numDays = 28;
 
   // Months are 1, ..., 12
@@ -1919,7 +2029,11 @@ int getNumberOfDaysInMonth(final int month) {
       numDays = 31;
       break;
     case 2:
-      numDays = 28;
+      if ((2020 - year) % 4 == 0) {
+        numDays = 29;
+      } else
+        numDays = 28;
+
       break;
     case 3:
       numDays = 31;

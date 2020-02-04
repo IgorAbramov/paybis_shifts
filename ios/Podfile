@@ -4,11 +4,6 @@
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
-# add the Firebase pod for Google Analytics
-pod 'Firebase/Analytics'
-# add pods for any other desired Firebase products
-# https://firebase.google.com/docs/ios/setup#available-pods
-
 project 'Runner', {
   'Debug' => :debug,
   'Profile' => :release,
@@ -38,8 +33,8 @@ def parse_KV_file(file, separator='=')
 end
 
 target 'Runner' do
-  use_frameworks!
   use_modular_headers!
+  use_frameworks!
   
   # Flutter Pod
 
@@ -93,4 +88,3 @@ post_install do |installer|
     end
   end
 end
-

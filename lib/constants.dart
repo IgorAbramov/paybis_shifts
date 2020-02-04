@@ -31,6 +31,7 @@ const String kChangesCollection = 'changes';
 const List<String> kAdminChoicesPopupMenu = [
   kChangeRequests,
   kRecentChanges,
+  kStats,
   kSupportDaysOff,
   kItDaysOff,
   kParking,

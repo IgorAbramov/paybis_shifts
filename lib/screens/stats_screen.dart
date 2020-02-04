@@ -41,7 +41,7 @@ class _StatsScreenState extends State<StatsScreen> {
     eveningSalary = 0;
     salary = 0;
 
-//    print(daysWithInfo.length);
+    print(daysWithInfo.length);
 
     calculateAmountOfShifts(employee);
     calculateAmountOfNightShifts(employee);
@@ -58,9 +58,10 @@ class _StatsScreenState extends State<StatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (employee.department != kSuperAdmin) getAllPersonalData(employee);
+    if (employee.department != kSuperAdmin || employee.department != kAdmin)
+      getAllPersonalData(employee);
 
-    return (employee.department == kSuperAdmin)
+    return (employee.department == kSuperAdmin || employee.department == kAdmin)
         ? Scaffold(
             appBar: AppBar(
               title: Text('Stats for ${getMonthName(dateTime.month)}'),
@@ -72,61 +73,107 @@ class _StatsScreenState extends State<StatsScreen> {
                     border: TableBorder.all(
                       color: secondaryColor,
                     ),
-                    columnWidths: {
-                      0: FlexColumnWidth(1),
-                      1: FlexColumnWidth(1),
-                      2: FlexColumnWidth(0.6),
-                      3: FlexColumnWidth(0.8),
-                      4: FlexColumnWidth(0.8),
-                      5: FlexColumnWidth(0.8),
-                    },
+                    columnWidths: (employee.department == kSuperAdmin)
+                        ? {
+                            0: FlexColumnWidth(1),
+                            1: FlexColumnWidth(1),
+                            2: FlexColumnWidth(0.6),
+                            3: FlexColumnWidth(0.8),
+                            4: FlexColumnWidth(0.8),
+                            5: FlexColumnWidth(0.8),
+                          }
+                        : {
+                            0: FlexColumnWidth(1),
+                            1: FlexColumnWidth(0.6),
+                            2: FlexColumnWidth(0.8),
+                            3: FlexColumnWidth(0.8),
+                            4: FlexColumnWidth(0.8),
+                          },
                     children: [
                       TableRow(
                         decoration: BoxDecoration(color: darkPrimaryColor),
-                        children: [
-                          TableCell(
-                            child: Text(
-                              'Name',
-                              style: kButtonFontStyle,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          TableCell(
-                            child: Text(
-                              'Salary',
-                              style: kButtonFontStyle,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          TableCell(
-                            child: Text(
-                              'Shifts',
-                              style: kButtonFontStyle,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          TableCell(
-                            child: Text(
-                              'Nights',
-                              style: kButtonFontStyle,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          TableCell(
-                            child: Text(
-                              'Mornings',
-                              style: kButtonFontStyle,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          TableCell(
-                            child: Text(
-                              'Evenings',
-                              style: kButtonFontStyle,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
+                        children: (employee.department == kSuperAdmin)
+                            ? [
+                                TableCell(
+                                  child: Text(
+                                    'Name',
+                                    style: kButtonFontStyle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                    'Salary',
+                                    style: kButtonFontStyle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                    'Shifts',
+                                    style: kButtonFontStyle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                    'Nights',
+                                    style: kButtonFontStyle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                    'Mornings',
+                                    style: kButtonFontStyle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                    'Evenings',
+                                    style: kButtonFontStyle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ]
+                            : [
+                                TableCell(
+                                  child: Text(
+                                    'Name',
+                                    style: kButtonFontStyle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                    'Shifts',
+                                    style: kButtonFontStyle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                    'Nights',
+                                    style: kButtonFontStyle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                    'Mornings',
+                                    style: kButtonFontStyle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                    'Evenings',
+                                    style: kButtonFontStyle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
                       ),
                     ],
                   ),
@@ -163,12 +210,15 @@ class _StatsScreenState extends State<StatsScreen> {
 
                           if (!daysWithInfo.contains(dayWithInfo) &&
                               daysWithInfo.length <
-                                  getNumberOfDaysInMonth(dateTime.month))
+                                  getNumberOfDaysInMonth(
+                                      dateTime.month, dateTime.year))
                             daysWithInfo.add(dayWithInfo);
                         }
                         return Expanded(
                           child: ListView(
-                            children: listStatsObjects(),
+                            children: (employee.department == kSuperAdmin)
+                                ? listStatsObjects()
+                                : listStatsObjectsWithoutSalary(),
                           ),
                         );
                       }),
@@ -214,12 +264,14 @@ class _StatsScreenState extends State<StatsScreen> {
 
                       if (daysWithInfo.contains(dayWithInfo) ||
                           daysWithInfo.length ==
-                              getNumberOfDaysInMonth(dateTime.month)) {
+                              getNumberOfDaysInMonth(
+                                  dateTime.month, dateTime.year)) {
                         daysWithInfo.clear();
                       }
                       if (!daysWithInfo.contains(dayWithInfo) &&
                           daysWithInfo.length <
-                              getNumberOfDaysInMonth(dateTime.month))
+                              getNumberOfDaysInMonth(
+                                  dateTime.month, dateTime.year))
                         daysWithInfo.add(dayWithInfo);
                     }
                     return listStatsForEmp();
@@ -380,6 +432,29 @@ class _StatsScreenState extends State<StatsScreen> {
     return list;
   }
 
+  List<StatsObjectWithoutSalary> listStatsObjectsWithoutSalary() {
+    List<StatsObjectWithoutSalary> list = List<StatsObjectWithoutSalary>();
+
+    for (Employee emp in listWithEmployees) {
+      if (emp.department == kSupportDepartment) {
+        getAllPersonalData(emp);
+
+        StatsObjectWithoutSalary statsObject = StatsObjectWithoutSalary(
+            emp.name,
+            nightShiftHoursCountThisMonth,
+            morningShiftHoursCountThisMonth,
+            eveningShiftHoursCountThisMonth,
+            amountOfShiftsThisMonth,
+            nightShiftsCountThisMonth,
+            eveningShiftsCountThisMonth,
+            morningShiftsCountThisMonth);
+        list.add(statsObject);
+      }
+    }
+
+    return list;
+  }
+
   Widget listStatsForEmp() {
     getAllPersonalData(employee);
 
@@ -519,6 +594,106 @@ class StatsObject extends StatelessWidget {
                 TableCell(
                   child: Text(
                     '${salary.toStringAsFixed(2)}',
+                    style: kButtonFontStyle,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                TableCell(
+                  child: Text(
+                    '$amountOfShifts',
+                    style: kButtonFontStyle,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                TableCell(
+                  child: Column(children: <Widget>[
+                    Text(
+                      '$amountOfNightShifts',
+                      style: kButtonFontStyle,
+                    ),
+                    Text(
+                      '($nightHours)',
+                      style: kButtonFontStyle,
+                    ),
+                  ]),
+                ),
+                TableCell(
+                  child: Column(children: <Widget>[
+                    Text(
+                      '$amountOfMorningShifts',
+                      style: kButtonFontStyle,
+                    ),
+                    Text(
+                      '($morningHours)',
+                      style: kButtonFontStyle,
+                    ),
+                  ]),
+                ),
+                TableCell(
+                  child: Column(children: <Widget>[
+                    Text(
+                      '$amountOfEveningShifts',
+                      style: kButtonFontStyle,
+                    ),
+                    Text(
+                      '($eveningHours)',
+                      style: kButtonFontStyle,
+                    ),
+                  ]),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class StatsObjectWithoutSalary extends StatelessWidget {
+  final String name;
+  final double nightHours;
+  final double morningHours;
+  final double eveningHours;
+  final int amountOfShifts;
+  final int amountOfNightShifts;
+  final int amountOfEveningShifts;
+  final int amountOfMorningShifts;
+
+  StatsObjectWithoutSalary(
+      this.name,
+      this.nightHours,
+      this.morningHours,
+      this.eveningHours,
+      this.amountOfShifts,
+      this.amountOfNightShifts,
+      this.amountOfEveningShifts,
+      this.amountOfMorningShifts);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 2.0),
+        child: Table(
+          border: TableBorder.all(
+            color: secondaryColor,
+          ),
+          columnWidths: {
+            0: FlexColumnWidth(1),
+            1: FlexColumnWidth(0.6),
+            2: FlexColumnWidth(0.8),
+            3: FlexColumnWidth(0.8),
+            4: FlexColumnWidth(0.8),
+          },
+          children: [
+            TableRow(
+              decoration:
+                  BoxDecoration(color: darkPrimaryColor.withOpacity(0.7)),
+              children: [
+                TableCell(
+                  child: Text(
+                    name,
                     style: kButtonFontStyle,
                     textAlign: TextAlign.center,
                   ),
