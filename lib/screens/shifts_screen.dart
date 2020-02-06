@@ -87,7 +87,6 @@ class _ShiftScreenState extends State<ShiftScreen> {
   @override
   void reassemble() {
     super.reassemble();
-//    print("Reassemble method invoked");
     daysWithShiftsForCountThisMonth.clear();
   }
 
@@ -96,14 +95,9 @@ class _ShiftScreenState extends State<ShiftScreen> {
     double height = MediaQuery.of(context).size.height;
     ScreenUtil.init(context, width: 1080, height: 2220, allowFontScaling: true);
     daysWithShiftsForCountThisMonth.clear();
-//    print("Parent build method invoked");
     return Scaffold(
       key: shiftsScaffoldKey,
       backgroundColor: textIconColor,
-//      bottomNavigationBar: BottomAppBar(
-//        color: textPrimaryColor,
-//        elevation: 10.0,
-//      ),
       appBar: AppBar(
         backgroundColor: darkPrimaryColor,
         automaticallyImplyLeading: false,
@@ -501,7 +495,6 @@ class DaysStream extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-//    print("Child build method invoked");
     if (daysWithShiftsForCountThisMonth.isNotEmpty)
       daysWithShiftsForCountThisMonth.clear();
 
@@ -514,8 +507,6 @@ class DaysStream extends StatelessWidget {
         final days = snapshot.data.documents;
         List<Widget> daysWithShifts = [];
         for (var day in days) {
-//          print(day.data);
-//          print(day.documentID);
           final int dayDay = day.data['day'];
           final int dayMonth = day.data['month'];
           final int dayYear = day.data['year'];
@@ -607,8 +598,6 @@ class DaysStream extends StatelessWidget {
                                   i++) {
                                 copiedShift.add(dayWithShifts.night[i]);
                               }
-                              print(copiedShift);
-
                               showCopyMessage();
                             }
                           }
@@ -674,8 +663,6 @@ class DaysStream extends StatelessWidget {
                                   i++) {
                                 copiedShift.add(dayWithShifts.morning[i]);
                               }
-                              print(copiedShift);
-
                               showCopyMessage();
                             }
                           }
@@ -741,8 +728,6 @@ class DaysStream extends StatelessWidget {
                                   i++) {
                                 copiedShift.add(dayWithShifts.evening[i]);
                               }
-                              print(copiedShift);
-
                               showCopyMessage();
                             }
                           }
@@ -990,9 +975,6 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
         (widget.month < DateTime.now().month &&
             widget.year <= DateTime.now().year)) isPast = true;
 
-//    isPast = true;
-//    print(isPast);
-
     for (Employee emp in listWithEmployees) {
       //Converting String to Color
       if (emp.initial == widget.text) {
@@ -1013,20 +995,15 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 
                 ? DragTarget(
                     onWillAccept: (shift) {
-//                      print('onWillAccept ');
                       dragCompleted = true;
                       return true;
                     },
                     onAccept: (Shift shift) async {
-//                      print('onACCEPT');
                       shiftOnDragComplete.type = widget.shift.type;
-                      print(shiftOnDragComplete.type);
                       dragDocument = await dbController.getDocument(documentID);
-                      print(shiftOnDragComplete.type);
                       return dragCompleted = true;
                     },
                     onLeave: (shift) {
-//                      print('onLeave');
                       return dragCompleted = false;
                     },
                     builder: (context, accepted, rejected) {
@@ -1089,12 +1066,9 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                     affinity: Axis.horizontal,
                     data: widget.shift,
                     onDragCompleted: () async {
-                      print('drag completed: $dragCompleted');
                       if (dragCompleted) {
-                        print(shiftOnDragComplete.type);
                         currentDocument =
                             await dbController.getDocument(documentID);
-                        print(shiftOnDragComplete.type);
                         Shift newShift = Shift(widget.shift.holder, 8.0,
                             widget.shift.position, shiftOnDragComplete.type);
                         await dbController.deleteShift(
@@ -1408,16 +1382,11 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 }
 
 void highlightEmp(String initials) {
-//  print('Highlight $highlighted');
   highlighted = initials;
-//  print(highlighted);
 }
 
 void deHighlightEmp() {
-//  print(' DeHighlight $highlighted');
-
   highlighted = '';
-//  print(highlighted);
 }
 
 void updateShiftExchangeValuesToNull() {
@@ -1952,8 +1921,6 @@ openNotificationAlertDialog(
             ),
           ),
           onPressed: () async {
-//            print(employee.id);
-//            await dbController.deleteUserFeedItems(employee.id);
             Navigator.of(context).pop();
           },
         ),

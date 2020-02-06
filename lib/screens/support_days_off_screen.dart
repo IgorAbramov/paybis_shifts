@@ -239,7 +239,6 @@ class DaysOffStream extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-//    print("Child build method invoked");
     return StreamBuilder<QuerySnapshot>(
       stream: dbController.createDaysStream(year, month),
       builder: (context, snapshot) {
@@ -262,7 +261,6 @@ class DaysOffStream extends StatelessWidget {
 
           List vacations = day.data['vacations'];
           List sickLeaves = day.data['sick'];
-          print('$dayDay.$dayMonth : vacations: $vacations');
 
           final dayWithShifts = Day(dayDay, dayMonth, dayYear, dayIsHoliday,
               nightShifts, morningShifts, eveningShifts);

@@ -41,8 +41,6 @@ class _StatsScreenState extends State<StatsScreen> {
     eveningSalary = 0;
     salary = 0;
 
-    print(daysWithInfo.length);
-
     calculateAmountOfShifts(employee);
     calculateAmountOfNightShifts(employee);
     calculateAmountOfMorningShifts(employee);
@@ -205,8 +203,6 @@ class _StatsScreenState extends State<StatsScreen> {
                               nightShifts,
                               morningShifts,
                               eveningShifts);
-
-//                          print(dayWithInfo);
 
                           if (!daysWithInfo.contains(dayWithInfo) &&
                               daysWithInfo.length <
@@ -402,9 +398,6 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   calculateSalaryThisMonth(Employee employee) {
-//    print('evening: $eveningSalary');
-//    print('morning: $morningSalary');
-//    print('night: $nightSalary');
     salary = eveningSalary + nightSalary + morningSalary;
   }
 

@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:paybis_com_shifts/constants.dart';
@@ -24,9 +22,6 @@ class AdminCalendarScreen extends StatefulWidget {
 
 class AdminCalendarState extends State<AdminCalendarScreen> {
   String parkingStatus = 'free';
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-//  final FirebaseMessaging _firebaseMessaging =  FirebaseMessaging();
-  QuerySnapshot _userEventSnapshot;
   int _beginMonthPadding = 0;
 
   CalendarState() {
@@ -84,41 +79,6 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
     _beginMonthPadding == 7 ? (_beginMonthPadding = 0) : _beginMonthPadding;
   }
 
-//  Future<QuerySnapshot> _getCalendarData() async {
-//    FirebaseUser currentUser = await _auth.currentUser();
-//
-//    if (currentUser != null) {
-//      QuerySnapshot userEvents = await Firestore.instance
-//          .collection('calendar_events')
-//          .where('time',
-//              isGreaterThanOrEqualTo:
-//                   DateTime(dateTime.year, dateTime.month))
-//          .where('email', isEqualTo: currentUser.email)
-//          .getDocuments();
-//
-//      _userEventSnapshot = userEvents;
-//      return _userEventSnapshot;
-//    } else {
-//      return null;
-//    }
-//  }
-//
-//  void _goToToday() {
-//    print("trying to go to the month of today");
-//    setState(() {
-//      dateTime = DateTime.now();
-//      setMonthPadding();
-//    });
-//  }
-//
-//  void _onDayTapped(int day) {
-//    Navigator.push(
-//        context,
-//         MaterialPageRoute(
-//            builder: (BuildContext context) =>  EventsView(
-//                 DateTime(dateTime.year, dateTime.month, day))));
-//  }
-
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -140,34 +100,6 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
 
     return Scaffold(
       drawerScrimColor: Colors.white,
-//        drawer: Drawer(
-//          child: ListView(
-//            // Important: Remove any padding from the ListView.
-//            padding: EdgeInsets.zero,
-//            children: <Widget>[
-//              DrawerHeader(
-//                child: Text('Drawer Header'),
-//                decoration: BoxDecoration(
-//                  color: Colors.blue,
-//                ),
-//              ),
-//              ListTile(
-//                title: Text('Item 1'),
-//                onTap: () {
-//                  // Update the state of the app.
-//                  // ...
-//                },
-//              ),
-//              ListTile(
-//                title: Text('Item 2'),
-//                onTap: () {
-//                  // Update the state of the app.
-//                  // ...
-//                },
-//              ),
-//            ],
-//          ),
-//        ),
       appBar: AppBar(
         automaticallyImplyLeading: true,
         actions: <Widget>[
@@ -317,13 +249,6 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
 
                   currentDocument = day;
 
-//                print(dayMonth);
-//                print(dayYear);
-//                print(supportVacation);
-//              print(supportVacations.length);
-//                print(itVacation);
-//                print(itVacations);
-
                   final dayWithShifts = Day(dayDay, dayMonth, dayYear,
                       dayIsHoliday, nightShifts, morningShifts, eveningShifts);
 
@@ -340,36 +265,36 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
                         Expanded(
                             child: Text('Mon',
                                 textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.headline)),
+                                style: Theme.of(context).textTheme.headline5)),
                         Expanded(
                             child: Text('Tue',
                                 textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.headline)),
+                                style: Theme.of(context).textTheme.headline5)),
                         Expanded(
                             child: Text('Wed',
                                 textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.headline)),
+                                style: Theme.of(context).textTheme.headline5)),
                         Expanded(
                             child: Text('Thu',
                                 textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.headline)),
+                                style: Theme.of(context).textTheme.headline5)),
                         Expanded(
                             child: Text('Fri',
                                 textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.headline)),
+                                style: Theme.of(context).textTheme.headline5)),
                         Expanded(
                             child: Text('Sat',
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
-                                    .headline
+                                    .headline5
                                     .copyWith(color: accentColor))),
                         Expanded(
                             child: Text('Sun',
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
-                                    .headline
+                                    .headline5
                                     .copyWith(color: accentColor))),
                       ],
                       mainAxisSize: MainAxisSize.min,
@@ -421,7 +346,6 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
   }
 
   Align buildDayNumberWidget(int dayNumber) {
-    //print('buildDayNumberWidget, dayNumber: $dayNumber');
     if ((dayNumber - _beginMonthPadding) == DateTime.now().day &&
         dateTime.month == DateTime.now().month &&
         dateTime.year == DateTime.now().year) {
@@ -438,7 +362,7 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
             textAlign: TextAlign.center,
             style: Theme.of(context)
                 .textTheme
-                .title
+                .headline6
                 .copyWith(color: Colors.white, fontSize: 20.0),
           ),
         ),
@@ -456,7 +380,7 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
                 ? ' '
                 : (dayNumber - _beginMonthPadding).toString(),
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headline.copyWith(
+            style: Theme.of(context).textTheme.headline5.copyWith(
                   color: (dayNumber == 7 ||
                           dayNumber == 6 ||
                           dayNumber == 13 ||

@@ -59,22 +59,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 Navigator.pushNamed(context, LoginScreen.id);
               },
             ),
-//            RoundedButton(
-//              color: Colors.blueAccent,
-//              title: 'Register',
-//              onPressed: () {
-//                //Go to login screen.
-//                Navigator.pushNamed(context, RegistrationScreen.id);
-//              },
-//            ),
           ],
         ),
       ),
     );
   }
 }
-
-/* Map<int day of the year, Day>
-   List<Shifts> day = [];
-   List<Employees> shift = [];
-* */

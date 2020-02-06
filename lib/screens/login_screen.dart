@@ -12,7 +12,6 @@ import 'shifts_screen.dart';
 Employee employee;
 final dbController = DBController();
 List<Employee> listWithEmployees = List<Employee>();
-//bool isLoading = true;
 
 //TODO (In the end) add google auto log in option
 
@@ -32,10 +31,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Future getCurrentUserAndLogin() async {
     try {
       final user = await _auth.currentUser();
-//      await dbController.changeUserId(loggedInUser.email);
       listWithEmployees.clear();
       await dbController.getUsers(listWithEmployees);
-//      isLoading = false;
       if (user != null) {
         loggedInUser = user;
         for (Employee emp in listWithEmployees) {

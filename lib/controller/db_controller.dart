@@ -4,6 +4,10 @@ import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 
+/*  This is a class making all operations with the Cloud Firestore.
+All methods' names explain it's functionality.
+* */
+
 final _fireStore = Firestore.instance;
 final feedRef = Firestore.instance.collection('feed');
 final String adminFeedDocID = 'T8dBZmU5meD1LfEgfEM3';
@@ -101,13 +105,6 @@ class DBController {
     }
   }
 
-//  updateHours(DocumentSnapshot documentSnapshot, int number, int hours) async {
-//    return await _fireStore
-//        .collection(kDaysCollection)
-//        .document(documentSnapshot.documentID)
-//        .updateData({'$number.hours': hours});
-//  }
-
   updateHours(DocumentSnapshot documentSnapshot, String shiftType, Map shiftOld,
       Map shiftNew) async {
     await _fireStore
@@ -126,9 +123,6 @@ class DBController {
 
   changeShiftHolders(String docID1, String docID2, String shiftType1,
       String shiftType2, Map shift1, Map shift2) async {
-//    print(
-//        'docID1: $docID1 ::: docID2: $docID2 ::: shiftType1: $shiftType1 ::: shiftType2: $shiftType2 ::: shift1: ${shift1.toString()} ::: shift2: ${shift2.toString()}');
-
     await _fireStore.collection(kDaysCollection).document(docID1).updateData({
       '$shiftType1': FieldValue.arrayRemove([shift1])
     });
@@ -246,24 +240,6 @@ class DBController {
       });
     }
   }
-
-//  void addHoursToDays() async {
-//    final docs = await _fireStore
-//        .collection(kDaysCollection)
-//        .where('year', isEqualTo: 2019)
-//        .getDocuments();
-//
-//    for (var doc in docs.documents) {
-//      for (int i = 1; i < 10; i++) {
-//        await _fireStore
-//            .collection(kDaysCollection)
-//            .document(doc.documentID)
-//            .updateData({'$i.hours': 8}).catchError((e) {
-//          print(e);
-//        });
-//      }
-//    }
-//  }
 
   getUsers(List<Employee> list) async {
     final users = await _fireStore.collection(kUsersCollection).getDocuments();

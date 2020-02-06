@@ -288,26 +288,11 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
                       child: AlertDialog(
                         title: const Text('Pick a color!'),
                         content: SingleChildScrollView(
-//                        child: ColorPicker(
-//                          pickerColor: pickerColor,
-//                          onColorChanged: changeColor,
-//                          enableLabel: true,
-//                          pickerAreaHeightPercent: 0.8,
-//                        ),
-                          // Use Material color picker:
-                          //
                           child: MaterialPicker(
                             pickerColor: pickerColor,
                             onColorChanged: changeColor,
                             enableLabel: true, // only on portrait mode
                           ),
-                          //
-                          // Use Block color picker:
-                          //
-                          // child: BlockPicker(
-                          //   pickerColor: currentColor,
-                          //   onColorChanged: changeColor,
-                          // ),
                         ),
                         actions: <Widget>[
                           FlatButton(
@@ -328,12 +313,6 @@ class _ChangeUserScreenState extends State<ChangeUserScreen> {
                     );
                   },
                 ),
-//                  Container(
-//                    decoration: BoxDecoration(
-//                        shape: BoxShape.circle,
-//                        color: pickerColor,
-//                        borderRadius: BorderRadius.circular(10.0)),
-//                  ),
               ],
             ),
             SizedBox(

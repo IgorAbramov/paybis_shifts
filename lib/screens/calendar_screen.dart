@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,9 +18,6 @@ class CalendarScreen extends StatefulWidget {
 
 class CalendarState extends State<CalendarScreen> {
   String parkingStatus = 'free';
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-//  final FirebaseMessaging _firebaseMessaging =  FirebaseMessaging();
-  QuerySnapshot _userEventSnapshot;
   int _beginMonthPadding = 0;
 
   CalendarState() {
@@ -33,84 +28,12 @@ class CalendarState extends State<CalendarScreen> {
   void initState() {
     SystemChrome.setEnabledSystemUIOverlays([]);
     super.initState();
-
-//    _firebaseMessaging.configure(
-//      onMessage: (Map<String, dynamic> message) async {
-//        print("******** - onMessage: $message");
-//      },
-//      onLaunch: (Map<String, dynamic> message) async {
-//        print("******** - onLaunch: $message");
-//      },
-//      onResume: (Map<String, dynamic> message) async {
-//        print("******** - onResume: $message");
-//      },
-//    );
-//
-//    _firebaseMessaging.requestNotificationPermissions(
-//        const IosNotificationSettings(sound: true, badge: true, alert: true));
-//    _firebaseMessaging.onIosSettingsRegistered
-//        .listen((IosNotificationSettings settings) {
-//      print("Settings registered: $settings");
-//    });
-//
-//    _firebaseMessaging.getToken().then((String token) async {
-//      assert(token != null);
-//      print('push token: ' + token);
-//
-//      FirebaseUser user = await FirebaseAuth.instance.currentUser();
-//      QuerySnapshot snapshot = await Firestore.instance
-//          .collection('users')
-//          .where('email', isEqualTo: user.email)
-//          .getDocuments();
-//
-//      snapshot.documents.forEach((doc) {
-//        Firestore.instance
-//            .collection('users')
-//            .document(doc.documentID)
-//            .setData({'email': user.email, 'token': token});
-//      });
-//    });
   }
 
   void setMonthPadding() {
     _beginMonthPadding = DateTime(dateTime.year, dateTime.month, 1).weekday - 1;
     _beginMonthPadding == 7 ? (_beginMonthPadding = 0) : _beginMonthPadding;
   }
-
-//  Future<QuerySnapshot> _getCalendarData() async {
-//    FirebaseUser currentUser = await _auth.currentUser();
-//
-//    if (currentUser != null) {
-//      QuerySnapshot userEvents = await Firestore.instance
-//          .collection('calendar_events')
-//          .where('time',
-//              isGreaterThanOrEqualTo:
-//                   DateTime(dateTime.year, dateTime.month))
-//          .where('email', isEqualTo: currentUser.email)
-//          .getDocuments();
-//
-//      _userEventSnapshot = userEvents;
-//      return _userEventSnapshot;
-//    } else {
-//      return null;
-//    }
-//  }
-//
-//  void _goToToday() {
-//    print("trying to go to the month of today");
-//    setState(() {
-//      dateTime = DateTime.now();
-//      setMonthPadding();
-//    });
-//  }
-//
-//  void _onDayTapped(int day) {
-//    Navigator.push(
-//        context,
-//         MaterialPageRoute(
-//            builder: (BuildContext context) =>  EventsView(
-//                 DateTime(dateTime.year, dateTime.month, day))));
-//  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,12 +63,6 @@ class CalendarState extends State<CalendarScreen> {
                 getMonthName(dateTime.month) + " " + dateTime.year.toString(),
               )),
           actions: <Widget>[
-//            IconButton(
-//                icon: Icon(
-//                  Icons.today,
-//                  color: Colors.white,
-//                ),
-//                onPressed: _goToToday),
             IconButton(
                 icon: Icon(
                   Icons.chevron_left,
@@ -239,36 +156,36 @@ class CalendarState extends State<CalendarScreen> {
                       Expanded(
                           child: Text('Mon',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline)),
+                              style: Theme.of(context).textTheme.headline5)),
                       Expanded(
                           child: Text('Tue',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline)),
+                              style: Theme.of(context).textTheme.headline5)),
                       Expanded(
                           child: Text('Wed',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline)),
+                              style: Theme.of(context).textTheme.headline5)),
                       Expanded(
                           child: Text('Thu',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline)),
+                              style: Theme.of(context).textTheme.headline5)),
                       Expanded(
                           child: Text('Fri',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline)),
+                              style: Theme.of(context).textTheme.headline5)),
                       Expanded(
                           child: Text('Sat',
                               textAlign: TextAlign.center,
                               style: Theme.of(context)
                                   .textTheme
-                                  .headline
+                                  .headline5
                                   .copyWith(color: accentColor))),
                       Expanded(
                           child: Text('Sun',
                               textAlign: TextAlign.center,
                               style: Theme.of(context)
                                   .textTheme
-                                  .headline
+                                  .headline5
                                   .copyWith(color: accentColor))),
                     ],
                     mainAxisSize: MainAxisSize.min,
@@ -333,7 +250,6 @@ class CalendarState extends State<CalendarScreen> {
   }
 
   Align buildDayNumberWidget(int dayNumber) {
-    //print('buildDayNumberWidget, dayNumber: $dayNumber');
     if ((dayNumber - _beginMonthPadding) == DateTime.now().day &&
         dateTime.month == DateTime.now().month &&
         dateTime.year == DateTime.now().year) {
@@ -350,7 +266,7 @@ class CalendarState extends State<CalendarScreen> {
             textAlign: TextAlign.center,
             style: Theme.of(context)
                 .textTheme
-                .title
+                .headline6
                 .copyWith(color: Colors.white, fontSize: 20.0),
           ),
         ),
@@ -368,7 +284,7 @@ class CalendarState extends State<CalendarScreen> {
                 ? ' '
                 : (dayNumber - _beginMonthPadding).toString(),
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headline.copyWith(
+            style: Theme.of(context).textTheme.headline5.copyWith(
                   color: (dayNumber == 7 ||
                           dayNumber == 6 ||
                           dayNumber == 13 ||

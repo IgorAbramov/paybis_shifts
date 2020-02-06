@@ -159,5 +159,3 @@ const Color accentColor = Color(0xFFFF5252);
 const Color textPrimaryColor = Color(0xFF212121);
 const Color secondaryColor = Color(0xFF757575);
 const Color dividerColor = Color(0xFFBDBDBD);
-
-const String usersCollectionId = 'users';
