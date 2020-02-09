@@ -13,6 +13,7 @@ const String kITDepartment = 'IT Department';
 const String kMarketingDepartment = 'Marketing Department';
 const String kManagement = 'Management';
 const String kAdmin = 'Admin';
+const String kITAdmin = 'ITAdmin';
 const String kSuperAdmin = 'SuperAdmin';
 const String kTrainee = 'Trainee';
 const String kJuniorSupport = 'Junior Support';
@@ -50,6 +51,7 @@ const List<String> kSuperAdminChoicesPopupMenu = [
 ];
 
 const List<String> kItChoicesPopupMenu = [kItDaysOff, kSettings, kLogOut];
+const List<String> kItAdminChoicesPopupMenu = [kItDaysOff, kSettings, kLogOut];
 
 const List<String> kEmployeeWithCarChoicesPopupMenu = [
   kChangeRequests,
@@ -76,6 +78,7 @@ const List<String> kEmployeeDepartmentTypes = [
   kMarketingDepartment,
   kManagement,
   kAdmin,
+  kITAdmin,
   kSuperAdmin
 ];
 

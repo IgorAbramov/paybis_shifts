@@ -99,7 +99,7 @@ class EventsViewState extends State<EventsView> {
                                           'Event: ' + document.data['name'],
                                           style: Theme.of(context)
                                               .textTheme
-                                              .headline,
+                                              .headline5,
                                         ),
                                       ),
                                       new Container(
@@ -110,7 +110,7 @@ class EventsViewState extends State<EventsView> {
                                                     .format(_eventTime),
                                             style: Theme.of(context)
                                                 .textTheme
-                                                .headline),
+                                                .headline5),
                                       ),
                                       new Container(
                                         padding: EdgeInsets.all(10.0),
@@ -119,7 +119,7 @@ class EventsViewState extends State<EventsView> {
                                                 document.data['summary'],
                                             style: Theme.of(context)
                                                 .textTheme
-                                                .headline),
+                                                .headline5),
                                       ),
                                     ],
                                   ),

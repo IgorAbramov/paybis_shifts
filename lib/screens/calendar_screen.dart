@@ -365,7 +365,7 @@ class CalendarState extends State<CalendarScreen> {
     }
     if (itcs != null && mgmt != null) {
       if (mgmt.isNotEmpty && itcs.isNotEmpty) {
-        if (parkingStatus == 'free' && mgmt.length == 3 && itcs.length == 6) {
+        if (parkingStatus == 'free' && mgmt.length == 3 && itcs.length >= 4) {
           parkingStatus = 'busy';
         }
       }
@@ -475,68 +475,72 @@ class CalendarState extends State<CalendarScreen> {
     } else if ((shiftCount == 0 && vacationStatus) ||
         employee.department == kITDepartment ||
         employee.department == kMarketingDepartment ||
-        employee.department == kManagement) {
+        employee.department == kManagement ||
+        employee.department == kITAdmin) {
       return Expanded(
-        child: FittedBox(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  (employee.department != kSupportDepartment &&
-                          employee.hasCar &&
-                          parkingStatus == 'reserved' &&
-                          (((dayNumber - _beginMonthPadding) >=
-                                      DateTime.now().day &&
-                                  dateTime.month == DateTime.now().month &&
-                                  (dayNumber - _beginMonthPadding) <=
-                                      DateTime.now().day + 7) ||
-                              (dateTime.month > DateTime.now().month &&
-                                  (dayNumber - _beginMonthPadding) < 7)))
-                      ? ParkingWidget(Colors.lightGreenAccent)
-                      : SizedBox(
-                          height: 1.0,
-                        ),
-                  (employee.department != kSupportDepartment &&
-                          employee.hasCar &&
-                          parkingStatus == 'free' &&
-                          (((dayNumber - _beginMonthPadding) >=
-                                      DateTime.now().day &&
-                                  dateTime.month == DateTime.now().month &&
-                                  (dayNumber - _beginMonthPadding) <=
-                                      DateTime.now().day + 7) ||
-                              (dateTime.month > DateTime.now().month &&
-                                  (dayNumber - _beginMonthPadding) < 7)))
-                      ? ParkingWidget(Colors.yellowAccent)
-                      : SizedBox(
-                          height: 1.0,
-                        ),
-                  (employee.department != kSupportDepartment &&
-                          employee.hasCar &&
-                          parkingStatus == 'busy' &&
-                          (((dayNumber - _beginMonthPadding) >=
-                                      DateTime.now().day &&
-                                  dateTime.month == DateTime.now().month &&
-                                  (dayNumber - _beginMonthPadding) <=
-                                      DateTime.now().day + 7) ||
-                              (dateTime.month > DateTime.now().month &&
-                                  (dayNumber - _beginMonthPadding) < 7)))
-                      ? ParkingWidget(Colors.red)
-                      : SizedBox(
-                          height: 1.0,
-                        ),
-                  (vacationStatus)
-                      ? VacationWidget()
-                      : SizedBox(
-                          height: 1.0,
-                        ),
-                ],
-              ),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                (employee.department != kSupportDepartment &&
+                        employee.hasCar &&
+                        parkingStatus == 'reserved' &&
+                        (((dayNumber - _beginMonthPadding) >=
+                                    DateTime.now().day &&
+                                dateTime.month == DateTime.now().month &&
+                                (dayNumber - _beginMonthPadding) <=
+                                    DateTime.now().day + 7) ||
+                            (dateTime.month > DateTime.now().month &&
+                                (dayNumber - _beginMonthPadding) < 7)))
+                    ? FittedBox(
+                        fit: BoxFit.fill,
+                        child: ParkingWidget(Colors.lightGreenAccent))
+                    : SizedBox(
+                        height: 1.0,
+                      ),
+                (employee.department != kSupportDepartment &&
+                        employee.hasCar &&
+                        parkingStatus == 'free' &&
+                        (((dayNumber - _beginMonthPadding) >=
+                                    DateTime.now().day &&
+                                dateTime.month == DateTime.now().month &&
+                                (dayNumber - _beginMonthPadding) <=
+                                    DateTime.now().day + 7) ||
+                            (dateTime.month > DateTime.now().month &&
+                                (dayNumber - _beginMonthPadding) < 7)))
+                    ? FittedBox(
+                        fit: BoxFit.fill,
+                        child: ParkingWidget(Colors.yellowAccent))
+                    : SizedBox(
+                        height: 1.0,
+                      ),
+                (employee.department != kSupportDepartment &&
+                        employee.hasCar &&
+                        parkingStatus == 'busy' &&
+                        (((dayNumber - _beginMonthPadding) >=
+                                    DateTime.now().day &&
+                                dateTime.month == DateTime.now().month &&
+                                (dayNumber - _beginMonthPadding) <=
+                                    DateTime.now().day + 7) ||
+                            (dateTime.month > DateTime.now().month &&
+                                (dayNumber - _beginMonthPadding) < 7)))
+                    ? FittedBox(
+                        fit: BoxFit.fill, child: ParkingWidget(Colors.red))
+                    : SizedBox(
+                        height: 1.0,
+                      ),
+                (vacationStatus)
+                    ? VacationWidget()
+                    : SizedBox(
+                        height: 1.0,
+                      ),
+              ],
+            ),
+          ],
         ),
       );
     } else {

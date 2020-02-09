@@ -45,7 +45,7 @@ class EventCreatorState extends State<EventCreator> {
             borderRadius: BorderRadius.circular(8.0),
           )),
       initialValue: widget._event != null ? widget._event.title : '',
-      style: Theme.of(context).textTheme.headline,
+      style: Theme.of(context).textTheme.headline5,
       validator: this._validateTitle,
       onSaved: (String value) => this._eventData.title = value,
     );
@@ -59,7 +59,7 @@ class EventCreatorState extends State<EventCreator> {
           contentPadding: EdgeInsets.all(16.0),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0))),
       initialValue: widget._event != null ? widget._event.summary : '',
-      style: Theme.of(context).textTheme.headline,
+      style: Theme.of(context).textTheme.headline5,
       onSaved: (String value) => this._eventData.summary = value,
     );
 

@@ -281,7 +281,10 @@ class _ShiftScreenState extends State<ShiftScreen> {
               )
             ],
           ),
-          DaysStream(year: dateTime.year, month: dateTime.month),
+          DaysStream(
+            year: dateTime.year,
+            month: dateTime.month,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -491,7 +494,10 @@ class DaysStream extends StatelessWidget {
   final int year;
   final int month;
 
-  DaysStream({@required this.year, @required this.month});
+  DaysStream({
+    @required this.year,
+    @required this.month,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -512,6 +518,7 @@ class DaysStream extends StatelessWidget {
           final int dayYear = day.data['year'];
           final String dayDocumentID = day.documentID;
           final bool dayIsHoliday = day.data['isHoliday'];
+          final bool isWeekUnconfirmed = day.data['isWeekUnconfirmed'];
           final List nightShifts = day.data[kNight];
           final List morningShifts = day.data[kMorning];
           final List eveningShifts = day.data[kEvening];
@@ -523,6 +530,7 @@ class DaysStream extends StatelessWidget {
           bool isAbsentNight = false;
           bool isAbsentMorning = false;
           bool isAbsentEvening = false;
+          bool isWeekConfirmed = true;
 
           if (nightAbsent != null) {
             if (nightAbsent.contains(employee.initial)) {
@@ -537,6 +545,11 @@ class DaysStream extends StatelessWidget {
           if (eveningAbsent != null) {
             if (eveningAbsent.contains(employee.initial)) {
               isAbsentEvening = true;
+            }
+          }
+          if (isWeekUnconfirmed != null) {
+            if (isWeekUnconfirmed == true) {
+              isWeekConfirmed = false;
             }
           }
 
@@ -777,9 +790,45 @@ class DaysStream extends StatelessWidget {
           daysWithShifts.add(dayWithShiftsUI);
 
           if (weekdayCheck(dayDay, dayMonth, dayYear) == 7) {
-            final divider = SizedBox(
-              height: 15.0,
-            );
+            final divider = isWeekConfirmed
+                ? GestureDetector(
+                    onLongPress: () async {
+                      if (employee.department == kAdmin ||
+                          employee.department == kSuperAdmin) {
+                        await dbController.changeWeekConfirmedStatus(
+                            dayDocumentID, true);
+                      }
+                    },
+                    child: Container(
+                      color: Colors.white,
+                      height: 20.0,
+                      width: 600.0,
+                    ),
+                  )
+                : GestureDetector(
+                    onLongPress: () async {
+                      if (employee.department == kAdmin ||
+                          employee.department == kSuperAdmin) {
+                        await dbController.changeWeekConfirmedStatus(
+                            dayDocumentID, false);
+                      }
+                    },
+                    child: Container(
+                      color: accentColor,
+                      height: 20.0,
+                      width: 600.0,
+                      child: Center(
+                        child: Text(
+                          'Unconfirmed',
+                          style: TextStyle(
+                            fontSize: ScreenUtil().setSp(45),
+                            fontWeight: FontWeight.bold,
+                            color: textIconColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
             daysWithShifts.add(divider);
           }
         }

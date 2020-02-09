@@ -63,7 +63,7 @@ class PBShifts extends StatelessWidget {
         CalendarScreen.id: (context) => CalendarScreen(),
         AdminCalendarScreen.id: (context) => AdminCalendarScreen(),
       },
-      theme: _kPBShiftsTheme,
+//      theme: _kPBShiftsTheme,
     );
   }
 

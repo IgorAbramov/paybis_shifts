@@ -1,7 +1,7 @@
 name: paybis_com_shifts
 description: Paybis Shifts for customer support
 
-version: 3.0.0
+version: 4.0.0
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -15,7 +15,7 @@ dependencies:
   google_sign_in: ^4.1.1
   cloud_firestore: ^0.13.0+1
   firebase_storage: ^3.1.1
-  cloud_functions: ^0.4.1+8
+  cloud_functions: ^0.4.1+9
   timeago: ^2.0.26
   flutter_screenutil: ^1.0.2
   grouped_buttons: ^1.0.4
@@ -25,7 +25,9 @@ dependencies:
   device_info: ^0.4.1+4
   http: ^0.12.0+4
   pull_to_refresh: ^1.5.8
-#  notification_permissions: ^0.4.3
+  rxdart: ^0.23.1
+  async: 2.4.0
+#  notification_permissions: ^0.4.4
 
 dev_dependencies:
   flutter_test:

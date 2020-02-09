@@ -176,6 +176,16 @@ class _LoginScreenState extends State<LoginScreen> {
         }
         break;
 
+      case kITAdmin:
+        {
+          print(kITAdmin);
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (BuildContext context) {
+            return ParkingScreen();
+          }));
+        }
+        break;
+
       case kManagement:
         {
           print(kManagement);

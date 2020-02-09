@@ -23,6 +23,15 @@ class DBController {
         .snapshots();
   }
 
+  Stream createOneDayStream<QuerySnapshot>(int year, int month, int day) {
+    return _fireStore
+        .collection(kDaysCollection)
+        .where('month', isEqualTo: month)
+        .where('year', isEqualTo: year)
+        .where('day', isEqualTo: day)
+        .snapshots();
+  }
+
   addMonth(Map dayMap) async {
     await _fireStore
         .collection(kDaysCollection)
@@ -493,5 +502,12 @@ class DBController {
         .collection(kDaysCollection)
         .document(docID)
         .updateData({'isHoliday': isHoliday});
+  }
+
+  changeWeekConfirmedStatus(String docID, bool isWeekUnconfirmed) async {
+    await _fireStore
+        .collection(kDaysCollection)
+        .document(docID)
+        .updateData({'isWeekUnconfirmed': isWeekUnconfirmed});
   }
 }

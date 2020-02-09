@@ -51,9 +51,45 @@ class _ParkingScreenState extends State<ParkingScreen> {
             : false,
         title: Text('PayBis Parking'),
         actions: <Widget>[
+          (employee.department == kITAdmin)
+              ? (_markerInitials == '' || _markerInitials == 'none')
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        showAdminMarkerAlertDialogParking(context);
+                      },
+                    )
+                  : Material(
+                      elevation: 5.0,
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(30.0),
+                      child: MaterialButton(
+                        onPressed: () {
+                          setState(() {
+                            _markerInitials = '';
+                          });
+                        },
+                        minWidth: 26.0,
+                        height: 26.0,
+                        child: Text(
+                          _markerInitials,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ),
+                    )
+              : SizedBox(
+                  height: 1.0,
+                ),
           (employee.department == kITDepartment ||
                   employee.department == kManagement ||
-                  employee.department == kMarketingDepartment)
+                  employee.department == kMarketingDepartment ||
+                  employee.department == kITAdmin)
               ? IconButton(
                   icon: Icon(
                     Icons.today,
@@ -306,10 +342,12 @@ class _ParkingScreenState extends State<ParkingScreen> {
                   children: listParkingWidgets(context),
                 ),
                 Container(
-                  child: Wrap(
-                    children: <Widget>[
-                      ParkingDates(),
-                    ],
+                  child: FittedBox(
+                    child: Wrap(
+                      children: <Widget>[
+                        ParkingDates(),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -392,8 +430,14 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
       child: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            SizedBox(
-              height: 5.0,
+            IconButton(
+              icon: Icon(
+                Icons.cancel,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
             ),
             Image.asset('images/parking.png'),
             Padding(
@@ -807,7 +851,8 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
           color = Colors.amber;
         }
         if (emp.department == kITDepartment ||
-            emp.department == kMarketingDepartment) {
+            emp.department == kMarketingDepartment ||
+            emp.department == kITAdmin) {
           color = Colors.lightGreen;
         }
 //        color = convertColor(emp.empColor);
@@ -816,7 +861,8 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
 
 // if USER is Admin "and not in the Past" build this
     return ((employee.department == kAdmin ||
-            employee.department == kSuperAdmin)
+            employee.department == kSuperAdmin ||
+            employee.department == kITAdmin)
 //        && isPast == false
         )
         ? SizedBox(

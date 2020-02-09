@@ -362,7 +362,7 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
             textAlign: TextAlign.center,
             style: Theme.of(context)
                 .textTheme
-                .headline6
+                .title
                 .copyWith(color: Colors.white, fontSize: 20.0),
           ),
         ),
