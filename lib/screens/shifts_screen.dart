@@ -934,32 +934,35 @@ class DateTableCell extends StatelessWidget {
             }
           }
         },
-        child: Container(
-          child: Column(
-            children: <Widget>[
-              Transform.rotate(
-                angle: pi * 1.5,
-                child: Text(
-                  '$month',
-                  style: TextStyle(
-                    fontSize: ScreenUtil().setSp(28),
-                    fontWeight: FontWeight.bold,
-                    color: isWeekend ? accentColor : textPrimaryColor,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                Transform.rotate(
+                  angle: pi * 1.5,
+                  child: Text(
+                    '$month',
+                    style: TextStyle(
+                      fontSize: ScreenUtil().setSp(30),
+                      fontWeight: FontWeight.bold,
+                      color: isWeekend ? accentColor : textPrimaryColor,
+                    ),
                   ),
                 ),
-              ),
-              Transform.rotate(
-                angle: pi * 1.5,
-                child: Text(
-                  '$day.',
-                  style: TextStyle(
-                    fontSize: ScreenUtil().setSp(28),
-                    fontWeight: FontWeight.bold,
-                    color: isWeekend ? accentColor : textPrimaryColor,
+                Transform.rotate(
+                  angle: pi * 1.5,
+                  child: Text(
+                    '$day.',
+                    style: TextStyle(
+                      fontSize: ScreenUtil().setSp(30),
+                      fontWeight: FontWeight.bold,
+                      color: isWeekend ? accentColor : textPrimaryColor,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

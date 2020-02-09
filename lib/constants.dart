@@ -98,7 +98,7 @@ const List<double> kAMLCertifiedSupportSalary = [7.06, 10.59];
 const List<double> kTeamLeadSupportSalary = [8.5, 12.75];
 
 const TextStyle kHeaderFontStyle = TextStyle(
-  fontSize: 18.0,
+  fontSize: 16.0,
   fontWeight: FontWeight.bold,
   color: textIconColor,
 );

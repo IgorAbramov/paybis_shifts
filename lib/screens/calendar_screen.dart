@@ -156,37 +156,38 @@ class CalendarState extends State<CalendarScreen> {
                       Expanded(
                           child: Text('Mon',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline5)),
+                              style: kHeaderFontStyle.copyWith(
+                                  fontSize: 18, color: Colors.black))),
                       Expanded(
                           child: Text('Tue',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline5)),
+                              style: kHeaderFontStyle.copyWith(
+                                  fontSize: 18, color: Colors.black))),
                       Expanded(
                           child: Text('Wed',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline5)),
+                              style: kHeaderFontStyle.copyWith(
+                                  fontSize: 18, color: Colors.black))),
                       Expanded(
                           child: Text('Thu',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline5)),
+                              style: kHeaderFontStyle.copyWith(
+                                  fontSize: 18, color: Colors.black))),
                       Expanded(
                           child: Text('Fri',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headline5)),
+                              style: kHeaderFontStyle.copyWith(
+                                  fontSize: 18, color: Colors.black))),
                       Expanded(
                           child: Text('Sat',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline5
-                                  .copyWith(color: accentColor))),
+                              style: kHeaderFontStyle.copyWith(
+                                  fontSize: 18, color: accentColor))),
                       Expanded(
                           child: Text('Sun',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline5
-                                  .copyWith(color: accentColor))),
+                              style: kHeaderFontStyle.copyWith(
+                                  fontSize: 18, color: accentColor))),
                     ],
                     mainAxisSize: MainAxisSize.min,
                   ),

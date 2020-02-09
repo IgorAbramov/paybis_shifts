@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
@@ -479,48 +480,57 @@ List<Widget> listParkingInfo(BuildContext context) {
   for (Employee emp in listWithEmployees) {
     if (emp.hasCar) {
       list.add(
-        Row(
+        Column(
           children: <Widget>[
-            Expanded(
-              flex: 5,
-              child: Text(
-                '${emp.name}',
-                style: TextStyle(
-                  color: textIconColor,
-                  fontWeight: FontWeight.bold,
+            Row(
+              children: <Widget>[
+                Expanded(
+                  flex: 5,
+                  child: Text(
+                    '${emp.name}',
+                    style: TextStyle(
+                      color: textIconColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Text(
-                '${emp.initial}',
-                style: TextStyle(
-                  color: textIconColor,
-                  fontWeight: FontWeight.bold,
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    '${emp.initial}',
+                    style: TextStyle(
+                      color: textIconColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Text(
-                '${emp.cardId}',
-                style: TextStyle(
-                  color: textIconColor,
-                  fontWeight: FontWeight.bold,
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    '${emp.cardId}',
+                    style: TextStyle(
+                      color: textIconColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Expanded(
-              flex: 10,
-              child: Text(
-                '${emp.carInfo}',
-                style: TextStyle(
-                  color: textIconColor,
-                  fontWeight: FontWeight.bold,
+                Expanded(
+                  flex: 10,
+                  child: Text(
+                    '${emp.carInfo}',
+                    style: TextStyle(
+                      color: textIconColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
+            Container(
+              height: 1.0,
+              width: 500.0,
+              color: Colors.white,
+            )
           ],
         ),
       );
@@ -912,6 +922,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                 //If Emp is chosen
 
                 : MaterialButton(
+                    height: ScreenUtil().setHeight(20.0),
                     onPressed: () {
                       setState(() async {
                         if (_markerInitials == '' ||
@@ -944,30 +955,32 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     ),
-                    child: Stack(
-                      alignment: AlignmentDirectional.center,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Text(
-                            widget.text,
-                            style: TextStyle(
-                              fontSize: isLong ? 13.0 : 16.0,
-                              color: textIconColor,
+                    child: FittedBox(
+                      child: Stack(
+                        alignment: AlignmentDirectional.center,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Text(
+                              widget.text,
+                              style: TextStyle(
+                                fontSize: isLong ? 13.0 : 16.0,
+                                color: textIconColor,
+                              ),
                             ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 22.0),
-                          child: Text(
-                            widget.time,
-                            style: TextStyle(
-                              fontSize: 10.0,
-                              color: Colors.black,
+                          Padding(
+                            padding: const EdgeInsets.only(top: 22.0),
+                            child: Text(
+                              widget.time,
+                              style: TextStyle(
+                                fontSize: ScreenUtil().setSp(25),
+                                color: Colors.black,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     padding: EdgeInsets.all(0.0),
                     minWidth: 10.0,
@@ -1022,30 +1035,32 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                           ),
                           child: Padding(
                             padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
-                            child: Stack(
-                              alignment: AlignmentDirectional.center,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Text(
-                                    widget.text,
-                                    style: TextStyle(
-                                      fontSize: isLong ? 13.0 : 16.0,
-                                      color: textIconColor,
+                            child: FittedBox(
+                              child: Stack(
+                                alignment: AlignmentDirectional.center,
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Text(
+                                      widget.text,
+                                      style: TextStyle(
+                                        fontSize: isLong ? 13.0 : 16.0,
+                                        color: textIconColor,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 22.0),
-                                  child: Text(
-                                    widget.time,
-                                    style: TextStyle(
-                                      fontSize: 10.0,
-                                      color: Colors.black,
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 22.0),
+                                    child: Text(
+                                      widget.time,
+                                      style: TextStyle(
+                                        fontSize: ScreenUtil().setSp(25),
+                                        color: Colors.black,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                           padding: EdgeInsets.all(0.0),
