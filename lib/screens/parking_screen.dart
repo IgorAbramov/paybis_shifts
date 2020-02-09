@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
@@ -922,7 +921,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                 //If Emp is chosen
 
                 : MaterialButton(
-                    height: ScreenUtil().setHeight(20.0),
+                    height: 30.0,
                     onPressed: () {
                       setState(() async {
                         if (_markerInitials == '' ||
@@ -956,6 +955,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                     child: FittedBox(
+                      fit: BoxFit.scaleDown,
                       child: Stack(
                         alignment: AlignmentDirectional.center,
                         children: <Widget>[
@@ -974,7 +974,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                             child: Text(
                               widget.time,
                               style: TextStyle(
-                                fontSize: ScreenUtil().setSp(25),
+                                fontSize: 10,
                                 color: Colors.black,
                               ),
                             ),
@@ -983,7 +983,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                       ),
                     ),
                     padding: EdgeInsets.all(0.0),
-                    minWidth: 10.0,
+                    minWidth: 30.0,
                   ),
           )
 
@@ -1028,6 +1028,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                             : color.withOpacity(0),
                         borderRadius: BorderRadius.circular(15.0),
                         child: MaterialButton(
+                          height: 30.0,
                           onPressed: () {},
                           color: color,
                           shape: RoundedRectangleBorder(
@@ -1036,6 +1037,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                           child: Padding(
                             padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
                             child: FittedBox(
+                              fit: BoxFit.scaleDown,
                               child: Stack(
                                 alignment: AlignmentDirectional.center,
                                 children: <Widget>[
@@ -1054,7 +1056,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                                     child: Text(
                                       widget.time,
                                       style: TextStyle(
-                                        fontSize: ScreenUtil().setSp(25),
+                                        fontSize: 10,
                                         color: Colors.black,
                                       ),
                                     ),

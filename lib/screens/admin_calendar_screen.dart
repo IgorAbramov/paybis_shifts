@@ -353,18 +353,21 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
       // Add a circle around the current day
       return Align(
         alignment: Alignment.topLeft,
-        child: Container(
-          width: ScreenUtil().setWidth(110),
-          height: ScreenUtil().setHeight(100),
-          padding: EdgeInsets.all(5.0),
-          decoration: BoxDecoration(),
-          child: Text(
-            (dayNumber - _beginMonthPadding).toString(),
-            textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .title
-                .copyWith(color: Colors.white, fontSize: 20.0),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Container(
+            width: ScreenUtil().setWidth(110),
+            height: ScreenUtil().setHeight(100),
+            padding: EdgeInsets.all(5.0),
+            decoration: BoxDecoration(),
+            child: Text(
+              (dayNumber - _beginMonthPadding).toString(),
+              textAlign: TextAlign.center,
+              style: Theme.of(context)
+                  .textTheme
+                  .title
+                  .copyWith(color: Colors.white, fontSize: 20.0),
+            ),
           ),
         ),
       );
@@ -372,29 +375,33 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
       // No circle around the current day
       return Align(
         alignment: Alignment.topLeft,
-        child: Container(
-          width: ScreenUtil().setWidth(100),
-          height: ScreenUtil().setHeight(100),
-          padding: EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),
-          child: Text(
-            dayNumber <= _beginMonthPadding
-                ? ' '
-                : (dayNumber - _beginMonthPadding).toString(),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headline5.copyWith(
-                  color: (dayNumber == 7 ||
-                          dayNumber == 6 ||
-                          dayNumber == 13 ||
-                          dayNumber == 14 ||
-                          dayNumber == 20 ||
-                          dayNumber == 21 ||
-                          dayNumber == 27 ||
-                          dayNumber == 28 ||
-                          dayNumber == 34 ||
-                          dayNumber == 35)
-                      ? accentColor
-                      : textPrimaryColor,
-                ),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Container(
+            width: ScreenUtil().setWidth(100),
+            height: ScreenUtil().setHeight(100),
+            padding: EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),
+            child: Text(
+              dayNumber <= _beginMonthPadding
+                  ? ' '
+                  : (dayNumber - _beginMonthPadding).toString(),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headline5.copyWith(
+                    fontSize: 18.0,
+                    color: (dayNumber == 7 ||
+                            dayNumber == 6 ||
+                            dayNumber == 13 ||
+                            dayNumber == 14 ||
+                            dayNumber == 20 ||
+                            dayNumber == 21 ||
+                            dayNumber == 27 ||
+                            dayNumber == 28 ||
+                            dayNumber == 34 ||
+                            dayNumber == 35)
+                        ? accentColor
+                        : textPrimaryColor,
+                  ),
+            ),
           ),
         ),
       );
@@ -402,8 +409,10 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
   }
 
   Widget buildDayEventInfoWidget(int dayNumber, List vacations) {
-    return Container(
-      child: buildVacationInfoWidget(vacations[dayNumber - 1]),
+    return Expanded(
+      child: Container(
+        child: buildVacationInfoWidget(vacations[dayNumber - 1]),
+      ),
     );
   }
 
@@ -417,15 +426,19 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
         }
       }
 
-      Widget vacationText = Container(
-        width: 150.0,
-        decoration: BoxDecoration(
-          color: color,
-        ),
-        child: Text(
-          vacations[i],
-          style: TextStyle(
-            color: Colors.white,
+      Widget vacationText = FittedBox(
+        child: Container(
+          width: 50.0,
+          height: 13.0,
+          decoration: BoxDecoration(
+            color: color,
+          ),
+          child: Text(
+            vacations[i],
+            style: TextStyle(
+              fontSize: 12.0,
+              color: Colors.white,
+            ),
           ),
         ),
       );
