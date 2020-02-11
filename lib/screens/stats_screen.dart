@@ -379,6 +379,11 @@ class _StatsScreenState extends State<StatsScreen> {
         return addSalary = hours * kMiddleSupportSalary[1];
       else
         return addSalary = hours * kMiddleSupportSalary[0];
+    } else if (position == kTrainee) {
+      if (shiftType == kNight)
+        return addSalary = hours * kTraineeSalary[1];
+      else
+        return addSalary = hours * kTraineeSalary[0];
     } else if (position == kSeniorSupport) {
       if (shiftType == kNight)
         return addSalary = hours * kSeniorSupportSalary[1];

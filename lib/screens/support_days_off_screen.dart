@@ -103,7 +103,7 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
                 ),
               ],
             ),
-            DaysOffStream(month: dateTime.month),
+            DaysOffStream(month: dateTime.month, year: dateTime.year),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

@@ -90,7 +90,7 @@ const List<String> kSupportPositionsChoices = [
   kAMLCertifiedSupport,
   kTeamLeadSupport
 ];
-
+const List<double> kTraineeSalary = [0.0, 0.0];
 const List<double> kJuniorSupportSalary = [4.0, 6.0];
 const List<double> kMiddleSupportSalary = [5.1, 7.65];
 const List<double> kSeniorSupportSalary = [6.2, 9.3];
