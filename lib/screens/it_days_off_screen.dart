@@ -8,6 +8,7 @@ import 'login_screen.dart';
 import 'shifts_screen.dart';
 
 String _markerInitials = '';
+String _markerInfo = '';
 
 class ItDaysOffScreen extends StatefulWidget {
   static const String id = 'it_days_off_screen';
@@ -184,34 +185,52 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
   showAdminMarkerAlertDialogITDaysOff(
     BuildContext context,
   ) {
+    bool unpaid = false;
+    String info = '';
     final result = showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(32.0))),
-          content: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                Center(
-                  child: Text(
-                    'Choose employee',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(32.0))),
+            content: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Center(
+                    child: Text(
+                      'Choose employee',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 18.0),
+                    ),
                   ),
-                ),
-                SizedBox(
-                  height: 5.0,
-                ),
-                Wrap(
-                  alignment: WrapAlignment.spaceEvenly,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: listMyITWidgets(context),
-                ),
-              ],
+                  SizedBox(
+                    height: 5.0,
+                  ),
+                  Wrap(
+                    alignment: WrapAlignment.spaceEvenly,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: listMyITWidgets(context),
+                  ),
+                  Container(
+                    width: 150.0,
+                    child: CheckboxListTile(
+                      title: Text('Unpaid'),
+                      value: unpaid,
+                      checkColor: Colors.white,
+                      onChanged: (value) {
+                        setState(() {
+                          unpaid = value;
+                          (unpaid) ? info = ' -' : info = '';
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        });
       },
     );
     result.then((result) async {
@@ -223,60 +242,15 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
         if (choiceOfEmployee == 'none') {
           setState(() {
             _markerInitials = '';
+            _markerInfo = '';
           });
         } else
           setState(() {
             _markerInitials = choiceOfEmployee;
+            _markerInfo = info;
           });
       }
     });
-  }
-
-  List<Widget> listMyITWidgets(BuildContext context) {
-    List<Widget> list = List();
-    for (Employee emp in listWithEmployees) {
-      if (emp.department == kITDepartment) {
-        list.add(Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: Material(
-            elevation: 5.0,
-            color: convertColor(emp.empColor),
-            borderRadius: BorderRadius.circular(15.0),
-            child: MaterialButton(
-              minWidth: 100.0,
-              onPressed: () {
-                Navigator.pop(context, emp.initial);
-              },
-              child: Text(
-                emp.name,
-                style: TextStyle(
-                  fontSize: (emp.name.length <= 7) ? 17.0 : 14.0,
-                  color: textIconColor,
-                ),
-              ),
-            ),
-          ),
-        ));
-      }
-    }
-    list.add(Padding(
-      padding: const EdgeInsets.all(5.0),
-      child: Material(
-        elevation: 5.0,
-        color: textPrimaryColor,
-        borderRadius: BorderRadius.circular(15.0),
-        child: MaterialButton(
-          onPressed: () {
-            Navigator.pop(context, 'none');
-          },
-          child: Text(
-            'none',
-            style: kHeaderFontStyle,
-          ),
-        ),
-      ),
-    ));
-    return list;
   }
 }
 
@@ -392,11 +366,14 @@ class ITDaysOffStream extends StatelessWidget {
     if (vacations != null) {
       if (vacations.length > 0 || vacations.isEmpty) {
         for (int i = 0; i < vacations.length; i++) {
+          String vacationsConverted = vacations[i];
+          List<String> splitted = vacationsConverted.split(' ');
           list.add(ITDayOffRoundButton(
             day: day,
             month: month,
             year: year,
-            text: vacations[i],
+            text: splitted[0],
+            unpaid: (splitted.length == 2) ? splitted[1] : '',
             documentID: documentID,
             number: i,
             type: 'vacation',
@@ -409,6 +386,7 @@ class ITDaysOffStream extends StatelessWidget {
             year: year,
             text: '',
             documentID: documentID,
+            unpaid: '',
             number: 0,
             type: 'vacation',
           ));
@@ -421,6 +399,7 @@ class ITDaysOffStream extends StatelessWidget {
         year: year,
         text: '',
         documentID: documentID,
+        unpaid: '',
         number: 0,
         type: 'vacation',
       ));
@@ -433,12 +412,15 @@ class ITDaysOffStream extends StatelessWidget {
     if (sickLeaves != null) {
       if (sickLeaves.length >= 0) {
         for (int i = 0; i < sickLeaves.length; i++) {
+          String sickLeavesConverted = sickLeaves[i];
+          List<String> splitted = sickLeavesConverted.split(' ');
           list.add(ITDayOffRoundButton(
             day: day,
             month: month,
             year: year,
-            text: sickLeaves[i],
+            text: splitted[0],
             documentID: documentID,
+            unpaid: (splitted.length == 2) ? splitted[1] : '',
             number: i,
             type: 'sickLeave',
           ));
@@ -450,6 +432,7 @@ class ITDaysOffStream extends StatelessWidget {
             year: year,
             text: '',
             documentID: documentID,
+            unpaid: '',
             number: 0,
             type: 'sickLeave',
           ));
@@ -462,6 +445,7 @@ class ITDaysOffStream extends StatelessWidget {
         year: year,
         text: '',
         documentID: documentID,
+        unpaid: '',
         number: 0,
         type: 'sickLeave',
       ));
@@ -477,6 +461,7 @@ class ITDayOffRoundButton extends StatefulWidget {
   final String documentID;
   final int number;
   final String type;
+  final String unpaid;
 
   ITDayOffRoundButton({
     @required this.day,
@@ -486,6 +471,7 @@ class ITDayOffRoundButton extends StatefulWidget {
     @required this.documentID,
     @required this.number,
     @required this.type,
+    this.unpaid,
   }) : super();
 
   @override
@@ -547,12 +533,12 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                         } else {
                           if (widget.type == 'vacation') {
                             await dbController.addITVacation(
-                                documentID, _markerInitials);
+                                documentID, '$_markerInitials$_markerInfo');
                           }
 
                           if (widget.type == 'sickLeave') {
                             await dbController.addITSickLeave(
-                                documentID, _markerInitials);
+                                documentID, '$_markerInitials$_markerInfo');
                           }
                         }
                       });
@@ -581,24 +567,32 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                         if (_markerInitials == '' ||
                             _markerInitials == 'none') {
                           if (widget.type == 'vacation') {
-                            dbController.removeITVacation(
-                                documentID, widget.text);
+                            if (widget.unpaid == '') {
+                              dbController.removeITVacation(
+                                  documentID, '${widget.text}');
+                            } else
+                              dbController.removeITVacation(documentID,
+                                  '${widget.text} ${widget.unpaid}');
                           }
                           if (widget.type == 'sickLeave') {
-                            dbController.removeITSickLeave(
-                                documentID, widget.text);
+                            if (widget.unpaid == '') {
+                              dbController.removeITSickLeave(
+                                  documentID, '${widget.text}');
+                            } else
+                              dbController.removeITSickLeave(documentID,
+                                  '${widget.text} ${widget.unpaid}');
                           }
                         } else {
                           if (widget.text == _markerInitials) {
                           } else {
                             if (widget.type == 'vacation') {
                               await dbController.addITVacation(
-                                  documentID, _markerInitials);
+                                  documentID, '$_markerInitials$_markerInfo');
                             }
 
                             if (widget.type == 'sickLeave') {
                               await dbController.addITSickLeave(
-                                  documentID, _markerInitials);
+                                  documentID, '$_markerInitials$_markerInfo');
                             }
                           }
                         }
@@ -610,7 +604,8 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                       widget.text,
                       style: TextStyle(
                         fontSize: isLong ? 13.0 : 16.0,
-                        color: textIconColor,
+                        color:
+                            (widget.unpaid == '') ? textIconColor : accentColor,
                       ),
                     ),
                     padding: EdgeInsets.all(0.0),
@@ -672,7 +667,9 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                               widget.text,
                               style: TextStyle(
                                 fontSize: isLong ? 13.0 : 16.0,
-                                color: textIconColor,
+                                color: (widget.unpaid == '')
+                                    ? textIconColor
+                                    : accentColor,
                               ),
                             ),
                           ),
@@ -730,33 +727,52 @@ showAdminAlertDialogDaysOff(
   String type,
   String title,
 ) {
+  bool unpaid = false;
+  String info = '';
   final result = showDialog(
     context: context,
     builder: (BuildContext context) {
-      return AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(32.0))),
-        content: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Center(
-                child: Text(
-                  'Choose employee',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+      return StatefulBuilder(builder: (context, setState) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Center(
+                  child: Text(
+                    'Choose employee',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+                  ),
                 ),
-              ),
-              SizedBox(
-                height: 5.0,
-              ),
-              Wrap(
-                alignment: WrapAlignment.spaceEvenly,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: listMyITWidgets(context),
-              ),
-            ],
+                SizedBox(
+                  height: 5.0,
+                ),
+                Wrap(
+                  alignment: WrapAlignment.spaceEvenly,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: listMyITWidgets(context),
+                ),
+                Container(
+                  width: 150.0,
+                  child: CheckboxListTile(
+                    title: Text('Unpaid'),
+                    value: unpaid,
+                    checkColor: Colors.white,
+                    onChanged: (value) {
+                      setState(() {
+                        unpaid = value;
+                        (unpaid) ? info = ' -' : info = '';
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      );
+        );
+      });
     },
   );
   result.then((result) async {
@@ -769,13 +785,13 @@ showAdminAlertDialogDaysOff(
         if (choiceOfEmployee == 'none') {
           await dbController.removeITVacation(docID, title);
         } else
-          await dbController.addITVacation(docID, choiceOfEmployee);
+          await dbController.addITVacation(docID, '$choiceOfEmployee$info');
       }
       if (type == 'sickLeave') {
         if (choiceOfEmployee == 'none') {
           await dbController.removeITSickLeave(docID, title);
         } else
-          await dbController.addITSickLeave(docID, choiceOfEmployee);
+          await dbController.addITSickLeave(docID, '$choiceOfEmployee$info');
       }
     }
   });

@@ -11,6 +11,7 @@ import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'shifts_screen.dart';
 
 String _markerInitials = '';
+String _markerInfo = '';
 
 class SupportDaysOffScreen extends StatefulWidget {
   static const String id = 'support_days_off_screen';
@@ -182,33 +183,53 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
   showAdminMarkerAlertDialogDaysOff(
     BuildContext context,
   ) {
+    bool unpaid = false;
+    String info = '';
     final result = showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(32.0))),
-          content: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                Center(
-                  child: Text(
-                    'Choose agent',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-                  ),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(32.0))),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    Center(
+                      child: Text(
+                        'Choose agent',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18.0),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 5.0,
+                    ),
+                    Wrap(
+                      alignment: WrapAlignment.spaceEvenly,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: listMyWidgets(context, emptyList),
+                    ),
+                    Container(
+                      width: 150.0,
+                      child: CheckboxListTile(
+                        title: Text('Unpaid'),
+                        value: unpaid,
+                        checkColor: Colors.white,
+                        onChanged: (value) {
+                          setState(() {
+                            unpaid = value;
+                            (unpaid) ? info = ' -' : info = '';
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(
-                  height: 5.0,
-                ),
-                Wrap(
-                  alignment: WrapAlignment.spaceEvenly,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: listMyWidgets(context, emptyList),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -221,10 +242,12 @@ class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
         if (choiceOfEmployee == 'none') {
           setState(() {
             _markerInitials = '';
+            _markerInfo = '';
           });
         } else
           setState(() {
             _markerInitials = choiceOfEmployee;
+            _markerInfo = info;
           });
       }
     });
@@ -344,11 +367,14 @@ class DaysOffStream extends StatelessWidget {
     if (vacations != null) {
       if (vacations.length > 0 || vacations.isEmpty) {
         for (int i = 0; i < vacations.length; i++) {
+          String vacationsConverted = vacations[i];
+          List<String> splitted = vacationsConverted.split(' ');
           list.add(DayOffRoundButton(
             day: day,
             month: month,
             year: year,
-            text: vacations[i],
+            text: splitted[0],
+            unpaid: (splitted.length == 2) ? splitted[1] : '',
             documentID: documentID,
             number: i,
             type: 'vacation',
@@ -361,6 +387,7 @@ class DaysOffStream extends StatelessWidget {
             year: year,
             text: '',
             documentID: documentID,
+            unpaid: '',
             number: 0,
             type: 'vacation',
           ));
@@ -373,6 +400,7 @@ class DaysOffStream extends StatelessWidget {
         year: year,
         text: '',
         documentID: documentID,
+        unpaid: '',
         number: 0,
         type: 'vacation',
       ));
@@ -385,12 +413,15 @@ class DaysOffStream extends StatelessWidget {
     if (sickLeaves != null) {
       if (sickLeaves.length >= 0) {
         for (int i = 0; i < sickLeaves.length; i++) {
+          String sickLeavesConverted = sickLeaves[i];
+          List<String> splitted = sickLeavesConverted.split(' ');
           list.add(DayOffRoundButton(
             day: day,
             month: month,
             year: year,
-            text: sickLeaves[i],
+            text: splitted[0],
             documentID: documentID,
+            unpaid: (splitted.length == 2) ? splitted[1] : '',
             number: i,
             type: 'sickLeave',
           ));
@@ -402,6 +433,7 @@ class DaysOffStream extends StatelessWidget {
             year: year,
             text: '',
             documentID: documentID,
+            unpaid: '',
             number: 0,
             type: 'sickLeave',
           ));
@@ -414,6 +446,7 @@ class DaysOffStream extends StatelessWidget {
         year: year,
         text: '',
         documentID: documentID,
+        unpaid: '',
         number: 0,
         type: 'sickLeave',
       ));
@@ -429,6 +462,7 @@ class DayOffRoundButton extends StatefulWidget {
   final String documentID;
   final int number;
   final String type;
+  final String unpaid;
 
   DayOffRoundButton({
     @required this.day,
@@ -438,6 +472,7 @@ class DayOffRoundButton extends StatefulWidget {
     @required this.documentID,
     @required this.number,
     @required this.type,
+    this.unpaid,
   }) : super();
 
   @override
@@ -499,12 +534,12 @@ class _DayOffRoundButtonState extends State<DayOffRoundButton> {
                         } else {
                           if (widget.type == 'vacation') {
                             await dbController.addVacation(
-                                documentID, _markerInitials);
+                                documentID, '$_markerInitials$_markerInfo');
                           }
 
                           if (widget.type == 'sickLeave') {
                             await dbController.addSickLeave(
-                                documentID, _markerInitials);
+                                documentID, '$_markerInitials$_markerInfo');
                           }
                         }
                       });
@@ -533,24 +568,32 @@ class _DayOffRoundButtonState extends State<DayOffRoundButton> {
                         if (_markerInitials == '' ||
                             _markerInitials == 'none') {
                           if (widget.type == 'vacation') {
-                            dbController.removeVacation(
-                                documentID, widget.text);
+                            if (widget.unpaid == '') {
+                              dbController.removeVacation(
+                                  documentID, '${widget.text}');
+                            } else
+                              dbController.removeVacation(documentID,
+                                  '${widget.text} ${widget.unpaid}');
                           }
                           if (widget.type == 'sickLeave') {
-                            dbController.removeSickLeave(
-                                documentID, widget.text);
+                            if (widget.unpaid == '') {
+                              dbController.removeSickLeave(
+                                  documentID, '${widget.text}');
+                            } else
+                              dbController.removeSickLeave(documentID,
+                                  '${widget.text} ${widget.unpaid}');
                           }
                         } else {
                           if (widget.text == _markerInitials) {
                           } else {
                             if (widget.type == 'vacation') {
                               await dbController.addVacation(
-                                  documentID, _markerInitials);
+                                  documentID, '$_markerInitials$_markerInfo');
                             }
 
                             if (widget.type == 'sickLeave') {
                               await dbController.addSickLeave(
-                                  documentID, _markerInitials);
+                                  documentID, '$_markerInitials$_markerInfo');
                             }
                           }
                         }
@@ -562,7 +605,8 @@ class _DayOffRoundButtonState extends State<DayOffRoundButton> {
                       widget.text,
                       style: TextStyle(
                         fontSize: isLong ? 13.0 : 16.0,
-                        color: textIconColor,
+                        color:
+                            (widget.unpaid == '') ? textIconColor : accentColor,
                       ),
                     ),
                     padding: EdgeInsets.all(0.0),
@@ -624,7 +668,9 @@ class _DayOffRoundButtonState extends State<DayOffRoundButton> {
                               widget.text,
                               style: TextStyle(
                                 fontSize: isLong ? 13.0 : 16.0,
-                                color: textIconColor,
+                                color: (widget.unpaid == '')
+                                    ? textIconColor
+                                    : accentColor,
                               ),
                             ),
                           ),
@@ -682,32 +728,53 @@ showAdminAlertDialogDaysOff(
   String type,
   String title,
 ) {
+  bool unpaid = false;
+  String info = '';
   final result = showDialog(
     context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(32.0))),
-        content: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Center(
-                child: Text(
-                  'Choose agent',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-                ),
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(32.0))),
+            content: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Center(
+                    child: Text(
+                      'Choose agent',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 18.0),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 5.0,
+                  ),
+                  Wrap(
+                    alignment: WrapAlignment.spaceEvenly,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: listMyWidgets(context, emptyList),
+                  ),
+                  Container(
+                    width: 150.0,
+                    child: CheckboxListTile(
+                      title: Text('Unpaid'),
+                      value: unpaid,
+                      checkColor: Colors.white,
+                      onChanged: (value) {
+                        setState(() {
+                          unpaid = value;
+                          (unpaid) ? info = ' -' : info = '';
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(
-                height: 5.0,
-              ),
-              Wrap(
-                alignment: WrapAlignment.spaceEvenly,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: listMyWidgets(context, emptyList),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       );
     },
   );
@@ -721,13 +788,13 @@ showAdminAlertDialogDaysOff(
         if (choiceOfEmployee == 'none') {
           await dbController.removeVacation(docID, title);
         } else
-          await dbController.addVacation(docID, choiceOfEmployee);
+          await dbController.addVacation(docID, '$choiceOfEmployee$info');
       }
       if (type == 'sickLeave') {
         if (choiceOfEmployee == 'none') {
           await dbController.removeSickLeave(docID, title);
         } else
-          await dbController.addSickLeave(docID, choiceOfEmployee);
+          await dbController.addSickLeave(docID, '$choiceOfEmployee$info');
       }
     }
   });

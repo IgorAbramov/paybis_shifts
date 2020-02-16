@@ -545,13 +545,17 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
   }
 
   Widget buildVacationInfoWidget(List vacations) {
+    bool unpaid = false;
     List<Widget> vacationList = [];
     Color color = Colors.transparent;
     for (int i = 0; i < vacations.length; i++) {
       for (Employee emp in listWithEmployees) {
         if (emp.initial == vacations[i]) {
+          unpaid = false;
           color = convertColor(emp.empColor);
-        }
+          break;
+        } else
+          unpaid = true;
       }
 
       Widget vacationText = FittedBox(
@@ -565,7 +569,7 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
             vacations[i],
             style: TextStyle(
               fontSize: 12.0,
-              color: Colors.white,
+              color: unpaid ? accentColor : textIconColor,
             ),
           ),
         ),
