@@ -493,10 +493,12 @@ class _ShiftScreenState extends State<ShiftScreen> {
 class DaysStream extends StatelessWidget {
   final int year;
   final int month;
+  final int day;
 
   DaysStream({
     @required this.year,
     @required this.month,
+    this.day,
   });
 
   @override
@@ -505,7 +507,9 @@ class DaysStream extends StatelessWidget {
       daysWithShiftsForCountThisMonth.clear();
 
     return StreamBuilder<QuerySnapshot>(
-      stream: dbController.createDaysStream(year, month),
+      stream: (day == null)
+          ? dbController.createDaysStream(year, month)
+          : dbController.createOneDayStream(year, month, day),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return circularProgress();
@@ -792,6 +796,12 @@ class DaysStream extends StatelessWidget {
           if (weekdayCheck(dayDay, dayMonth, dayYear) == 7) {
             final divider = isWeekConfirmed
                 ? GestureDetector(
+                    onDoubleTap: () {
+                      if (employee.department == kAdmin ||
+                          employee.department == kSuperAdmin) {
+                        openWeekEditorAlertDialog(context, dayDay + 1);
+                      }
+                    },
                     onLongPress: () async {
                       if (employee.department == kAdmin ||
                           employee.department == kSuperAdmin) {
@@ -806,6 +816,12 @@ class DaysStream extends StatelessWidget {
                     ),
                   )
                 : GestureDetector(
+                    onDoubleTap: () {
+                      if (employee.department == kAdmin ||
+                          employee.department == kSuperAdmin) {
+                        openWeekEditorAlertDialog(context, dayDay + 1);
+                      }
+                    },
                     onLongPress: () async {
                       if (employee.department == kAdmin ||
                           employee.department == kSuperAdmin) {
@@ -2024,6 +2040,59 @@ openNotificationAlertDialog(
       ],
     ),
   );
+}
+
+openWeekEditorAlertDialog(BuildContext context, int startDayNumber) {
+  return showDialog(
+    context: context,
+    builder: (context) => StatefulBuilder(builder: (context, setState) {
+      return Padding(
+        padding: MediaQuery.of(context).viewInsets +
+            const EdgeInsets.symmetric(horizontal: 0.0, vertical: 125.0),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: double.infinity),
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                  child: Column(
+                    children: buildWeekdayStreamGroup(startDayNumber),
+                  ),
+                ),
+                Material(
+                  borderRadius: BorderRadius.circular(15.0),
+                  child: IconButton(
+                      icon: Icon(
+                        Icons.cancel,
+                        color: Colors.black,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      }),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    }),
+  );
+}
+
+List<Widget> buildWeekdayStreamGroup(int startDayNumber) {
+  DateTime weekEditorDateTime =
+      DateTime(dateTime.year, dateTime.month, startDayNumber);
+  List<Widget> listOfStreams = [];
+
+  for (int i = 0; i < 7; i++) {
+    var newDateTime = weekEditorDateTime.add(Duration(days: i));
+    listOfStreams.add(DaysStream(
+        year: newDateTime.year,
+        month: newDateTime.month,
+        day: newDateTime.day));
+  }
+
+  return listOfStreams;
 }
 
 class Shift {
