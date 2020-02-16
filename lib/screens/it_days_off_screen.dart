@@ -561,55 +561,59 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
 
                 //If Emp is chosen
 
-                : MaterialButton(
-                    onPressed: () {
-                      setState(() async {
-                        if (_markerInitials == '' ||
-                            _markerInitials == 'none') {
-                          if (widget.type == 'vacation') {
-                            if (widget.unpaid == '') {
-                              dbController.removeITVacation(
-                                  documentID, '${widget.text}');
-                            } else
-                              dbController.removeITVacation(documentID,
-                                  '${widget.text} ${widget.unpaid}');
-                          }
-                          if (widget.type == 'sickLeave') {
-                            if (widget.unpaid == '') {
-                              dbController.removeITSickLeave(
-                                  documentID, '${widget.text}');
-                            } else
-                              dbController.removeITSickLeave(documentID,
-                                  '${widget.text} ${widget.unpaid}');
-                          }
-                        } else {
-                          if (widget.text == _markerInitials) {
-                          } else {
+                : Tooltip(
+                    message: (widget.unpaid == '') ? 'Paid' : 'Unpaid',
+                    child: MaterialButton(
+                      onPressed: () {
+                        setState(() async {
+                          if (_markerInitials == '' ||
+                              _markerInitials == 'none') {
                             if (widget.type == 'vacation') {
-                              await dbController.addITVacation(
-                                  documentID, '$_markerInitials$_markerInfo');
+                              if (widget.unpaid == '') {
+                                dbController.removeITVacation(
+                                    documentID, '${widget.text}');
+                              } else
+                                dbController.removeITVacation(documentID,
+                                    '${widget.text} ${widget.unpaid}');
                             }
-
                             if (widget.type == 'sickLeave') {
-                              await dbController.addITSickLeave(
-                                  documentID, '$_markerInitials$_markerInfo');
+                              if (widget.unpaid == '') {
+                                dbController.removeITSickLeave(
+                                    documentID, '${widget.text}');
+                              } else
+                                dbController.removeITSickLeave(documentID,
+                                    '${widget.text} ${widget.unpaid}');
+                            }
+                          } else {
+                            if (widget.text == _markerInitials) {
+                            } else {
+                              if (widget.type == 'vacation') {
+                                await dbController.addITVacation(
+                                    documentID, '$_markerInitials$_markerInfo');
+                              }
+
+                              if (widget.type == 'sickLeave') {
+                                await dbController.addITSickLeave(
+                                    documentID, '$_markerInitials$_markerInfo');
+                              }
                             }
                           }
-                        }
-                      });
-                    },
-                    color: color,
-                    shape: CircleBorder(),
-                    child: Text(
-                      widget.text,
-                      style: TextStyle(
-                        fontSize: isLong ? 13.0 : 16.0,
-                        color:
-                            (widget.unpaid == '') ? textIconColor : accentColor,
+                        });
+                      },
+                      color: color,
+                      shape: CircleBorder(),
+                      child: Text(
+                        widget.text,
+                        style: TextStyle(
+                          fontSize: isLong ? 13.0 : 16.0,
+                          color: (widget.unpaid == '')
+                              ? textIconColor
+                              : accentColor,
+                        ),
                       ),
+                      padding: EdgeInsets.all(0.0),
+                      minWidth: 10.0,
                     ),
-                    padding: EdgeInsets.all(0.0),
-                    minWidth: 10.0,
                   ),
           )
 
@@ -642,40 +646,44 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                   )
 
                 //If Emp is chosen
-                : Padding(
-                    padding: EdgeInsets.symmetric(vertical: 1.8),
-                    child: Material(
-                        color: (employee != null)
-                            ? (widget.text == employee.initial)
-                                ? textPrimaryColor
-                                : color.withOpacity(0)
-                            : color.withOpacity(0),
-                        borderRadius: BorderRadius.circular(15.0),
-                        child: MaterialButton(
-                          onPressed: () {},
-                          color: (employee != null)
-                              ? (widget.text == employee.initial)
-                                  ? darkPrimaryColor
-                                  : (widget.text == highlighted)
-                                      ? textPrimaryColor
-                                      : color.withOpacity(0.25)
-                              : color,
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
-                            child: Text(
-                              widget.text,
-                              style: TextStyle(
-                                fontSize: isLong ? 13.0 : 16.0,
-                                color: (widget.unpaid == '')
-                                    ? textIconColor
-                                    : accentColor,
+                : Tooltip(
+                    message: (widget.unpaid == '') ? 'Paid' : 'Unpaid',
+                    child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 1.8),
+                        child: Material(
+                            color: (employee != null)
+                                ? (widget.text == employee.initial)
+                                    ? textPrimaryColor
+                                    : color.withOpacity(0)
+                                : color.withOpacity(0),
+                            borderRadius: BorderRadius.circular(15.0),
+                            child: MaterialButton(
+                              onPressed: () {},
+                              color: (employee != null)
+                                  ? (widget.text == employee.initial)
+                                      ? darkPrimaryColor
+                                      : (widget.text == highlighted)
+                                          ? textPrimaryColor
+                                          : color.withOpacity(0.25)
+                                  : color,
+                              shape: CircleBorder(),
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.only(bottom: 0.0, right: 0.0),
+                                child: Text(
+                                  widget.text,
+                                  style: TextStyle(
+                                    fontSize: isLong ? 13.0 : 16.0,
+                                    color: (widget.unpaid == '')
+                                        ? textIconColor
+                                        : accentColor,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          padding: EdgeInsets.all(0.0),
-                          minWidth: 10.0,
-                        ))));
+                              padding: EdgeInsets.all(0.0),
+                              minWidth: 10.0,
+                            ))),
+                  ));
   }
 }
 
