@@ -1,7 +1,7 @@
 name: paybis_com_shifts
 description: Paybis Shifts for customer support
 
-version: 4.0.0
+version: 5.0.0
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -13,7 +13,7 @@ dependencies:
   firebase_core: ^0.4.3+3
   firebase_auth: ^0.15.4
   google_sign_in: ^4.1.1
-  cloud_firestore: ^0.13.0+1
+  cloud_firestore: ^0.13.1+1
   firebase_storage: ^3.1.1
   cloud_functions: ^0.4.1+9
   timeago: ^2.0.26

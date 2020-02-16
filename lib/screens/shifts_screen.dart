@@ -836,7 +836,40 @@ class DaysStream extends StatelessWidget {
           child: ListView(
             controller: scrollController,
             reverse: false,
-            children: daysWithShifts,
+            children: (daysWithShifts.length != 0)
+                ? daysWithShifts
+                : (employee.department == kAdmin ||
+                        employee.department == kSuperAdmin)
+                    ? [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Material(
+                            elevation: 5.0,
+                            color: darkPrimaryColor,
+                            borderRadius: BorderRadius.circular(15.0),
+                            child: MaterialButton(
+                              height: 50.00,
+                              onPressed: () async {
+//                        dbController.deleteMonth(2);
+                                for (int i = 1;
+                                    i <= getNumberOfDaysInMonth(month, year);
+                                    i++) {
+                                  Day newDay = new Day(
+                                      i, month, year, false, [], [], []);
+                                  Map dayMap = newDay.buildMap(
+                                      i, month, year, false, [], [], []);
+                                  await dbController.addMonth(dayMap);
+                                }
+                              },
+                              child: Text(
+                                'Add month',
+                                style: kHeaderFontStyle,
+                              ),
+                            ),
+                          ),
+                        )
+                      ]
+                    : [SizedBox()],
           ),
         );
       },
@@ -944,7 +977,7 @@ class DateTableCell extends StatelessWidget {
                   child: Text(
                     '$month',
                     style: TextStyle(
-                      fontSize: ScreenUtil().setSp(30),
+                      fontSize: ScreenUtil().setSp(29),
                       fontWeight: FontWeight.bold,
                       color: isWeekend ? accentColor : textPrimaryColor,
                     ),
@@ -955,7 +988,7 @@ class DateTableCell extends StatelessWidget {
                   child: Text(
                     '$day.',
                     style: TextStyle(
-                      fontSize: ScreenUtil().setSp(30),
+                      fontSize: ScreenUtil().setSp(29),
                       fontWeight: FontWeight.bold,
                       color: isWeekend ? accentColor : textPrimaryColor,
                     ),
@@ -1002,6 +1035,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
   Color color = primaryColor;
   String buttonText = '+';
   double size = 26.0;
+
   double bottom = 5.0;
   double right = 1.0;
   String buttonHolder;
@@ -1040,7 +1074,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 //        && isPast == false
         )
         ? SizedBox(
-            width: 30.0,
+            width: ScreenUtil().setWidth(84),
+//            30.0,
             child: employeeChosen == false
 
                 //If Emp is NOT chosen
@@ -1113,162 +1148,165 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 
                 //If Emp is chosen
 
-                : Draggable(
-                    maxSimultaneousDrags: 1,
-                    affinity: Axis.horizontal,
-                    data: widget.shift,
-                    onDragCompleted: () async {
-                      if (dragCompleted) {
-                        currentDocument =
-                            await dbController.getDocument(documentID);
-                        Shift newShift = Shift(widget.shift.holder, 8.0,
-                            widget.shift.position, shiftOnDragComplete.type);
-                        await dbController.deleteShift(
-                            currentDocument,
-                            widget.shiftType,
-                            widget.shift.buildMap(
-                                widget.shift.holder,
-                                widget.shift.hours,
-                                widget.shift.position,
-                                widget.shift.type));
-                        await dbController.createShift(
-                            dragDocument,
-                            newShift.type,
-                            newShift.buildMap(newShift.holder, newShift.hours,
-                                newShift.position, newShift.type));
-                        setState(() {});
-                      }
-                    },
-                    feedback:
-                        //Container(),
-                        MaterialButton(
-                      onPressed: () {},
-                      color: color,
-                      shape: CircleBorder(),
-                      child: (widget.workingHours != 8)
-                          ? Stack(
-                              alignment: AlignmentDirectional.center,
-                              children: <Widget>[
-                                Text(
-                                  widget.text,
-                                  style: TextStyle(
-                                    fontSize: isLong ? 13.0 : 16.0,
-                                    color: textIconColor,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 24.0, left: 24.0),
-                                  child: Text(
-                                    (widget.workingHours < 8) ? '-' : '+',
-                                    style: TextStyle(
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: (widget.workingHours < 8)
-                                            ? accentColor
-                                            : Colors.green),
-                                  ),
-                                )
-                              ],
-                            )
-                          : Text(
-                              widget.text,
-                              style: TextStyle(
-                                fontSize: isLong ? 13.0 : 16.0,
-                                color: textIconColor,
-                              ),
-                            ),
-                      padding: EdgeInsets.all(0.0),
-                      minWidth: 30.0,
-                    ),
-                    childWhenDragging: Container(),
-                    child: MaterialButton(
-                      onPressed: () {
-                        setState(() async {
-                          if (_markerInitials == '') {
-                            showAdminAlertDialog(
-                                context,
-                                documentID,
-                                widget.shift,
-                                "Who's gonna work?",
-                                widget.absentList);
-                          } else if (_markerInitials == 'X') {
-                            currentDocument =
-                                await dbController.getDocument(documentID);
-                            await dbController.deleteShift(
-                                currentDocument,
-                                widget.shiftType,
-                                widget.shift.buildMap(
-                                    widget.shift.holder,
-                                    widget.shift.hours,
-                                    widget.shift.position,
-                                    widget.shift.type));
-                          } else {
-                            currentDocument =
-                                await dbController.getDocument(documentID);
-
-                            String position;
-                            for (Employee emp in listWithEmployees) {
-                              if (emp.initial == _markerInitials) {
-                                position = emp.position;
-                              }
-                            }
-                            Shift newShift = Shift(_markerInitials, 8.0,
-                                position, widget.shift.type);
-
-                            await dbController.updateShift(
-                                currentDocument,
-                                widget.shift.type,
-                                widget.shift.buildMap(
-                                    widget.shift.holder,
-                                    widget.shift.hours,
-                                    widget.shift.position,
-                                    widget.shift.type),
-                                newShift.buildMap(
-                                    newShift.holder,
-                                    newShift.hours,
-                                    newShift.position,
-                                    newShift.type));
-                          }
-                        });
+                : Tooltip(
+                    message: '${widget.shift.hours} hours',
+                    child: Draggable(
+                      maxSimultaneousDrags: 1,
+                      affinity: Axis.horizontal,
+                      data: widget.shift,
+                      onDragCompleted: () async {
+                        if (dragCompleted) {
+                          currentDocument =
+                              await dbController.getDocument(documentID);
+                          Shift newShift = Shift(widget.shift.holder, 8.0,
+                              widget.shift.position, shiftOnDragComplete.type);
+                          await dbController.deleteShift(
+                              currentDocument,
+                              widget.shiftType,
+                              widget.shift.buildMap(
+                                  widget.shift.holder,
+                                  widget.shift.hours,
+                                  widget.shift.position,
+                                  widget.shift.type));
+                          await dbController.createShift(
+                              dragDocument,
+                              newShift.type,
+                              newShift.buildMap(newShift.holder, newShift.hours,
+                                  newShift.position, newShift.type));
+                          setState(() {});
+                        }
                       },
-                      color: color,
-                      shape: CircleBorder(),
-                      child: (widget.workingHours != 8)
-                          ? Stack(
-                              alignment: AlignmentDirectional.center,
-                              children: <Widget>[
-                                Text(
-                                  widget.text,
-                                  style: TextStyle(
-                                    fontSize: isLong ? 13.0 : 16.0,
-                                    color: textIconColor,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 24.0, left: 24.0),
-                                  child: Text(
-                                    (widget.workingHours < 8) ? '-' : '+',
+                      feedback:
+                          //Container(),
+                          MaterialButton(
+                        onPressed: () {},
+                        color: color,
+                        shape: CircleBorder(),
+                        child: (widget.workingHours != 8)
+                            ? Stack(
+                                alignment: AlignmentDirectional.center,
+                                children: <Widget>[
+                                  Text(
+                                    widget.text,
                                     style: TextStyle(
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: (widget.workingHours < 8)
-                                            ? accentColor
-                                            : Colors.green),
+                                      fontSize: isLong ? 13.0 : 16.0,
+                                      color: textIconColor,
+                                    ),
                                   ),
-                                )
-                              ],
-                            )
-                          : Text(
-                              widget.text,
-                              style: TextStyle(
-                                fontSize: isLong ? 13.0 : 16.0,
-                                color: textIconColor,
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 24.0, left: 24.0),
+                                    child: Text(
+                                      (widget.workingHours < 8) ? '-' : '+',
+                                      style: TextStyle(
+                                          fontSize: 20.0,
+                                          fontWeight: FontWeight.bold,
+                                          color: (widget.workingHours < 8)
+                                              ? accentColor
+                                              : Colors.green),
+                                    ),
+                                  )
+                                ],
+                              )
+                            : Text(
+                                widget.text,
+                                style: TextStyle(
+                                  fontSize: isLong ? 13.0 : 16.0,
+                                  color: textIconColor,
+                                ),
                               ),
-                            ),
-                      padding: EdgeInsets.all(0.0),
-                      minWidth: 10.0,
+                        padding: EdgeInsets.all(0.0),
+                        minWidth: 30.0,
+                      ),
+                      childWhenDragging: Container(),
+                      child: MaterialButton(
+                        onPressed: () {
+                          setState(() async {
+                            if (_markerInitials == '') {
+                              showAdminAlertDialog(
+                                  context,
+                                  documentID,
+                                  widget.shift,
+                                  "Who's gonna work?",
+                                  widget.absentList);
+                            } else if (_markerInitials == 'X') {
+                              currentDocument =
+                                  await dbController.getDocument(documentID);
+                              await dbController.deleteShift(
+                                  currentDocument,
+                                  widget.shiftType,
+                                  widget.shift.buildMap(
+                                      widget.shift.holder,
+                                      widget.shift.hours,
+                                      widget.shift.position,
+                                      widget.shift.type));
+                            } else {
+                              currentDocument =
+                                  await dbController.getDocument(documentID);
+
+                              String position;
+                              for (Employee emp in listWithEmployees) {
+                                if (emp.initial == _markerInitials) {
+                                  position = emp.position;
+                                }
+                              }
+                              Shift newShift = Shift(_markerInitials, 8.0,
+                                  position, widget.shift.type);
+
+                              await dbController.updateShift(
+                                  currentDocument,
+                                  widget.shift.type,
+                                  widget.shift.buildMap(
+                                      widget.shift.holder,
+                                      widget.shift.hours,
+                                      widget.shift.position,
+                                      widget.shift.type),
+                                  newShift.buildMap(
+                                      newShift.holder,
+                                      newShift.hours,
+                                      newShift.position,
+                                      newShift.type));
+                            }
+                          });
+                        },
+                        color: color,
+                        shape: CircleBorder(),
+                        child: (widget.workingHours != 8)
+                            ? Stack(
+                                alignment: AlignmentDirectional.center,
+                                children: <Widget>[
+                                  Text(
+                                    widget.text,
+                                    style: TextStyle(
+                                      fontSize: isLong ? 13.0 : 16.0,
+                                      color: textIconColor,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 24.0, left: 24.0),
+                                    child: Text(
+                                      (widget.workingHours < 8) ? '-' : '+',
+                                      style: TextStyle(
+                                          fontSize: 20.0,
+                                          fontWeight: FontWeight.bold,
+                                          color: (widget.workingHours < 8)
+                                              ? accentColor
+                                              : Colors.green),
+                                    ),
+                                  )
+                                ],
+                              )
+                            : Text(
+                                widget.text,
+                                style: TextStyle(
+                                  fontSize: isLong ? 13.0 : 16.0,
+                                  color: textIconColor,
+                                ),
+                              ),
+                        padding: EdgeInsets.all(0.0),
+                        minWidth: 10.0,
+                      ),
                     ),
                   ),
           )
@@ -1316,120 +1354,127 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                       )
 
                 //If Emp is chosen
-                : Padding(
-                    padding: EdgeInsets.symmetric(vertical: 0.1),
-                    child: Material(
-                        color: (employee != null)
-                            ? (widget.text == employee.initial)
-                                ? textPrimaryColor
-                                : color.withOpacity(0)
-                            : color.withOpacity(0),
-                        borderRadius: BorderRadius.circular(15.0),
-                        child: MaterialButton(
-                          onPressed: () {
-                            setState(() {
-                              if (widget.text == employee.initial &&
-                                  isPast == false &&
-                                  shiftDocIDContainer1ForShiftExchange ==
-                                      null &&
-                                  shiftPositionContainer1ForShiftExchange ==
-                                      null &&
-                                  shiftHolderContainer1ForShiftExchange ==
-                                      null) {
-                                openPersonalShiftAlertBox(
-                                    context,
-                                    documentID,
-                                    widget.shift.position,
-                                    date,
-                                    'Exchange?',
-                                    widget.shiftType);
-                              }
-                              if (isPast == false &&
-                                  widget.text != employee.initial &&
-                                  shiftDocIDContainer1ForShiftExchange !=
-                                      null &&
-                                  shiftPositionContainer1ForShiftExchange !=
-                                      null &&
-                                  shiftHolderContainer1ForShiftExchange !=
-                                      null) {
-                                openChangeShiftsConfirmationAlertBox(
-                                  context,
-                                  documentID,
-                                  widget.shift.position,
-                                  date,
-                                  'Exchange with ${widget.text}?',
-                                  widget.text,
-                                  widget.shiftType,
-                                );
-                              }
+                : Tooltip(
+                    message: '${widget.shift.hours} hours',
+                    child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 0.1),
+                        child: Material(
+                            color: (employee != null)
+                                ? (widget.text == employee.initial)
+                                    ? textPrimaryColor
+                                    : color.withOpacity(0)
+                                : color.withOpacity(0),
+                            borderRadius: BorderRadius.circular(15.0),
+                            child: MaterialButton(
+                              onPressed: () {
+                                setState(() {
+                                  if (widget.text == employee.initial &&
+                                      isPast == false &&
+                                      shiftDocIDContainer1ForShiftExchange ==
+                                          null &&
+                                      shiftPositionContainer1ForShiftExchange ==
+                                          null &&
+                                      shiftHolderContainer1ForShiftExchange ==
+                                          null) {
+                                    openPersonalShiftAlertBox(
+                                        context,
+                                        documentID,
+                                        widget.shift.position,
+                                        date,
+                                        'Exchange?',
+                                        widget.shiftType);
+                                  }
+                                  if (isPast == false &&
+                                      widget.text != employee.initial &&
+                                      shiftDocIDContainer1ForShiftExchange !=
+                                          null &&
+                                      shiftPositionContainer1ForShiftExchange !=
+                                          null &&
+                                      shiftHolderContainer1ForShiftExchange !=
+                                          null) {
+                                    openChangeShiftsConfirmationAlertBox(
+                                      context,
+                                      documentID,
+                                      widget.shift.position,
+                                      date,
+                                      'Exchange with ${widget.text}?',
+                                      widget.text,
+                                      widget.shiftType,
+                                    );
+                                  }
 
-                              if (widget.text != employee.initial &&
-                                  highlighted == '' &&
-                                  shiftDocIDContainer1ForShiftExchange ==
-                                      null &&
-                                  shiftPositionContainer1ForShiftExchange ==
-                                      null &&
-                                  shiftHolderContainer1ForShiftExchange ==
-                                      null) {
+                                  if (widget.text != employee.initial &&
+                                      highlighted == '' &&
+                                      shiftDocIDContainer1ForShiftExchange ==
+                                          null &&
+                                      shiftPositionContainer1ForShiftExchange ==
+                                          null &&
+                                      shiftHolderContainer1ForShiftExchange ==
+                                          null) {
 //                                setState(() {
-                                highlightEmp(widget.text);
-                                shiftsScreenKey.currentState.rebuild();
+                                    highlightEmp(widget.text);
+                                    shiftsScreenKey.currentState.rebuild();
 //                                });
-                              } else {
+                                  } else {
 //                                setState(() {
-                                deHighlightEmp();
-                                shiftsScreenKey.currentState.rebuild();
+                                    deHighlightEmp();
+                                    shiftsScreenKey.currentState.rebuild();
 //                                });
-                              }
-                            });
-                          },
-                          color: (employee != null)
-                              ? (widget.text == employee.initial)
-                                  ? darkPrimaryColor
-                                  : (widget.text == highlighted)
-                                      ? textPrimaryColor
-                                      : color.withOpacity(0.25)
-                              : color,
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
-                            child: (widget.workingHours != 8)
-                                ? Stack(
-                                    alignment: AlignmentDirectional.center,
-                                    children: <Widget>[
-                                      Text(
+                                  }
+                                });
+                              },
+                              color: (employee != null)
+                                  ? (widget.text == employee.initial)
+                                      ? darkPrimaryColor
+                                      : (widget.text == highlighted)
+                                          ? textPrimaryColor
+                                          : color.withOpacity(0.25)
+                                  : color,
+                              shape: CircleBorder(),
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.only(bottom: 0.0, right: 0.0),
+                                child: (widget.workingHours != 8)
+                                    ? Stack(
+                                        alignment: AlignmentDirectional.center,
+                                        children: <Widget>[
+                                          Text(
+                                            widget.text,
+                                            style: TextStyle(
+                                              fontSize: isLong ? 13.0 : 16.0,
+                                              color: textIconColor,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                top: 24.0, left: 24.0),
+                                            child: Text(
+                                              (widget.workingHours < 8)
+                                                  ? '-'
+                                                  : '+',
+                                              style: TextStyle(
+                                                  fontSize: 20.0,
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                      (widget.workingHours < 8)
+                                                          ? accentColor
+                                                          : Colors.green),
+                                            ),
+                                          )
+                                        ],
+                                      )
+                                    : Text(
                                         widget.text,
                                         style: TextStyle(
                                           fontSize: isLong ? 13.0 : 16.0,
                                           color: textIconColor,
                                         ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 24.0, left: 24.0),
-                                        child: Text(
-                                          (widget.workingHours < 8) ? '-' : '+',
-                                          style: TextStyle(
-                                              fontSize: 20.0,
-                                              fontWeight: FontWeight.bold,
-                                              color: (widget.workingHours < 8)
-                                                  ? accentColor
-                                                  : Colors.green),
-                                        ),
-                                      )
-                                    ],
-                                  )
-                                : Text(
-                                    widget.text,
-                                    style: TextStyle(
-                                      fontSize: isLong ? 13.0 : 16.0,
-                                      color: textIconColor,
-                                    ),
-                                  ),
-                          ),
-                          padding: EdgeInsets.all(0.0),
-                          minWidth: 10.0,
-                        ))));
+                              ),
+                              padding: EdgeInsets.all(0.0),
+                              minWidth: 10.0,
+                            ))),
+                  ));
   }
 }
 

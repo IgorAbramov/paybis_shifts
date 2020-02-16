@@ -24,7 +24,7 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
   String parkingStatus = 'free';
   int _beginMonthPadding = 0;
 
-  CalendarState() {
+  AdminCalendarState() {
     setMonthPadding();
   }
 
@@ -175,175 +175,303 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
               }),
         ],
       ),
-      body: Column(
-        children: <Widget>[
-          FittedBox(
-              fit: BoxFit.contain,
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Text(
-                  getMonthName(dateTime.month) + " " + dateTime.year.toString(),
-                  style: TextStyle(
-                    fontSize: 22.0,
-                    fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            FittedBox(
+                fit: BoxFit.contain,
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Text(
+                    getMonthName(dateTime.month) +
+                        " " +
+                        dateTime.year.toString(),
+                    style: TextStyle(
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              )),
-          StreamBuilder(
-              stream:
-                  dbController.createDaysStream(dateTime.year, dateTime.month),
-              builder: (context, snapshot) {
-                List emptyDay = [];
-                List daysOff = [];
+                )),
+            StreamBuilder(
+                stream: dbController.createDaysStream(
+                    dateTime.year, dateTime.month),
+                builder: (context, snapshot) {
+                  List emptyDay = [];
+                  List daysOff = [];
+                  List supportDepartmentList = [];
+                  List itDepartmentList = [];
 
-                for (int i = 0; i < _beginMonthPadding; i++) {
-                  daysOff.add(emptyDay);
-                }
-                if (!snapshot.hasData) {
-                  return circularProgress();
-                }
-                if (daysWithShiftsForCountThisMonth.isNotEmpty)
-                  daysWithShiftsForCountThisMonth.clear();
-
-                final days = snapshot.data.documents;
-                for (var day in days) {
-                  final int dayDay = day.data['day'];
-                  final int dayMonth = day.data['month'];
-                  final int dayYear = day.data['year'];
-                  final bool dayIsHoliday = day.data['isHoliday'];
-                  final List nightShifts = [];
-                  final List morningShifts = [];
-                  final List eveningShifts = [];
-                  if (_btnDepartmentText == 'SUP' &&
-                      _btnTypeText == 'Vacations') {
-                    final List vacation = day.data['vacations'];
-                    if (vacation != null) {
-                      daysOff.add(vacation);
-                    } else
-                      daysOff.add(emptyDay);
+                  for (int i = 0; i < _beginMonthPadding; i++) {
+                    daysOff.add(emptyDay);
                   }
-                  if (_btnDepartmentText == 'IT' &&
-                      _btnTypeText == 'Vacations') {
-                    final List vacation = day.data['ITVacations'];
-                    if (vacation != null) {
-                      daysOff.add(vacation);
-                    } else
-                      daysOff.add(emptyDay);
+                  if (!snapshot.hasData) {
+                    return circularProgress();
                   }
-                  if (_btnDepartmentText == 'SUP' &&
-                      _btnTypeText == 'Sick Leaves') {
-                    final List vacation = day.data['sick'];
-                    if (vacation != null) {
-                      daysOff.add(vacation);
-                    } else
-                      daysOff.add(emptyDay);
+                  if (daysWithShiftsForCountThisMonth.isNotEmpty)
+                    daysWithShiftsForCountThisMonth.clear();
+
+                  final days = snapshot.data.documents;
+                  for (var day in days) {
+                    final int dayDay = day.data['day'];
+                    final int dayMonth = day.data['month'];
+                    final int dayYear = day.data['year'];
+                    final bool dayIsHoliday = day.data['isHoliday'];
+                    final List nightShifts = [];
+                    final List morningShifts = [];
+                    final List eveningShifts = [];
+                    final List supVacations = day.data['vacations'];
+                    final List itVacations = day.data['ITVacations'];
+                    if (supVacations != null) {
+                      for (int i = 0; i < supVacations.length; i++) {
+                        if (!supportDepartmentList.contains(supVacations[i])) {
+                          supportDepartmentList.add(supVacations[i]);
+                        }
+                      }
+                    }
+                    if (itVacations != null) {
+                      for (int i = 0; i < itVacations.length; i++) {
+                        if (!itDepartmentList.contains(itVacations[i])) {
+                          itDepartmentList.add(itVacations[i]);
+                        }
+                      }
+                    }
+
+                    if (_btnDepartmentText == 'SUP' &&
+                        _btnTypeText == 'Vacations') {
+                      final List vacation = day.data['vacations'];
+                      if (vacation != null) {
+                        daysOff.add(vacation);
+                        for (int i = 0; i < vacation.length; i++) {
+                          if (!supportDepartmentList.contains(vacation[i])) {
+                            supportDepartmentList.add(vacation[i]);
+                          }
+                        }
+                      } else
+                        daysOff.add(emptyDay);
+                    }
+                    if (_btnDepartmentText == 'IT' &&
+                        _btnTypeText == 'Vacations') {
+                      final List vacation = day.data['ITVacations'];
+                      if (vacation != null) {
+                        daysOff.add(vacation);
+                        for (int i = 0; i < vacation.length; i++) {
+                          if (!itDepartmentList.contains(vacation[i])) {
+                            itDepartmentList.add(vacation[i]);
+                          }
+                        }
+                      } else
+                        daysOff.add(emptyDay);
+                    }
+                    if (_btnDepartmentText == 'SUP' &&
+                        _btnTypeText == 'Sick Leaves') {
+                      final List vacation = day.data['sick'];
+                      if (vacation != null) {
+                        daysOff.add(vacation);
+                        for (int i = 0; i < vacation.length; i++) {
+                          if (!supportDepartmentList.contains(vacation[i])) {
+                            supportDepartmentList.add(vacation[i]);
+                          }
+                        }
+                      } else
+                        daysOff.add(emptyDay);
+                    }
+                    if (_btnDepartmentText == 'IT' &&
+                        _btnTypeText == 'Sick Leaves') {
+                      final List vacation = day.data['ITSick'];
+                      if (vacation != null) {
+                        daysOff.add(vacation);
+                        for (int i = 0; i < vacation.length; i++) {
+                          if (!itDepartmentList.contains(vacation[i])) {
+                            itDepartmentList.add(vacation[i]);
+                          }
+                        }
+                      } else
+                        daysOff.add(emptyDay);
+                    }
+
+                    currentDocument = day;
+
+                    final dayWithShifts = Day(
+                        dayDay,
+                        dayMonth,
+                        dayYear,
+                        dayIsHoliday,
+                        nightShifts,
+                        morningShifts,
+                        eveningShifts);
+
+                    if (!daysWithShiftsForCountThisMonth
+                            .contains(dayWithShifts) &&
+                        daysWithShiftsForCountThisMonth.length <
+                            getNumberOfDaysInMonth(dateTime.month))
+                      daysWithShiftsForCountThisMonth.add(dayWithShifts);
                   }
-                  if (_btnDepartmentText == 'IT' &&
-                      _btnTypeText == 'Sick Leaves') {
-                    final List vacation = day.data['ITSick'];
-                    if (vacation != null) {
-                      daysOff.add(vacation);
-                    } else
-                      daysOff.add(emptyDay);
-                  }
-
-                  currentDocument = day;
-
-                  final dayWithShifts = Day(dayDay, dayMonth, dayYear,
-                      dayIsHoliday, nightShifts, morningShifts, eveningShifts);
-
-                  if (!daysWithShiftsForCountThisMonth
-                          .contains(dayWithShifts) &&
-                      daysWithShiftsForCountThisMonth.length <
-                          getNumberOfDaysInMonth(dateTime.month))
-                    daysWithShiftsForCountThisMonth.add(dayWithShifts);
-                }
-                return Column(
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                            child: Text('Mon',
-                                textAlign: TextAlign.center,
-                                style: kHeaderFontStyle.copyWith(
-                                    fontSize: 18, color: Colors.black))),
-                        Expanded(
-                            child: Text('Tue',
-                                textAlign: TextAlign.center,
-                                style: kHeaderFontStyle.copyWith(
-                                    fontSize: 18, color: Colors.black))),
-                        Expanded(
-                            child: Text('Wed',
-                                textAlign: TextAlign.center,
-                                style: kHeaderFontStyle.copyWith(
-                                    fontSize: 18, color: Colors.black))),
-                        Expanded(
-                            child: Text('Thu',
-                                textAlign: TextAlign.center,
-                                style: kHeaderFontStyle.copyWith(
-                                    fontSize: 18, color: Colors.black))),
-                        Expanded(
-                            child: Text('Fri',
-                                textAlign: TextAlign.center,
-                                style: kHeaderFontStyle.copyWith(
-                                    fontSize: 18, color: Colors.black))),
-                        Expanded(
-                            child: Text('Sat',
-                                textAlign: TextAlign.center,
-                                style: kHeaderFontStyle.copyWith(
-                                    fontSize: 18, color: accentColor))),
-                        Expanded(
-                            child: Text('Sun',
-                                textAlign: TextAlign.center,
-                                style: kHeaderFontStyle.copyWith(
-                                    fontSize: 18, color: accentColor))),
-                      ],
-                      mainAxisSize: MainAxisSize.min,
-                    ),
-                    GridView.count(
-                      crossAxisCount: numWeekDays,
-                      childAspectRatio: (itemWidth / itemHeight),
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      children: List.generate(
-                          getNumberOfDaysInMonth(dateTime.month), (index) {
-                        int dayNumber = index + 1;
-                        return GestureDetector(
-                            // Used for handling tap on each day view
-//                    onTap: () => _onDayTapped(dayNumber - _beginMonthPadding),
-                            child: Container(
-                                margin: const EdgeInsets.all(1.0),
-                                padding: const EdgeInsets.all(1.0),
-                                decoration: BoxDecoration(
-                                  gradient: RadialGradient(
-                                      colors: [primaryColor, darkPrimaryColor]),
-                                  color: ((dayNumber - _beginMonthPadding) ==
-                                              DateTime.now().day &&
-                                          dateTime.month ==
-                                              DateTime.now().month &&
-                                          dateTime.year == DateTime.now().year)
-                                      ? darkPrimaryColor
-                                      : (dayNumber - _beginMonthPadding <= 0)
-                                          ? Colors.transparent
-                                          : darkPrimaryColor.withOpacity(0.1),
-                                  border: Border.all(color: Colors.grey),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10.0)),
-                                ),
-                                child: Column(
-                                  children: <Widget>[
-                                    buildDayNumberWidget(dayNumber),
-                                    buildDayEventInfoWidget(dayNumber, daysOff)
-                                  ],
-                                )));
-                      }),
-                    ),
-                  ],
-                );
-              }),
-        ],
+                  return Column(
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                              child: Text('Mon',
+                                  textAlign: TextAlign.center,
+                                  style: kHeaderFontStyle.copyWith(
+                                      fontSize: 18, color: Colors.black))),
+                          Expanded(
+                              child: Text('Tue',
+                                  textAlign: TextAlign.center,
+                                  style: kHeaderFontStyle.copyWith(
+                                      fontSize: 18, color: Colors.black))),
+                          Expanded(
+                              child: Text('Wed',
+                                  textAlign: TextAlign.center,
+                                  style: kHeaderFontStyle.copyWith(
+                                      fontSize: 18, color: Colors.black))),
+                          Expanded(
+                              child: Text('Thu',
+                                  textAlign: TextAlign.center,
+                                  style: kHeaderFontStyle.copyWith(
+                                      fontSize: 18, color: Colors.black))),
+                          Expanded(
+                              child: Text('Fri',
+                                  textAlign: TextAlign.center,
+                                  style: kHeaderFontStyle.copyWith(
+                                      fontSize: 18, color: Colors.black))),
+                          Expanded(
+                              child: Text('Sat',
+                                  textAlign: TextAlign.center,
+                                  style: kHeaderFontStyle.copyWith(
+                                      fontSize: 18, color: accentColor))),
+                          Expanded(
+                              child: Text('Sun',
+                                  textAlign: TextAlign.center,
+                                  style: kHeaderFontStyle.copyWith(
+                                      fontSize: 18, color: accentColor))),
+                        ],
+                        mainAxisSize: MainAxisSize.min,
+                      ),
+                      GridView.count(
+                        crossAxisCount: numWeekDays,
+                        childAspectRatio: (itemWidth / itemHeight),
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        children: List.generate(
+                            getNumberOfDaysInMonth(dateTime.month), (index) {
+                          int dayNumber = index + 1;
+                          return Container(
+                              margin: const EdgeInsets.all(1.0),
+                              padding: const EdgeInsets.all(1.0),
+                              decoration: BoxDecoration(
+                                gradient: RadialGradient(
+                                    colors: [primaryColor, darkPrimaryColor]),
+                                color: ((dayNumber - _beginMonthPadding) ==
+                                            DateTime.now().day &&
+                                        dateTime.month ==
+                                            DateTime.now().month &&
+                                        dateTime.year == DateTime.now().year)
+                                    ? darkPrimaryColor
+                                    : (dayNumber - _beginMonthPadding <= 0)
+                                        ? Colors.transparent
+                                        : darkPrimaryColor.withOpacity(0.1),
+                                border: Border.all(color: Colors.grey),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0)),
+                              ),
+                              child: Column(
+                                children: <Widget>[
+                                  buildDayNumberWidget(dayNumber),
+                                  buildDayEventInfoWidget(dayNumber, daysOff)
+                                ],
+                              ));
+                        }),
+                      ),
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                              child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: Text(
+                                kSupportDepartment,
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15.0,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          )),
+                          Expanded(
+                              child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: Text(
+                                kITDepartment,
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15.0,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          )),
+                        ],
+                      ),
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Column(
+                              children: buildMonthVacationWidget(
+                                  supportDepartmentList),
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              children:
+                                  buildMonthVacationWidget(itDepartmentList),
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                }),
+          ],
+        ),
       ),
     );
+  }
+
+  List<Widget> buildMonthVacationWidget(List vacationList) {
+    List<Widget> names = [];
+    for (String string in vacationList) {
+      for (Employee employee in listWithEmployees) {
+        if (string == employee.initial) {
+          names.add(
+            Column(
+              children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    color: convertColor(employee.empColor),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      '${employee.initial} - ${employee.name}',
+                      style: TextStyle(color: textIconColor),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 1.0,
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    }
+
+    return names;
   }
 
   Align buildDayNumberWidget(int dayNumber) {
@@ -429,7 +557,7 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
       Widget vacationText = FittedBox(
         child: Container(
           width: 50.0,
-          height: 13.0,
+          height: ScreenUtil().setWidth(36),
           decoration: BoxDecoration(
             color: color,
           ),
