@@ -2043,43 +2043,23 @@ openNotificationAlertDialog(
 }
 
 openWeekEditorAlertDialog(BuildContext context, int startDayNumber) {
+  double width = MediaQuery.of(context).size.width;
+  double height = MediaQuery.of(context).size.height;
+  double padding = (height - 380) / 2;
   return showDialog(
     context: context,
     builder: (context) => StatefulBuilder(builder: (context, setState) {
       return Padding(
-        padding: MediaQuery.of(context).viewInsets +
-            const EdgeInsets.symmetric(horizontal: 0.0, vertical: 125.0),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minWidth: double.infinity),
-          child: Container(
-            child: Column(
-              children: <Widget>[
-                Expanded(
-                  child: Column(
-                    children: buildWeekdayStreamGroup(startDayNumber),
-                  ),
-                ),
-                Material(
-                  borderRadius: BorderRadius.circular(15.0),
-                  child: IconButton(
-                      icon: Icon(
-                        Icons.cancel,
-                        color: Colors.black,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      }),
-                )
-              ],
-            ),
-          ),
+        padding: EdgeInsets.only(top: padding, bottom: padding),
+        child: Column(
+          children: buildWeekdayStreamGroup(startDayNumber, context),
         ),
       );
     }),
   );
 }
 
-List<Widget> buildWeekdayStreamGroup(int startDayNumber) {
+List<Widget> buildWeekdayStreamGroup(int startDayNumber, BuildContext context) {
   DateTime weekEditorDateTime =
       DateTime(dateTime.year, dateTime.month, startDayNumber);
   List<Widget> listOfStreams = [];
@@ -2091,6 +2071,19 @@ List<Widget> buildWeekdayStreamGroup(int startDayNumber) {
         month: newDateTime.month,
         day: newDateTime.day));
   }
+  listOfStreams.add(
+    Material(
+      borderRadius: BorderRadius.circular(15.0),
+      child: IconButton(
+          icon: Icon(
+            Icons.cancel,
+            color: Colors.black,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          }),
+    ),
+  );
 
   return listOfStreams;
 }
