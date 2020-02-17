@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: loginScaffoldKey,
-      backgroundColor: textIconColor,
+      backgroundColor: Theme.of(context).textSelectionColor,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
@@ -130,9 +130,13 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 24.0,
             ),
             RoundedButton(
-              color: primaryColor,
+              color: Theme.of(context).primaryColor,
               title: 'Log In',
               onPressed: () async {
+                emailInputController.text =
+                    emailInputController.text.replaceAll(' ', '');
+                pwdInputController.text =
+                    pwdInputController.text.replaceAll(' ', '');
                 if (_loginFormKey.currentState.validate()) {
                   try {
                     final user = await _auth
@@ -240,7 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
       "Wrong email or password",
       style: TextStyle(
           fontSize: 13.0,
-          color: accentColor,
+          color: Theme.of(context).accentColor,
           height: 1.0,
           fontWeight: FontWeight.w300),
     )));

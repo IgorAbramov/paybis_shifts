@@ -32,6 +32,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       key: settingsScaffoldKey,
       appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColorDark,
         title: Text('Settings'),
       ),
       body: (employee.department == kSuperAdmin)
@@ -53,6 +54,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   buttonText: 'Change password',
                   function: openConfirmationWindow,
                 ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text('Version: 6.0.0'),
+                ),
                 //TODO add options to change appearance of the shifts screen and theme
               ],
             )
@@ -62,6 +67,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 SettingsButton(
                   buttonText: 'Change password',
                   function: openConfirmationWindow,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text('Version: 6.0.0'),
                 ),
               ],
             ),
@@ -99,7 +108,7 @@ class _SettingsButtonState extends State<SettingsButton> {
       child: RoundedButton(
         onPressed: widget.function,
         title: widget.buttonText,
-        color: primaryColor,
+        color: Theme.of(context).primaryColor,
       ),
     );
   }
@@ -134,7 +143,7 @@ openPasswordChangeConfirmationAlertBox(BuildContext context, String title) {
                   height: 5.0,
                 ),
                 Divider(
-                  color: dividerColor,
+                  color: Theme.of(context).dividerColor,
                   height: 4.0,
                 ),
                 Row(
@@ -151,7 +160,7 @@ openPasswordChangeConfirmationAlertBox(BuildContext context, String title) {
                           child: Container(
                             padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
                             decoration: BoxDecoration(
-                              color: primaryColor,
+                              color: Theme.of(context).primaryColor,
                               borderRadius: BorderRadius.only(
                                 bottomLeft: Radius.circular(32.0),
                               ),
@@ -159,7 +168,7 @@ openPasswordChangeConfirmationAlertBox(BuildContext context, String title) {
                             child: Text(
                               "Yes",
                               style: TextStyle(
-                                  color: textIconColor,
+                                  color: Theme.of(context).textSelectionColor,
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center,
@@ -178,14 +187,14 @@ openPasswordChangeConfirmationAlertBox(BuildContext context, String title) {
                           child: Container(
                             padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
                             decoration: BoxDecoration(
-                              color: accentColor,
+                              color: Theme.of(context).accentColor,
                               borderRadius: BorderRadius.only(
                                   bottomRight: Radius.circular(32.0)),
                             ),
                             child: Text(
                               "Cancel",
                               style: TextStyle(
-                                  color: textIconColor,
+                                  color: Theme.of(context).textSelectionColor,
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center,

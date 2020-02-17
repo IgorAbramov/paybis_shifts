@@ -85,7 +85,8 @@ class EventsViewState extends State<EventsView> {
                           child: new Card(
                             color: Colors.amberAccent,
                             elevation: 10.0,
-                            shape: Border.all(color: Colors.black),
+                            shape: Border.all(
+                                color: Theme.of(context).indicatorColor),
                             child: new Row(
                               children: <Widget>[
                                 new Expanded(

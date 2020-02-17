@@ -109,7 +109,7 @@ const TextStyle kDateFontStyle = TextStyle(
   color: textPrimaryColor,
 );
 
-const TextStyle kButtonFontStyle = TextStyle(
+const TextStyle kButtonStyle = TextStyle(
   fontSize: 14.0,
   fontWeight: FontWeight.bold,
   color: textIconColor,
@@ -162,3 +162,12 @@ const Color accentColor = Color(0xFFFF5252);
 const Color textPrimaryColor = Color(0xFF212121);
 const Color secondaryColor = Color(0xFF757575);
 const Color dividerColor = Color(0xFFBDBDBD);
+
+//const Color darkPrimaryColor = Color(0xFF212121);
+//const Color lightPrimaryColor = Color(0xFF212121);
+//const Color primaryColor = Color(0xFF212121);
+//const Color textIconColor = Color(0xFFFFFFFF);
+//const Color accentColor = Color(0xFFFF5252);
+//const Color textPrimaryColor = Color(0xFFFFFFFF);
+//const Color secondaryColor = Color(0xFF212121);
+//const Color dividerColor = Color(0xFFBDBDBD);

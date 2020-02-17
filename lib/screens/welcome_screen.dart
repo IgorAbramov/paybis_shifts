@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/ui_parts/rounded_button.dart';
 
@@ -19,7 +18,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: textIconColor,
+      backgroundColor: Theme.of(context).textSelectionColor,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
@@ -42,7 +41,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   style: TextStyle(
                     fontSize: 36.0,
                     fontWeight: FontWeight.w900,
-                    color: primaryColor,
+                    color: Theme.of(context).primaryColor,
                     fontFamily: "Horizon",
                   ),
                 ),
@@ -52,7 +51,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               height: 48.0,
             ),
             RoundedButton(
-              color: primaryColor,
+              color: Theme.of(context).primaryColor,
               title: 'Log In',
               onPressed: () {
                 //Go to login screen.

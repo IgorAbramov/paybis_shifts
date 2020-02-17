@@ -62,6 +62,7 @@ class _StatsScreenState extends State<StatsScreen> {
     return (employee.department == kSuperAdmin || employee.department == kAdmin)
         ? Scaffold(
             appBar: AppBar(
+              backgroundColor: Theme.of(context).primaryColorDark,
               title: Text('Stats for ${getMonthName(dateTime.month)}'),
             ),
             body: Container(
@@ -89,48 +90,49 @@ class _StatsScreenState extends State<StatsScreen> {
                           },
                     children: [
                       TableRow(
-                        decoration: BoxDecoration(color: darkPrimaryColor),
+                        decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColorDark),
                         children: (employee.department == kSuperAdmin)
                             ? [
                                 TableCell(
                                   child: Text(
                                     'Name',
-                                    style: kButtonFontStyle,
+                                    style: kButtonStyle,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                                 TableCell(
                                   child: Text(
                                     'Salary',
-                                    style: kButtonFontStyle,
+                                    style: kButtonStyle,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                                 TableCell(
                                   child: Text(
                                     'Shifts',
-                                    style: kButtonFontStyle,
+                                    style: kButtonStyle,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                                 TableCell(
                                   child: Text(
                                     'Nights',
-                                    style: kButtonFontStyle,
+                                    style: kButtonStyle,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                                 TableCell(
                                   child: Text(
                                     'Mornings',
-                                    style: kButtonFontStyle,
+                                    style: kButtonStyle,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                                 TableCell(
                                   child: Text(
                                     'Evenings',
-                                    style: kButtonFontStyle,
+                                    style: kButtonStyle,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -139,35 +141,35 @@ class _StatsScreenState extends State<StatsScreen> {
                                 TableCell(
                                   child: Text(
                                     'Name',
-                                    style: kButtonFontStyle,
+                                    style: kButtonStyle,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                                 TableCell(
                                   child: Text(
                                     'Shifts',
-                                    style: kButtonFontStyle,
+                                    style: kButtonStyle,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                                 TableCell(
                                   child: Text(
                                     'Nights',
-                                    style: kButtonFontStyle,
+                                    style: kButtonStyle,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                                 TableCell(
                                   child: Text(
                                     'Mornings',
-                                    style: kButtonFontStyle,
+                                    style: kButtonStyle,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                                 TableCell(
                                   child: Text(
                                     'Evenings',
-                                    style: kButtonFontStyle,
+                                    style: kButtonStyle,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -224,6 +226,7 @@ class _StatsScreenState extends State<StatsScreen> {
           )
         : Scaffold(
             appBar: AppBar(
+              backgroundColor: Theme.of(context).primaryColorDark,
               title: Text(
                   'Hi ${employee.name}! Stats for ${getMonthName(dateTime.month)}'),
             ),
@@ -505,7 +508,8 @@ class StatsForTheEmp extends StatelessWidget {
             children: <TextSpan>[
               TextSpan(
                 text: ' $amountOfShiftsThisMonth',
-                style: TextStyle(color: darkPrimaryColor, fontSize: 22.0),
+                style: TextStyle(
+                    color: Theme.of(context).primaryColorDark, fontSize: 22.0),
               ),
             ],
           ),
@@ -528,7 +532,8 @@ class StatsForTheEmp extends StatelessWidget {
             children: <TextSpan>[
               TextSpan(
                 text: ' ${salary.toStringAsFixed(2)}',
-                style: TextStyle(color: darkPrimaryColor, fontSize: 22.0),
+                style: TextStyle(
+                    color: Theme.of(context).primaryColorDark, fontSize: 22.0),
               ),
             ],
           ),
@@ -579,27 +584,27 @@ class StatsObject extends StatelessWidget {
           },
           children: [
             TableRow(
-              decoration:
-                  BoxDecoration(color: darkPrimaryColor.withOpacity(0.7)),
+              decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColorDark.withOpacity(0.7)),
               children: [
                 TableCell(
                   child: Text(
                     name,
-                    style: kButtonFontStyle,
+                    style: kButtonStyle,
                     textAlign: TextAlign.center,
                   ),
                 ),
                 TableCell(
                   child: Text(
                     '${salary.toStringAsFixed(2)}',
-                    style: kButtonFontStyle,
+                    style: kButtonStyle,
                     textAlign: TextAlign.center,
                   ),
                 ),
                 TableCell(
                   child: Text(
                     '$amountOfShifts',
-                    style: kButtonFontStyle,
+                    style: kButtonStyle,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -607,11 +612,11 @@ class StatsObject extends StatelessWidget {
                   child: Column(children: <Widget>[
                     Text(
                       '$amountOfNightShifts',
-                      style: kButtonFontStyle,
+                      style: kButtonStyle,
                     ),
                     Text(
                       '($nightHours)',
-                      style: kButtonFontStyle,
+                      style: kButtonStyle,
                     ),
                   ]),
                 ),
@@ -619,11 +624,11 @@ class StatsObject extends StatelessWidget {
                   child: Column(children: <Widget>[
                     Text(
                       '$amountOfMorningShifts',
-                      style: kButtonFontStyle,
+                      style: kButtonStyle,
                     ),
                     Text(
                       '($morningHours)',
-                      style: kButtonFontStyle,
+                      style: kButtonStyle,
                     ),
                   ]),
                 ),
@@ -631,11 +636,11 @@ class StatsObject extends StatelessWidget {
                   child: Column(children: <Widget>[
                     Text(
                       '$amountOfEveningShifts',
-                      style: kButtonFontStyle,
+                      style: kButtonStyle,
                     ),
                     Text(
                       '($eveningHours)',
-                      style: kButtonFontStyle,
+                      style: kButtonStyle,
                     ),
                   ]),
                 ),
@@ -686,20 +691,20 @@ class StatsObjectWithoutSalary extends StatelessWidget {
           },
           children: [
             TableRow(
-              decoration:
-                  BoxDecoration(color: darkPrimaryColor.withOpacity(0.7)),
+              decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColorDark.withOpacity(0.7)),
               children: [
                 TableCell(
                   child: Text(
                     name,
-                    style: kButtonFontStyle,
+                    style: kButtonStyle,
                     textAlign: TextAlign.center,
                   ),
                 ),
                 TableCell(
                   child: Text(
                     '$amountOfShifts',
-                    style: kButtonFontStyle,
+                    style: kButtonStyle,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -707,11 +712,11 @@ class StatsObjectWithoutSalary extends StatelessWidget {
                   child: Column(children: <Widget>[
                     Text(
                       '$amountOfNightShifts',
-                      style: kButtonFontStyle,
+                      style: kButtonStyle,
                     ),
                     Text(
                       '($nightHours)',
-                      style: kButtonFontStyle,
+                      style: kButtonStyle,
                     ),
                   ]),
                 ),
@@ -719,11 +724,11 @@ class StatsObjectWithoutSalary extends StatelessWidget {
                   child: Column(children: <Widget>[
                     Text(
                       '$amountOfMorningShifts',
-                      style: kButtonFontStyle,
+                      style: kButtonStyle,
                     ),
                     Text(
                       '($morningHours)',
-                      style: kButtonFontStyle,
+                      style: kButtonStyle,
                     ),
                   ]),
                 ),
@@ -731,11 +736,11 @@ class StatsObjectWithoutSalary extends StatelessWidget {
                   child: Column(children: <Widget>[
                     Text(
                       '$amountOfEveningShifts',
-                      style: kButtonFontStyle,
+                      style: kButtonStyle,
                     ),
                     Text(
                       '($eveningHours)',
-                      style: kButtonFontStyle,
+                      style: kButtonStyle,
                     ),
                   ]),
                 ),

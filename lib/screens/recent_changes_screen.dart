@@ -17,6 +17,7 @@ class _RecentChangesScreenState extends State<RecentChangesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColorDark,
         title: Text('Recent Changes'),
       ),
       body: Container(
@@ -68,7 +69,8 @@ class Change extends StatelessWidget {
       child: ListTile(
         title: Text(
           text,
-          style: TextStyle(color: confirmed ? Colors.green : accentColor),
+          style: TextStyle(
+              color: confirmed ? Colors.green : Theme.of(context).accentColor),
         ),
         subtitle: Text(timestamp.toDate().toString()),
       ),

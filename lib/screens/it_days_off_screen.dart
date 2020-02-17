@@ -25,6 +25,7 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
     return Scaffold(
       key: itDaysOffScaffoldKey,
       appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColorDark,
         title: Text('IT Days off'),
         actions: <Widget>[
           (employee.department == kAdmin || employee.department == kSuperAdmin)
@@ -32,7 +33,7 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                   ? IconButton(
                       icon: Icon(
                         Icons.edit,
-                        color: Colors.white,
+                        color: Theme.of(context).textSelectionColor,
                       ),
                       onPressed: () {
                         showAdminMarkerAlertDialogITDaysOff(context);
@@ -40,7 +41,7 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                     )
                   : Material(
                       elevation: 5.0,
-                      color: Colors.black,
+                      color: Theme.of(context).indicatorColor,
                       borderRadius: BorderRadius.circular(30.0),
                       child: MaterialButton(
                         onPressed: () {
@@ -53,7 +54,7 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                         child: Text(
                           _markerInitials,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Theme.of(context).textSelectionColor,
                             fontSize: 16.0,
                           ),
                         ),
@@ -79,7 +80,8 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
               },
               children: [
                 TableRow(
-                  decoration: BoxDecoration(color: darkPrimaryColor),
+                  decoration:
+                      BoxDecoration(color: Theme.of(context).primaryColorDark),
                   children: [
                     TableCell(
                       child: Text(
@@ -117,7 +119,7 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                         left: 16.0, right: 4.0, top: 8.0, bottom: 8.0),
                     child: Material(
                       elevation: 5.0,
-                      color: darkPrimaryColor,
+                      color: Theme.of(context).primaryColorDark,
                       borderRadius: BorderRadius.circular(15.0),
                       child: MaterialButton(
                         onPressed: () {
@@ -127,7 +129,7 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                         },
                         child: Icon(
                           Icons.navigate_before,
-                          color: Colors.white,
+                          color: Theme.of(context).textSelectionColor,
                         ),
                       ),
                     ),
@@ -145,7 +147,7 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                       child: MaterialButton(
                         child: Text(
                           getMonthName(dateTime.month),
-                          style: kButtonFontStyle,
+                          style: kButtonStyle,
                         ),
                       ),
                     ),
@@ -158,7 +160,7 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                         left: 4.0, right: 16.0, top: 8.0, bottom: 8.0),
                     child: Material(
                       elevation: 5.0,
-                      color: darkPrimaryColor,
+                      color: Theme.of(context).primaryColorDark,
                       borderRadius: BorderRadius.circular(15.0),
                       child: MaterialButton(
                         onPressed: () {
@@ -168,7 +170,7 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                         },
                         child: Icon(
                           Icons.navigate_next,
-                          color: Colors.white,
+                          color: Theme.of(context).textSelectionColor,
                         ),
                       ),
                     ),
@@ -217,7 +219,7 @@ class _ItDaysOffScreenState extends State<ItDaysOffScreen> {
                     child: CheckboxListTile(
                       title: Text('Unpaid'),
                       value: unpaid,
-                      checkColor: Colors.white,
+                      checkColor: Theme.of(context).textSelectionColor,
                       onChanged: (value) {
                         setState(() {
                           unpaid = value;
@@ -289,7 +291,7 @@ class ITDaysOffStream extends StatelessWidget {
 
           final dayWithShiftsUI = Table(
             border: TableBorder.all(
-              color: textPrimaryColor,
+              color: Theme.of(context).indicatorColor,
             ),
             columnWidths: {
               0: FlexColumnWidth(0.2),
@@ -301,8 +303,8 @@ class ITDaysOffStream extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: ('${dayWithShifts.day}${dayWithShifts.month}' ==
                           '${DateTime.now().day}${DateTime.now().month}')
-                      ? primaryColor.withOpacity(0.4)
-                      : Colors.white,
+                      ? Theme.of(context).primaryColor.withOpacity(0.4)
+                      : Theme.of(context).textSelectionColor,
                 ),
                 children: [
                   DateTableCellDaysOffIt(
@@ -479,7 +481,6 @@ class ITDayOffRoundButton extends StatefulWidget {
 }
 
 class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
-  Color color = primaryColor;
   String buttonText = '+';
   double size = 26.0;
   double bottom = 5.0;
@@ -493,6 +494,8 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
 
   @override
   Widget build(BuildContext context) {
+    Color color = Theme.of(context).primaryColor;
+
     bool isLong = false;
     date = '${widget.day}.${widget.month}';
     documentID = widget.documentID;
@@ -543,7 +546,7 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                         }
                       });
                     },
-                    color: textIconColor,
+                    color: Theme.of(context).textSelectionColor,
                     shape: CircleBorder(),
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 3.0, right: 0.0),
@@ -551,7 +554,7 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                         buttonText,
                         style: TextStyle(
                           fontSize: size,
-                          color: textPrimaryColor,
+                          color: Theme.of(context).indicatorColor,
                         ),
                       ),
                     ),
@@ -607,8 +610,8 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                         style: TextStyle(
                           fontSize: isLong ? 13.0 : 16.0,
                           color: (widget.unpaid == '')
-                              ? textIconColor
-                              : accentColor,
+                              ? Theme.of(context).textSelectionColor
+                              : Theme.of(context).accentColor,
                         ),
                       ),
                       padding: EdgeInsets.all(0.0),
@@ -629,7 +632,7 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                     //  onPressed: () {
                     //  },
 
-                    color: primaryColor,
+                    color: Theme.of(context).primaryColor,
                     shape: CircleBorder(),
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
@@ -637,7 +640,7 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                         '',
                         style: TextStyle(
                           fontSize: size,
-                          color: textIconColor,
+                          color: Theme.of(context).textSelectionColor,
                         ),
                       ),
                     ),
@@ -653,7 +656,7 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                         child: Material(
                             color: (employee != null)
                                 ? (widget.text == employee.initial)
-                                    ? textPrimaryColor
+                                    ? Theme.of(context).indicatorColor
                                     : color.withOpacity(0)
                                 : color.withOpacity(0),
                             borderRadius: BorderRadius.circular(15.0),
@@ -661,9 +664,9 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                               onPressed: () {},
                               color: (employee != null)
                                   ? (widget.text == employee.initial)
-                                      ? darkPrimaryColor
+                                      ? Theme.of(context).primaryColorDark
                                       : (widget.text == highlighted)
-                                          ? textPrimaryColor
+                                          ? Theme.of(context).indicatorColor
                                           : color.withOpacity(0.25)
                                   : color,
                               shape: CircleBorder(),
@@ -675,8 +678,8 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                                   style: TextStyle(
                                     fontSize: isLong ? 13.0 : 16.0,
                                     color: (widget.unpaid == '')
-                                        ? textIconColor
-                                        : accentColor,
+                                        ? Theme.of(context).textSelectionColor
+                                        : Theme.of(context).accentColor,
                                   ),
                                 ),
                               ),
@@ -712,7 +715,9 @@ class DateTableCellDaysOffIt extends StatelessWidget {
             style: TextStyle(
               fontSize: 11.0,
               fontWeight: FontWeight.bold,
-              color: isWeekend ? accentColor : textPrimaryColor,
+              color: isWeekend
+                  ? Theme.of(context).accentColor
+                  : Theme.of(context).indicatorColor,
             ),
           ),
           Text(
@@ -720,7 +725,9 @@ class DateTableCellDaysOffIt extends StatelessWidget {
             style: TextStyle(
               fontSize: 11.0,
               fontWeight: FontWeight.bold,
-              color: isWeekend ? accentColor : textPrimaryColor,
+              color: isWeekend
+                  ? Theme.of(context).accentColor
+                  : Theme.of(context).indicatorColor,
             ),
           ),
         ],
@@ -767,7 +774,7 @@ showAdminAlertDialogDaysOff(
                   child: CheckboxListTile(
                     title: Text('Unpaid'),
                     value: unpaid,
-                    checkColor: Colors.white,
+                    checkColor: Theme.of(context).textSelectionColor,
                     onChanged: (value) {
                       setState(() {
                         unpaid = value;
@@ -824,7 +831,7 @@ List<Widget> listMyITWidgets(BuildContext context) {
               emp.name,
               style: TextStyle(
                 fontSize: (emp.name.length <= 7) ? 17.0 : 14.0,
-                color: textIconColor,
+                color: Theme.of(context).textSelectionColor,
               ),
             ),
           ),
@@ -836,7 +843,7 @@ List<Widget> listMyITWidgets(BuildContext context) {
     padding: const EdgeInsets.all(5.0),
     child: Material(
       elevation: 5.0,
-      color: textPrimaryColor,
+      color: Theme.of(context).indicatorColor,
       borderRadius: BorderRadius.circular(15.0),
       child: MaterialButton(
         onPressed: () {

@@ -55,8 +55,9 @@ class CalendarState extends State<CalendarScreen> {
     final double itemWidth = size.width / numWeekDays;
 
     return Scaffold(
-        drawerScrimColor: Colors.white,
+        drawerScrimColor: Theme.of(context).textSelectionColor,
         appBar: AppBar(
+          backgroundColor: Theme.of(context).primaryColorDark,
           title: FittedBox(
               fit: BoxFit.contain,
               child: Text(
@@ -66,7 +67,7 @@ class CalendarState extends State<CalendarScreen> {
             IconButton(
                 icon: Icon(
                   Icons.chevron_left,
-                  color: Colors.white,
+                  color: Theme.of(context).textSelectionColor,
                 ),
                 onPressed: () {
                   setState(() {
@@ -77,7 +78,7 @@ class CalendarState extends State<CalendarScreen> {
             IconButton(
                 icon: Icon(
                   Icons.chevron_right,
-                  color: Colors.white,
+                  color: Theme.of(context).textSelectionColor,
                 ),
                 onPressed: () {
                   setState(() {
@@ -157,37 +158,44 @@ class CalendarState extends State<CalendarScreen> {
                           child: Text('Mon',
                               textAlign: TextAlign.center,
                               style: kHeaderFontStyle.copyWith(
-                                  fontSize: 18, color: Colors.black))),
+                                  fontSize: 18,
+                                  color: Theme.of(context).indicatorColor))),
                       Expanded(
                           child: Text('Tue',
                               textAlign: TextAlign.center,
                               style: kHeaderFontStyle.copyWith(
-                                  fontSize: 18, color: Colors.black))),
+                                  fontSize: 18,
+                                  color: Theme.of(context).indicatorColor))),
                       Expanded(
                           child: Text('Wed',
                               textAlign: TextAlign.center,
                               style: kHeaderFontStyle.copyWith(
-                                  fontSize: 18, color: Colors.black))),
+                                  fontSize: 18,
+                                  color: Theme.of(context).indicatorColor))),
                       Expanded(
                           child: Text('Thu',
                               textAlign: TextAlign.center,
                               style: kHeaderFontStyle.copyWith(
-                                  fontSize: 18, color: Colors.black))),
+                                  fontSize: 18,
+                                  color: Theme.of(context).indicatorColor))),
                       Expanded(
                           child: Text('Fri',
                               textAlign: TextAlign.center,
                               style: kHeaderFontStyle.copyWith(
-                                  fontSize: 18, color: Colors.black))),
+                                  fontSize: 18,
+                                  color: Theme.of(context).indicatorColor))),
                       Expanded(
                           child: Text('Sat',
                               textAlign: TextAlign.center,
                               style: kHeaderFontStyle.copyWith(
-                                  fontSize: 18, color: accentColor))),
+                                  fontSize: 18,
+                                  color: Theme.of(context).accentColor))),
                       Expanded(
                           child: Text('Sun',
                               textAlign: TextAlign.center,
                               style: kHeaderFontStyle.copyWith(
-                                  fontSize: 18, color: accentColor))),
+                                  fontSize: 18,
+                                  color: Theme.of(context).accentColor))),
                     ],
                     mainAxisSize: MainAxisSize.min,
                   ),
@@ -206,17 +214,21 @@ class CalendarState extends State<CalendarScreen> {
                               margin: const EdgeInsets.all(1.0),
                               padding: const EdgeInsets.all(1.0),
                               decoration: BoxDecoration(
-                                gradient: RadialGradient(
-                                    colors: [primaryColor, darkPrimaryColor]),
+                                gradient: RadialGradient(colors: [
+                                  Theme.of(context).primaryColor,
+                                  Theme.of(context).primaryColorDark
+                                ]),
                                 color: ((dayNumber - _beginMonthPadding) ==
                                             DateTime.now().day &&
                                         dateTime.month ==
                                             DateTime.now().month &&
                                         dateTime.year == DateTime.now().year)
-                                    ? darkPrimaryColor
+                                    ? Theme.of(context).primaryColorDark
                                     : (dayNumber - _beginMonthPadding <= 0)
                                         ? Colors.transparent
-                                        : darkPrimaryColor.withOpacity(0.1),
+                                        : Theme.of(context)
+                                            .primaryColorDark
+                                            .withOpacity(0.1),
                                 border: Border.all(color: Colors.grey),
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(10.0)),
@@ -265,10 +277,8 @@ class CalendarState extends State<CalendarScreen> {
           child: Text(
             (dayNumber - _beginMonthPadding).toString(),
             textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .headline6
-                .copyWith(color: Colors.white, fontSize: 20.0),
+            style: Theme.of(context).textTheme.headline6.copyWith(
+                color: Theme.of(context).textSelectionColor, fontSize: 20.0),
           ),
         ),
       );
@@ -296,8 +306,8 @@ class CalendarState extends State<CalendarScreen> {
                           dayNumber == 28 ||
                           dayNumber == 34 ||
                           dayNumber == 35)
-                      ? accentColor
-                      : textPrimaryColor,
+                      ? Theme.of(context).accentColor
+                      : Theme.of(context).indicatorColor,
                 ),
           ),
         ),
@@ -398,7 +408,7 @@ class CalendarState extends State<CalendarScreen> {
                   maxLines: 1,
                   style: TextStyle(
                       fontSize: 13.0,
-                      color: textPrimaryColor,
+                      color: Theme.of(context).indicatorColor,
                       fontWeight: FontWeight.bold,
                       background: Paint()..color = Colors.transparent),
                 ),
@@ -413,7 +423,7 @@ class CalendarState extends State<CalendarScreen> {
                         maxLines: 1,
                         style: TextStyle(
                             fontSize: 13.0,
-                            color: textPrimaryColor,
+                            color: Theme.of(context).indicatorColor,
                             fontWeight: FontWeight.bold,
                             background: Paint()..color = Colors.transparent),
                       ))

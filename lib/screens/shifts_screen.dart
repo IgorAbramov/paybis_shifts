@@ -97,9 +97,9 @@ class _ShiftScreenState extends State<ShiftScreen> {
     daysWithShiftsForCountThisMonth.clear();
     return Scaffold(
       key: shiftsScaffoldKey,
-      backgroundColor: textIconColor,
+      backgroundColor: Theme.of(context).textSelectionColor,
       appBar: AppBar(
-        backgroundColor: darkPrimaryColor,
+        backgroundColor: Theme.of(context).primaryColorDark,
         automaticallyImplyLeading: false,
         title: Text('PayBis Schedule'),
         actions: <Widget>[
@@ -108,7 +108,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                   ? IconButton(
                       icon: Icon(
                         Icons.edit,
-                        color: Colors.white,
+                        color: Theme.of(context).textSelectionColor,
                       ),
                       onPressed: () {
                         showAdminMarkerAlertDialog(context);
@@ -116,7 +116,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                     )
                   : Material(
                       elevation: 5.0,
-                      color: Colors.black,
+                      color: Theme.of(context).indicatorColor,
                       borderRadius: BorderRadius.circular(30.0),
                       child: MaterialButton(
                         onPressed: () {
@@ -128,7 +128,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                         child: Text(
                           _markerInitials,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Theme.of(context).textSelectionColor,
                             fontSize: 16.0,
                           ),
                         ),
@@ -140,13 +140,13 @@ class _ShiftScreenState extends State<ShiftScreen> {
           IconButton(
               icon: Icon(
                 Icons.today,
-                color: Colors.white,
+                color: Theme.of(context).textSelectionColor,
               ),
               onPressed: goToCalendar),
           (employee.department != kAdmin && employee.department != kSuperAdmin)
               ? (employee.hasCar)
                   ? PopupMenuButton<String>(
-                      color: textPrimaryColor.withOpacity(0.8),
+                      color: Theme.of(context).indicatorColor.withOpacity(0.8),
                       elevation: 4.0,
                       shape: RoundedRectangleBorder(
                           borderRadius:
@@ -159,7 +159,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                             child: Text(
                               choice,
                               style: TextStyle(
-                                color: textIconColor,
+                                color: Theme.of(context).textSelectionColor,
                               ),
                             ),
                           );
@@ -168,7 +168,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                       onSelected: choicesAction,
                     )
                   : PopupMenuButton<String>(
-                      color: textPrimaryColor.withOpacity(0.8),
+                      color: Theme.of(context).indicatorColor.withOpacity(0.8),
                       elevation: 4.0,
                       shape: RoundedRectangleBorder(
                           borderRadius:
@@ -180,7 +180,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                             child: Text(
                               choice,
                               style: TextStyle(
-                                color: textIconColor,
+                                color: Theme.of(context).textSelectionColor,
                               ),
                             ),
                           );
@@ -190,7 +190,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                     )
               : (employee.department == kAdmin)
                   ? PopupMenuButton<String>(
-                      color: textPrimaryColor.withOpacity(0.8),
+                      color: Theme.of(context).indicatorColor.withOpacity(0.8),
                       elevation: 4.0,
                       shape: RoundedRectangleBorder(
                           borderRadius:
@@ -202,7 +202,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                             child: Text(
                               choice,
                               style: TextStyle(
-                                color: textIconColor,
+                                color: Theme.of(context).textSelectionColor,
                               ),
                             ),
                           );
@@ -211,7 +211,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                       onSelected: choicesAction,
                     )
                   : PopupMenuButton<String>(
-                      color: textPrimaryColor.withOpacity(0.8),
+                      color: Theme.of(context).indicatorColor.withOpacity(0.8),
                       elevation: 4.0,
                       shape: RoundedRectangleBorder(
                           borderRadius:
@@ -223,7 +223,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                             child: Text(
                               choice,
                               style: TextStyle(
-                                color: textIconColor,
+                                color: Theme.of(context).textSelectionColor,
                               ),
                             ),
                           );
@@ -247,7 +247,8 @@ class _ShiftScreenState extends State<ShiftScreen> {
             },
             children: [
               TableRow(
-                decoration: BoxDecoration(color: darkPrimaryColor),
+                decoration:
+                    BoxDecoration(color: Theme.of(context).primaryColorDark),
                 children: [
                   TableCell(
                     child: Text(
@@ -295,7 +296,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                       left: 16.0, right: 4.0, top: 8.0, bottom: 8.0),
                   child: Material(
                     elevation: 5.0,
-                    color: darkPrimaryColor,
+                    color: Theme.of(context).primaryColorDark,
                     borderRadius: BorderRadius.circular(15.0),
                     child: MaterialButton(
                       onPressed: () {
@@ -305,7 +306,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                       },
                       child: Icon(
                         Icons.navigate_before,
-                        color: Colors.white,
+                        color: Theme.of(context).textSelectionColor,
                       ),
                     ),
                   ),
@@ -327,7 +328,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                       },
                       child: Text(
                         getMonthName(dateTime.month),
-                        style: kButtonFontStyle,
+                        style: kButtonStyle,
                       ),
                     ),
                   ),
@@ -366,7 +367,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                       left: 4.0, right: 16.0, top: 8.0, bottom: 8.0),
                   child: Material(
                     elevation: 5.0,
-                    color: darkPrimaryColor,
+                    color: Theme.of(context).primaryColorDark,
                     borderRadius: BorderRadius.circular(15.0),
                     child: MaterialButton(
                       onPressed: () {
@@ -376,7 +377,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                       },
                       child: Icon(
                         Icons.navigate_next,
-                        color: Colors.white,
+                        color: Theme.of(context).textSelectionColor,
                       ),
                     ),
                   ),
@@ -567,7 +568,7 @@ class DaysStream extends StatelessWidget {
 
           final dayWithShiftsUI = Table(
             border: TableBorder.all(
-              color: textPrimaryColor,
+              color: Theme.of(context).indicatorColor,
             ),
             columnWidths: {
               0: FlexColumnWidth(0.15),
@@ -580,8 +581,8 @@ class DaysStream extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: ('${dayWithShifts.day}${dayWithShifts.month}' ==
                           '${DateTime.now().day}${DateTime.now().month}')
-                      ? primaryColor.withOpacity(0.4)
-                      : Colors.white,
+                      ? Theme.of(context).primaryColor.withOpacity(0.4)
+                      : Theme.of(context).textSelectionColor,
                 ),
                 children: [
                   DateTableCell(
@@ -810,7 +811,7 @@ class DaysStream extends StatelessWidget {
                       }
                     },
                     child: Container(
-                      color: Colors.white,
+                      color: Theme.of(context).textSelectionColor,
                       height: 20.0,
                       width: 600.0,
                     ),
@@ -830,7 +831,7 @@ class DaysStream extends StatelessWidget {
                       }
                     },
                     child: Container(
-                      color: accentColor,
+                      color: Theme.of(context).accentColor,
                       height: 20.0,
                       width: 600.0,
                       child: Center(
@@ -839,7 +840,7 @@ class DaysStream extends StatelessWidget {
                           style: TextStyle(
                             fontSize: ScreenUtil().setSp(45),
                             fontWeight: FontWeight.bold,
-                            color: textIconColor,
+                            color: Theme.of(context).textSelectionColor,
                           ),
                         ),
                       ),
@@ -861,7 +862,7 @@ class DaysStream extends StatelessWidget {
                           padding: const EdgeInsets.all(8.0),
                           child: Material(
                             elevation: 5.0,
-                            color: darkPrimaryColor,
+                            color: Theme.of(context).primaryColorDark,
                             borderRadius: BorderRadius.circular(15.0),
                             child: MaterialButton(
                               height: 50.00,
@@ -995,7 +996,9 @@ class DateTableCell extends StatelessWidget {
                     style: TextStyle(
                       fontSize: ScreenUtil().setSp(29),
                       fontWeight: FontWeight.bold,
-                      color: isWeekend ? accentColor : textPrimaryColor,
+                      color: isWeekend
+                          ? Theme.of(context).accentColor
+                          : Theme.of(context).indicatorColor,
                     ),
                   ),
                 ),
@@ -1006,7 +1009,9 @@ class DateTableCell extends StatelessWidget {
                     style: TextStyle(
                       fontSize: ScreenUtil().setSp(29),
                       fontWeight: FontWeight.bold,
-                      color: isWeekend ? accentColor : textPrimaryColor,
+                      color: isWeekend
+                          ? Theme.of(context).accentColor
+                          : Theme.of(context).indicatorColor,
                     ),
                   ),
                 ),
@@ -1048,7 +1053,6 @@ class ShiftsRoundButton extends StatefulWidget {
 }
 
 class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
-  Color color = primaryColor;
   String buttonText = '+';
   double size = 26.0;
 
@@ -1064,6 +1068,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 
   @override
   Widget build(BuildContext context) {
+    Color color = Theme.of(context).primaryColor;
     bool isLong = false;
     date = '${widget.day}.${widget.month}';
     documentID = widget.documentID;
@@ -1144,7 +1149,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                             }
                           });
                         },
-                        color: textIconColor,
+                        color: Theme.of(context).textSelectionColor,
                         shape: CircleBorder(),
                         child: Padding(
                           padding: EdgeInsets.only(bottom: 3.0, right: 0.0),
@@ -1152,7 +1157,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                             buttonText,
                             style: TextStyle(
                               fontSize: size,
-                              color: textPrimaryColor,
+                              color: Theme.of(context).indicatorColor,
                             ),
                           ),
                         ),
@@ -1206,7 +1211,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                     widget.text,
                                     style: TextStyle(
                                       fontSize: isLong ? 13.0 : 16.0,
-                                      color: textIconColor,
+                                      color:
+                                          Theme.of(context).textSelectionColor,
                                     ),
                                   ),
                                   Padding(
@@ -1218,7 +1224,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                           fontSize: 20.0,
                                           fontWeight: FontWeight.bold,
                                           color: (widget.workingHours < 8)
-                                              ? accentColor
+                                              ? Theme.of(context).accentColor
                                               : Colors.green),
                                     ),
                                   )
@@ -1228,7 +1234,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                 widget.text,
                                 style: TextStyle(
                                   fontSize: isLong ? 13.0 : 16.0,
-                                  color: textIconColor,
+                                  color: Theme.of(context).textSelectionColor,
                                 ),
                               ),
                         padding: EdgeInsets.all(0.0),
@@ -1295,7 +1301,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                     widget.text,
                                     style: TextStyle(
                                       fontSize: isLong ? 13.0 : 16.0,
-                                      color: textIconColor,
+                                      color:
+                                          Theme.of(context).textSelectionColor,
                                     ),
                                   ),
                                   Padding(
@@ -1307,7 +1314,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                           fontSize: 20.0,
                                           fontWeight: FontWeight.bold,
                                           color: (widget.workingHours < 8)
-                                              ? accentColor
+                                              ? Theme.of(context).accentColor
                                               : Colors.green),
                                     ),
                                   )
@@ -1317,7 +1324,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                 widget.text,
                                 style: TextStyle(
                                   fontSize: isLong ? 13.0 : 16.0,
-                                  color: textIconColor,
+                                  color: Theme.of(context).textSelectionColor,
                                 ),
                               ),
                         padding: EdgeInsets.all(0.0),
@@ -1338,7 +1345,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                 ? (widget.absent)
                     ? MaterialButton(
                         onPressed: () {},
-                        color: accentColor,
+                        color: Theme.of(context).accentColor,
                         shape: CircleBorder(),
                         child: Padding(
                           padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
@@ -1346,7 +1353,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                             '',
                             style: TextStyle(
                               fontSize: size,
-                              color: textIconColor,
+                              color: Theme.of(context).textSelectionColor,
                             ),
                           ),
                         ),
@@ -1362,7 +1369,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                             '',
                             style: TextStyle(
                               fontSize: size,
-                              color: textIconColor,
+                              color: Theme.of(context).textSelectionColor,
                             ),
                           ),
                         ),
@@ -1377,7 +1384,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                         child: Material(
                             color: (employee != null)
                                 ? (widget.text == employee.initial)
-                                    ? textPrimaryColor
+                                    ? Theme.of(context).indicatorColor
                                     : color.withOpacity(0)
                                 : color.withOpacity(0),
                             borderRadius: BorderRadius.circular(15.0),
@@ -1441,9 +1448,9 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                               },
                               color: (employee != null)
                                   ? (widget.text == employee.initial)
-                                      ? darkPrimaryColor
+                                      ? Theme.of(context).primaryColorDark
                                       : (widget.text == highlighted)
-                                          ? textPrimaryColor
+                                          ? Theme.of(context).indicatorColor
                                           : color.withOpacity(0.25)
                                   : color,
                               shape: CircleBorder(),
@@ -1458,7 +1465,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                             widget.text,
                                             style: TextStyle(
                                               fontSize: isLong ? 13.0 : 16.0,
-                                              color: textIconColor,
+                                              color: Theme.of(context)
+                                                  .textSelectionColor,
                                             ),
                                           ),
                                           Padding(
@@ -1473,7 +1481,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                                   fontWeight: FontWeight.bold,
                                                   color:
                                                       (widget.workingHours < 8)
-                                                          ? accentColor
+                                                          ? Theme.of(context)
+                                                              .accentColor
                                                           : Colors.green),
                                             ),
                                           )
@@ -1483,7 +1492,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                         widget.text,
                                         style: TextStyle(
                                           fontSize: isLong ? 13.0 : 16.0,
-                                          color: textIconColor,
+                                          color: Theme.of(context)
+                                              .textSelectionColor,
                                         ),
                                       ),
                               ),
@@ -1571,7 +1581,7 @@ showAdminAlertDialog(
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16.0,
-                            color: Colors.white,
+                            color: Theme.of(context).textSelectionColor,
                           ),
                         ),
                       ),
@@ -1594,14 +1604,14 @@ showAdminAlertDialog(
                         padding: const EdgeInsets.all(5.0),
                         child: Material(
                           elevation: 5.0,
-                          color: primaryColor,
+                          color: Theme.of(context).primaryColor,
                           borderRadius: BorderRadius.circular(15.0),
                           child: MaterialButton(
                             child: Text(
                               'Update',
                               style: TextStyle(
                                 fontSize: 16.0,
-                                color: textIconColor,
+                                color: Theme.of(context).textSelectionColor,
                               ),
                             ),
                             onPressed: () async {
@@ -1752,7 +1762,9 @@ List<Widget> listMyWidgets(BuildContext context, List absent) {
                 emp.name,
                 style: TextStyle(
                   fontSize: (emp.name.length <= 7) ? 17.0 : 14.0,
-                  color: isAbsent ? textPrimaryColor : textIconColor,
+                  color: isAbsent
+                      ? Theme.of(context).indicatorColor
+                      : Theme.of(context).textSelectionColor,
                 ),
               ),
             ),
@@ -1765,7 +1777,7 @@ List<Widget> listMyWidgets(BuildContext context, List absent) {
     padding: const EdgeInsets.all(5.0),
     child: Material(
       elevation: 5.0,
-      color: textPrimaryColor,
+      color: Theme.of(context).indicatorColor,
       borderRadius: BorderRadius.circular(15.0),
       child: MaterialButton(
         onPressed: () {
@@ -1813,7 +1825,7 @@ openPersonalShiftAlertBox(BuildContext context, String docID, String position,
                   height: 5.0,
                 ),
                 Divider(
-                  color: dividerColor,
+                  color: Theme.of(context).dividerColor,
                   height: 4.0,
                 ),
                 Padding(
@@ -1846,7 +1858,7 @@ openPersonalShiftAlertBox(BuildContext context, String docID, String position,
                     child: Container(
                       padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
                       decoration: BoxDecoration(
-                        color: primaryColor,
+                        color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.only(
                             bottomLeft: Radius.circular(32.0),
                             bottomRight: Radius.circular(32.0)),
@@ -1854,7 +1866,7 @@ openPersonalShiftAlertBox(BuildContext context, String docID, String position,
                       child: Text(
                         "Exchange",
                         style: TextStyle(
-                            color: textIconColor,
+                            color: Theme.of(context).textSelectionColor,
                             fontSize: 18.0,
                             fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
@@ -1907,7 +1919,7 @@ openChangeShiftsConfirmationAlertBox(
                   height: 5.0,
                 ),
                 Divider(
-                  color: dividerColor,
+                  color: Theme.of(context).dividerColor,
                   height: 4.0,
                 ),
                 Row(
@@ -1951,7 +1963,7 @@ openChangeShiftsConfirmationAlertBox(
                           child: Container(
                             padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
                             decoration: BoxDecoration(
-                              color: primaryColor,
+                              color: Theme.of(context).primaryColor,
                               borderRadius: BorderRadius.only(
                                 bottomLeft: Radius.circular(32.0),
                               ),
@@ -1959,7 +1971,7 @@ openChangeShiftsConfirmationAlertBox(
                             child: Text(
                               "Yes",
                               style: TextStyle(
-                                  color: textIconColor,
+                                  color: Theme.of(context).textSelectionColor,
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center,
@@ -1979,14 +1991,14 @@ openChangeShiftsConfirmationAlertBox(
                           child: Container(
                             padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
                             decoration: BoxDecoration(
-                              color: accentColor,
+                              color: Theme.of(context).accentColor,
                               borderRadius: BorderRadius.only(
                                   bottomRight: Radius.circular(32.0)),
                             ),
                             child: Text(
                               "Cancel",
                               style: TextStyle(
-                                  color: textIconColor,
+                                  color: Theme.of(context).textSelectionColor,
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center,
@@ -2077,7 +2089,7 @@ List<Widget> buildWeekdayStreamGroup(int startDayNumber, BuildContext context) {
       child: IconButton(
           icon: Icon(
             Icons.cancel,
-            color: Colors.black,
+            color: Theme.of(context).indicatorColor,
           ),
           onPressed: () {
             Navigator.pop(context);

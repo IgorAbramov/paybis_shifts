@@ -28,6 +28,7 @@ class _FeedScreenState extends State<FeedScreen> {
     return Scaffold(
       key: feedScaffoldKey,
       appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColorDark,
         title: Text('Requests to review'),
       ),
       body: Column(
@@ -64,7 +65,7 @@ class _FeedScreenState extends State<FeedScreen> {
                         'Your pending Requests',
                         style: TextStyle(
                           fontSize: 16.0,
-                          color: Colors.black,
+                          color: Theme.of(context).indicatorColor,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -199,7 +200,7 @@ class FeedItem extends StatelessWidget {
             text: TextSpan(
                 style: TextStyle(
                   fontSize: 14.0,
-                  color: Colors.black,
+                  color: Theme.of(context).indicatorColor,
                 ),
                 children: [
                   TextSpan(
@@ -225,7 +226,7 @@ class FeedItem extends StatelessWidget {
           ),
           children: <Widget>[
             Container(
-              color: lightPrimaryColor.withOpacity(0.05),
+              color: Theme.of(context).primaryColorLight.withOpacity(0.05),
               child: ListTile(
                 leading: (employee.department == kSupportDepartment &&
                         employee.initial == emp1)
@@ -304,7 +305,7 @@ class FeedItem extends StatelessWidget {
                         false);
                   },
                   child: CircleAvatar(
-                    backgroundColor: accentColor,
+                    backgroundColor: Theme.of(context).accentColor,
                     child: Icon(Icons.remove_circle),
                   ),
                 ),

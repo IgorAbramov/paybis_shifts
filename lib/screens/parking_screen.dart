@@ -36,14 +36,14 @@ class _ParkingScreenState extends State<ParkingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: textIconColor,
+      backgroundColor: Theme.of(context).textSelectionColor,
 //      bottomNavigationBar: BottomAppBar(
-//        color: textPrimaryColor,
+//        color: Theme.of(context).indicatorColor,
 //        elevation: 10.0,
 //      ),
       floatingActionButton: InfoFloatingActionButton(),
       appBar: AppBar(
-        backgroundColor: darkPrimaryColor,
+        backgroundColor: Theme.of(context).primaryColorDark,
         automaticallyImplyLeading: (employee.department == kAdmin ||
                 employee.department == kSuperAdmin ||
                 employee.department == kSupportDepartment)
@@ -56,7 +56,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                   ? IconButton(
                       icon: Icon(
                         Icons.edit,
-                        color: Colors.white,
+                        color: Theme.of(context).textSelectionColor,
                       ),
                       onPressed: () {
                         showAdminMarkerAlertDialogParking(context);
@@ -64,7 +64,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                     )
                   : Material(
                       elevation: 5.0,
-                      color: Colors.black,
+                      color: Theme.of(context).indicatorColor,
                       borderRadius: BorderRadius.circular(30.0),
                       child: MaterialButton(
                         onPressed: () {
@@ -77,7 +77,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                         child: Text(
                           _markerInitials,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Theme.of(context).textSelectionColor,
                             fontSize: 16.0,
                           ),
                         ),
@@ -93,7 +93,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
               ? IconButton(
                   icon: Icon(
                     Icons.today,
-                    color: Colors.white,
+                    color: Theme.of(context).textSelectionColor,
                   ),
                   onPressed: goToCalendar)
               : SizedBox(
@@ -105,7 +105,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                       height: 1.0,
                     )
                   : PopupMenuButton<String>(
-                      color: textPrimaryColor.withOpacity(0.8),
+                      color: Theme.of(context).indicatorColor.withOpacity(0.8),
                       elevation: 4.0,
                       shape: RoundedRectangleBorder(
                           borderRadius:
@@ -117,7 +117,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                             child: Text(
                               choice,
                               style: TextStyle(
-                                color: textIconColor,
+                                color: Theme.of(context).textSelectionColor,
                               ),
                             ),
                           );
@@ -129,7 +129,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                   ? IconButton(
                       icon: Icon(
                         Icons.edit,
-                        color: Colors.white,
+                        color: Theme.of(context).textSelectionColor,
                       ),
                       onPressed: () {
                         showAdminMarkerAlertDialogParking(context);
@@ -137,7 +137,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                     )
                   : Material(
                       elevation: 5.0,
-                      color: Colors.black,
+                      color: Theme.of(context).indicatorColor,
                       borderRadius: BorderRadius.circular(30.0),
                       child: MaterialButton(
                         onPressed: () {
@@ -150,7 +150,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                         child: Text(
                           _markerInitials,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Theme.of(context).textSelectionColor,
                             fontSize: 16.0,
                           ),
                         ),
@@ -172,7 +172,8 @@ class _ParkingScreenState extends State<ParkingScreen> {
               },
               children: [
                 TableRow(
-                  decoration: BoxDecoration(color: darkPrimaryColor),
+                  decoration:
+                      BoxDecoration(color: Theme.of(context).primaryColorDark),
                   children: [
                     TableCell(
                       child: Text(
@@ -210,7 +211,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                         left: 16.0, right: 4.0, top: 8.0, bottom: 8.0),
                     child: Material(
                       elevation: 5.0,
-                      color: darkPrimaryColor,
+                      color: Theme.of(context).primaryColorDark,
                       borderRadius: BorderRadius.circular(15.0),
                       child: MaterialButton(
                         onPressed: () {
@@ -220,7 +221,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                         },
                         child: Icon(
                           Icons.navigate_before,
-                          color: Colors.white,
+                          color: Theme.of(context).textSelectionColor,
                         ),
                       ),
                     ),
@@ -238,7 +239,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                       child: MaterialButton(
                         child: Text(
                           getMonthName(dateTime.month),
-                          style: kButtonFontStyle.copyWith(fontSize: 14.0),
+                          style: kButtonStyle.copyWith(fontSize: 14.0),
                         ),
                       ),
                     ),
@@ -251,7 +252,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                         left: 4.0, right: 16.0, top: 8.0, bottom: 8.0),
                     child: Material(
                       elevation: 5.0,
-                      color: darkPrimaryColor,
+                      color: Theme.of(context).primaryColorDark,
                       borderRadius: BorderRadius.circular(15.0),
                       child: MaterialButton(
                         onPressed: () {
@@ -261,7 +262,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                         },
                         child: Icon(
                           Icons.navigate_next,
-                          color: Colors.white,
+                          color: Theme.of(context).textSelectionColor,
                         ),
                       ),
                     ),
@@ -391,7 +392,7 @@ class _InfoFloatingActionButtonState extends State<InfoFloatingActionButton> {
   Widget build(BuildContext context) {
     return showFab
         ? FloatingActionButton(
-            backgroundColor: darkPrimaryColor,
+            backgroundColor: Theme.of(context).primaryColorDark,
             child: Icon(
               Icons.info_outline,
               size: 35.0,
@@ -433,7 +434,7 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
             IconButton(
               icon: Icon(
                 Icons.cancel,
-                color: Colors.white,
+                color: Theme.of(context).textSelectionColor,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -465,7 +466,7 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
 //            child: Icon(Icons.info),
 //            decoration: BoxDecoration(
 //              shape: BoxShape.circle,
-//              color: accentColor,
+//              color: Theme.of(context).accentColor,
 //            ),
 //          ),
 //        ],
@@ -488,7 +489,7 @@ List<Widget> listParkingInfo(BuildContext context) {
                   child: Text(
                     '${emp.name}',
                     style: TextStyle(
-                      color: textIconColor,
+                      color: Theme.of(context).textSelectionColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -498,7 +499,7 @@ List<Widget> listParkingInfo(BuildContext context) {
                   child: Text(
                     '${emp.initial}',
                     style: TextStyle(
-                      color: textIconColor,
+                      color: Theme.of(context).textSelectionColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -508,7 +509,7 @@ List<Widget> listParkingInfo(BuildContext context) {
                   child: Text(
                     '${emp.cardId}',
                     style: TextStyle(
-                      color: textIconColor,
+                      color: Theme.of(context).textSelectionColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -518,7 +519,7 @@ List<Widget> listParkingInfo(BuildContext context) {
                   child: Text(
                     '${emp.carInfo}',
                     style: TextStyle(
-                      color: textIconColor,
+                      color: Theme.of(context).textSelectionColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -528,7 +529,7 @@ List<Widget> listParkingInfo(BuildContext context) {
             Container(
               height: 1.0,
               width: 500.0,
-              color: Colors.white,
+              color: Theme.of(context).textSelectionColor,
             )
           ],
         ),
@@ -576,7 +577,7 @@ List<Widget> listParkingWidgets(BuildContext context) {
               emp.name,
               style: TextStyle(
                 fontSize: (emp.name.length <= 7) ? 17.0 : 14.0,
-                color: textIconColor,
+                color: Theme.of(context).textSelectionColor,
               ),
             ),
           ),
@@ -588,7 +589,7 @@ List<Widget> listParkingWidgets(BuildContext context) {
     padding: const EdgeInsets.all(5.0),
     child: Material(
       elevation: 5.0,
-      color: textPrimaryColor,
+      color: Theme.of(context).indicatorColor,
       borderRadius: BorderRadius.circular(15.0),
       child: MaterialButton(
         onPressed: () {
@@ -640,7 +641,7 @@ class ParkingDaysStream extends StatelessWidget {
 
           final dayWithShiftsUI = Table(
             border: TableBorder.all(
-              color: textPrimaryColor,
+              color: Theme.of(context).indicatorColor,
             ),
             columnWidths: {
               0: FlexColumnWidth(0.2),
@@ -652,8 +653,8 @@ class ParkingDaysStream extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: ('${dayWithShifts.day}${dayWithShifts.month}' ==
                           '${DateTime.now().day}${DateTime.now().month}')
-                      ? primaryColor.withOpacity(0.4)
-                      : Colors.white,
+                      ? Theme.of(context).primaryColor.withOpacity(0.4)
+                      : Theme.of(context).textSelectionColor,
                 ),
                 children: [
                   DateTableCellDaysOff(
@@ -833,7 +834,6 @@ class ParkingRoundButton extends StatefulWidget {
 }
 
 class _ParkingRoundButton extends State<ParkingRoundButton> {
-  Color color = primaryColor;
   String buttonText = '+';
   double size = 26.0;
   double bottom = 5.0;
@@ -847,6 +847,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
 
   @override
   Widget build(BuildContext context) {
+    Color color = Theme.of(context).primaryColor;
     bool isLong = false;
     date = '${widget.day}.${widget.month}';
     documentID = widget.documentID;
@@ -863,7 +864,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
       //Converting String to Color
       if (emp.initial == widget.text) {
         if (emp.department == kManagement) {
-          color = darkPrimaryColor;
+          color = Theme.of(context).primaryColorDark;
         }
         if (emp.department == kSupportDepartment) {
           color = Colors.amber;
@@ -909,7 +910,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                         }
                       });
                     },
-                    color: textIconColor,
+                    color: Theme.of(context).textSelectionColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     ),
@@ -919,7 +920,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                         buttonText,
                         style: TextStyle(
                           fontSize: size,
-                          color: textPrimaryColor,
+                          color: Theme.of(context).indicatorColor,
                         ),
                       ),
                     ),
@@ -974,7 +975,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                               widget.text,
                               style: TextStyle(
                                 fontSize: isLong ? 13.0 : 16.0,
-                                color: textIconColor,
+                                color: Theme.of(context).textSelectionColor,
                               ),
                             ),
                           ),
@@ -984,7 +985,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                               widget.time,
                               style: TextStyle(
                                 fontSize: 10,
-                                color: Colors.black,
+                                color: Theme.of(context).indicatorColor,
                               ),
                             ),
                           ),
@@ -1008,7 +1009,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                     //  onPressed: () {
                     //  },
 
-                    color: primaryColor,
+                    color: Theme.of(context).primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     ),
@@ -1018,7 +1019,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                         '',
                         style: TextStyle(
                           fontSize: size,
-                          color: textIconColor,
+                          color: Theme.of(context).textSelectionColor,
                         ),
                       ),
                     ),
@@ -1032,7 +1033,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                     child: Material(
                         color: (employee != null)
                             ? (widget.text == employee.initial)
-                                ? textPrimaryColor
+                                ? Theme.of(context).indicatorColor
                                 : color.withOpacity(0)
                             : color.withOpacity(0),
                         borderRadius: BorderRadius.circular(15.0),
@@ -1056,7 +1057,8 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                                       widget.text,
                                       style: TextStyle(
                                         fontSize: isLong ? 13.0 : 16.0,
-                                        color: textIconColor,
+                                        color: Theme.of(context)
+                                            .textSelectionColor,
                                       ),
                                     ),
                                   ),
@@ -1066,7 +1068,7 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                                       widget.time,
                                       style: TextStyle(
                                         fontSize: 10,
-                                        color: Colors.black,
+                                        color: Theme.of(context).indicatorColor,
                                       ),
                                     ),
                                   ),

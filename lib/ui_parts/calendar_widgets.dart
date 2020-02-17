@@ -7,7 +7,7 @@ class VacationWidget extends StatelessWidget {
       height: 25.0,
       width: 25.0,
       decoration: BoxDecoration(
-          color: Colors.black,
+          color: Theme.of(context).indicatorColor,
           borderRadius: BorderRadius.all(Radius.circular(7.0))),
       child: Icon(
         Icons.brightness_high,
@@ -29,7 +29,7 @@ class ParkingWidget extends StatelessWidget {
       height: 25.0,
       width: 25.0,
       decoration: BoxDecoration(
-          color: Colors.black,
+          color: Theme.of(context).indicatorColor,
           borderRadius: BorderRadius.all(Radius.circular(7.0))),
       child: Icon(
         Icons.directions_car,

@@ -29,14 +29,24 @@ ThemeData _buildPBShiftsTheme() {
   final ThemeData base = ThemeData.light();
   return base.copyWith(
     accentColor: accentColor,
+    primaryColorDark: darkPrimaryColor,
+    primaryColorLight: lightPrimaryColor,
     primaryColor: primaryColor,
+    dividerColor: dividerColor,
     buttonTheme: base.buttonTheme.copyWith(
       buttonColor: lightPrimaryColor,
       textTheme: ButtonTextTheme.normal,
     ),
+    appBarTheme: AppBarTheme(
+      color: darkPrimaryColor,
+    ),
+    bannerTheme: MaterialBannerThemeData(
+      backgroundColor: darkPrimaryColor,
+    ),
     scaffoldBackgroundColor: textIconColor,
     cardColor: textIconColor,
     textSelectionColor: textIconColor,
+    indicatorColor: textPrimaryColor,
     errorColor: accentColor,
   );
 }
@@ -63,7 +73,7 @@ class PBShifts extends StatelessWidget {
         CalendarScreen.id: (context) => CalendarScreen(),
         AdminCalendarScreen.id: (context) => AdminCalendarScreen(),
       },
-//      theme: _kPBShiftsTheme,
+      theme: _kPBShiftsTheme,
     );
   }
 
