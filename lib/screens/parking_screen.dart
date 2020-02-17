@@ -759,11 +759,21 @@ class ParkingDaysStream extends StatelessWidget {
 
   listITCS(int day, int month, int year, List itcs, String documentID) {
     List<ParkingRoundButton> list = [];
+    double weight = 0;
     if (itcs != null) {
       if (itcs.length >= 0) {
         for (int i = 0; i < itcs.length; i++) {
           String itcsConverted = itcs[i];
           List<String> splitted = itcsConverted.split(' ');
+          for (Employee emp in listWithEmployees) {
+            if (emp.initial == splitted[0]) {
+              if (emp.department == kSupportDepartment) {
+                weight += 0.5;
+              } else
+                weight += 1;
+            }
+          }
+          print(weight);
           list.add(ParkingRoundButton(
             day: day,
             month: month,
@@ -774,7 +784,7 @@ class ParkingDaysStream extends StatelessWidget {
             type: 'itcs',
           ));
         }
-        if (list.length < 6)
+        if (list.length < 6 && weight < 4)
           list.add(ParkingRoundButton(
             day: day,
             month: month,
