@@ -384,12 +384,13 @@ class CalendarState extends State<CalendarScreen> {
     if (employee.department == kSupportDepartment && shiftCount > 0) {
       return Expanded(
         child: FittedBox(
+          fit: BoxFit.scaleDown,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Padding(
-                padding: (shifts[0] == 'Night')
+                padding: (shifts[0] == kNight)
                     ? const EdgeInsets.only(right: 15.0)
                     : const EdgeInsets.only(left: 0.0),
                 child: Text(
@@ -404,7 +405,7 @@ class CalendarState extends State<CalendarScreen> {
               ),
               (shiftCount == 2)
                   ? Padding(
-                      padding: (shifts[1] == 'Night')
+                      padding: (shifts[1] == kNight)
                           ? const EdgeInsets.only(right: 15.0)
                           : const EdgeInsets.only(left: 0.0),
                       child: Text(
@@ -423,15 +424,16 @@ class CalendarState extends State<CalendarScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  (employee.hasCar &&
-                          parkingStatus == 'reserved' &&
-                          (((dayNumber - _beginMonthPadding) >=
-                                      DateTime.now().day &&
-                                  dateTime.month == DateTime.now().month &&
-                                  (dayNumber - _beginMonthPadding) <=
-                                      DateTime.now().day + 7) ||
-                              (dateTime.month > DateTime.now().month &&
-                                  (dayNumber - _beginMonthPadding) < 7)))
+                  ((employee.hasCar &&
+                              parkingStatus == 'reserved' &&
+                              (((dayNumber - _beginMonthPadding) >=
+                                          DateTime.now().day &&
+                                      dateTime.month == DateTime.now().month &&
+                                      (dayNumber - _beginMonthPadding) <=
+                                          DateTime.now().day + 7) ||
+                                  (dateTime.month > DateTime.now().month &&
+                                      (dayNumber - _beginMonthPadding) < 7))) ||
+                          shifts[0] == kNight)
                       ? ParkingWidget(Colors.lightGreenAccent)
                       : SizedBox(
                           height: 1.0,
@@ -450,6 +452,7 @@ class CalendarState extends State<CalendarScreen> {
                           height: 1.0,
                         ),
                   (employee.hasCar &&
+                          shifts[0] != kNight &&
                           parkingStatus == 'busy' &&
                           (((dayNumber - _beginMonthPadding) >=
                                       DateTime.now().day &&

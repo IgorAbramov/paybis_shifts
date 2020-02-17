@@ -773,7 +773,6 @@ class ParkingDaysStream extends StatelessWidget {
                 weight += 1;
             }
           }
-          print(weight);
           list.add(ParkingRoundButton(
             day: day,
             month: month,
