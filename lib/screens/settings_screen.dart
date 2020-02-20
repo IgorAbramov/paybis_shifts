@@ -4,6 +4,7 @@ import 'package:paybis_com_shifts/screens/change_user_screen.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/ui_parts/rounded_button.dart';
 
+import '../main.dart';
 import 'register_user_screen.dart';
 import 'shifts_screen.dart';
 
@@ -56,7 +57,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text('Version: 6.0.0'),
+                  child: Text(appVersion),
                 ),
                 //TODO add options to change appearance of the shifts screen and theme
               ],
@@ -70,7 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text('Version: 6.0.0'),
+                  child: Text(appVersion),
                 ),
               ],
             ),

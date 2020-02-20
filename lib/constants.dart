@@ -27,7 +27,11 @@ const String kEvening = 'evening';
 const String kDaysCollection = 'daysNew';
 const String kUsersCollection = 'users';
 const String kFeedItemsCollection = 'feedItems';
+const String kDataCollection = 'bonusData';
 const String kChangesCollection = 'changes';
+const String kTransactions = 'Transactions';
+const String kVerifications = 'Verifications';
+const String kChats = 'Chats';
 
 const List<String> kAdminChoicesPopupMenu = [
   kChangeRequests,
@@ -151,6 +155,17 @@ const kTextFieldDecoration = InputDecoration(
   focusedBorder: OutlineInputBorder(
     borderSide: BorderSide(color: darkPrimaryColor, width: 2.0),
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
+  ),
+);
+const kStatsTextFieldDecoration = InputDecoration(
+  hintText: 'Enter the value.',
+  contentPadding: EdgeInsets.symmetric(vertical: 1.0, horizontal: 30.0),
+  border: OutlineInputBorder(),
+  enabledBorder: OutlineInputBorder(
+    borderSide: BorderSide(color: primaryColor, width: 1.0),
+  ),
+  focusedBorder: OutlineInputBorder(
+    borderSide: BorderSide(color: darkPrimaryColor, width: 2.0),
   ),
 );
 

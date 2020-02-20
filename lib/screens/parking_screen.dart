@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
@@ -1039,7 +1040,17 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                         borderRadius: BorderRadius.circular(15.0),
                         child: MaterialButton(
                           height: 30.0,
-                          onPressed: () {},
+                          onPressed: () {
+                            if (widget.text == employee.initial) {
+                              openRefuseParkingConfirmationAlertBox(
+                                  context,
+                                  documentID,
+                                  widget.text,
+                                  widget.time,
+                                  'Sacrifice your parking place?',
+                                  widget.type);
+                            }
+                          },
                           color: color,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(5.0),
@@ -1151,4 +1162,109 @@ showAdminAlertDialogParking(
       }
     }
   });
+}
+
+openRefuseParkingConfirmationAlertBox(BuildContext context, String docID,
+    String text, String time, String title, String type) {
+  return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          contentPadding: EdgeInsets.only(top: 10.0),
+          content: Container(
+            width: 300.0,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: FittedBox(
+                    fit: BoxFit.fill,
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: ScreenUtil().setSp(24),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Divider(
+                  color: Theme.of(context).dividerColor,
+                  height: 4.0,
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          if (type == 'mgmt') {
+                            dbController.removeParkingMGMT(
+                                docID, '$text $time');
+                          }
+                          if (type == 'itcs') {
+                            dbController.removeParkingItCs(
+                                docID, '$text $time');
+                          }
+                          Navigator.pop(context);
+                        },
+                        child: InkWell(
+                          child: Container(
+                            padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(32.0),
+                              ),
+                            ),
+                            child: Text(
+                              "Yes",
+                              style: TextStyle(
+                                  color: Theme.of(context).textSelectionColor,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: InkWell(
+                          child: Container(
+                            padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).accentColor,
+                              borderRadius: BorderRadius.only(
+                                  bottomRight: Radius.circular(32.0)),
+                            ),
+                            child: Text(
+                              "Cancel",
+                              style: TextStyle(
+                                  color: Theme.of(context).textSelectionColor,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      });
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
+import 'package:paybis_com_shifts/screens/bonus_chart_screen.dart';
 
 import 'login_screen.dart';
 import 'shifts_screen.dart';
@@ -64,6 +65,14 @@ class _StatsScreenState extends State<StatsScreen> {
             appBar: AppBar(
               backgroundColor: Theme.of(context).primaryColorDark,
               title: Text('Stats for ${getMonthName(dateTime.month)}'),
+              actions: <Widget>[
+                IconButton(
+                    icon: Icon(
+                      Icons.equalizer,
+                      color: Theme.of(context).textSelectionColor,
+                    ),
+                    onPressed: goToCharts),
+              ],
             ),
             body: Container(
               child: Column(
@@ -227,6 +236,14 @@ class _StatsScreenState extends State<StatsScreen> {
         : Scaffold(
             appBar: AppBar(
               backgroundColor: Theme.of(context).primaryColorDark,
+              actions: <Widget>[
+                IconButton(
+                    icon: Icon(
+                      Icons.equalizer,
+                      color: Theme.of(context).textSelectionColor,
+                    ),
+                    onPressed: goToCharts),
+              ],
               title: Text(
                   'Hi ${employee.name}! Stats for ${getMonthName(dateTime.month)}'),
             ),
@@ -471,6 +488,14 @@ class _StatsScreenState extends State<StatsScreen> {
         eveningShiftsCountThisMonth);
 
     return statsObjectForEmp;
+  }
+
+  void goToCharts() {
+    if (employee.department == kAdmin || employee.department == kSuperAdmin) {
+      Navigator.pushNamed(context, BonusStatsChartScreen.id);
+    } else {
+      Navigator.pushNamed(context, BonusStatsChartScreen.id);
+    }
   }
 }
 

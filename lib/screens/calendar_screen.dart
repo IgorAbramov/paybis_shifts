@@ -435,15 +435,15 @@ class CalendarState extends State<CalendarScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   ((employee.hasCar &&
-                              parkingStatus == 'reserved' &&
-                              (((dayNumber - _beginMonthPadding) >=
-                                          DateTime.now().day &&
-                                      dateTime.month == DateTime.now().month &&
-                                      (dayNumber - _beginMonthPadding) <=
-                                          DateTime.now().day + 7) ||
-                                  (dateTime.month > DateTime.now().month &&
-                                      (dayNumber - _beginMonthPadding) < 7))) ||
-                          shifts[0] == kNight)
+                          (parkingStatus == 'reserved' ||
+                              shifts[0] == kNight) &&
+                          (((dayNumber - _beginMonthPadding) >=
+                                      DateTime.now().day &&
+                                  dateTime.month == DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) <=
+                                      DateTime.now().day + 7) ||
+                              (dateTime.month > DateTime.now().month &&
+                                  (dayNumber - _beginMonthPadding) < 7))))
                       ? ParkingWidget(Colors.lightGreenAccent)
                       : SizedBox(
                           height: 1.0,
@@ -451,12 +451,14 @@ class CalendarState extends State<CalendarScreen> {
                   (employee.hasCar &&
                           parkingStatus == 'free' &&
                           (((dayNumber - _beginMonthPadding) >=
-                                      DateTime.now().day &&
-                                  dateTime.month == DateTime.now().month &&
-                                  (dayNumber - _beginMonthPadding) <=
-                                      DateTime.now().day + 7) ||
+                                          DateTime.now().day &&
+                                      dateTime.month == DateTime.now().month &&
+                                      (dayNumber - _beginMonthPadding) <=
+                                          DateTime.now().day + 7) &&
+                                  shifts[0] != kNight ||
                               (dateTime.month > DateTime.now().month &&
-                                  (dayNumber - _beginMonthPadding) < 7)))
+                                  (dayNumber - _beginMonthPadding) < 7)) &&
+                          shifts[0] != kNight)
                       ? ParkingWidget(Colors.yellowAccent)
                       : SizedBox(
                           height: 1.0,

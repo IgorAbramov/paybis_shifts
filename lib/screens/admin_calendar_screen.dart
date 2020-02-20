@@ -572,6 +572,7 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
           break;
         } else
           unpaid = true;
+        color = Colors.transparent;
       }
 
       Widget vacationText = FittedBox(

@@ -23,8 +23,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _auth = FirebaseAuth.instance;
-  TextEditingController emailInputController;
-  TextEditingController pwdInputController;
+  TextEditingController _emailInputController;
+  TextEditingController _pwdInputController;
   final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
   final loginScaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -50,8 +50,8 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     getCurrentUserAndLogin();
 
-    emailInputController = new TextEditingController();
-    pwdInputController = new TextEditingController();
+    _emailInputController = new TextEditingController();
+    _pwdInputController = new TextEditingController();
   }
 
   String emailValidator(String value) {
@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextFormField(
                     keyboardType: TextInputType.emailAddress,
                     textAlign: TextAlign.center,
-                    controller: emailInputController,
+                    controller: _emailInputController,
                     validator: emailValidator,
                     decoration: kTextFieldDecoration.copyWith(
                       labelText: 'Email',
@@ -115,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   TextFormField(
                     textAlign: TextAlign.center,
-                    controller: pwdInputController,
+                    controller: _pwdInputController,
                     obscureText: true,
                     validator: pwdValidator,
                     decoration: kTextFieldDecoration.copyWith(
@@ -133,16 +133,16 @@ class _LoginScreenState extends State<LoginScreen> {
               color: Theme.of(context).primaryColor,
               title: 'Log In',
               onPressed: () async {
-                emailInputController.text =
-                    emailInputController.text.replaceAll(' ', '');
-                pwdInputController.text =
-                    pwdInputController.text.replaceAll(' ', '');
+                _emailInputController.text =
+                    _emailInputController.text.replaceAll(' ', '');
+                _pwdInputController.text =
+                    _pwdInputController.text.replaceAll(' ', '');
                 if (_loginFormKey.currentState.validate()) {
                   try {
                     final user = await _auth
                         .signInWithEmailAndPassword(
-                            email: emailInputController.text,
-                            password: pwdInputController.text)
+                            email: _emailInputController.text,
+                            password: _pwdInputController.text)
                         .catchError(((err) => wrongEmailOrPasswordError(err)));
                     if (user != null) {
                       await getCurrentUserAndLogin();

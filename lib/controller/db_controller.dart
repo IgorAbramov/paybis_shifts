@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:paybis_com_shifts/constants.dart';
+import 'package:paybis_com_shifts/models/chart_data.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 
@@ -8,6 +9,7 @@ import 'package:paybis_com_shifts/screens/login_screen.dart';
 All methods' names explain it's functionality.
 * */
 
+final String _test = '';
 final _fireStore = Firestore.instance;
 final feedRef = Firestore.instance.collection('feed');
 final String adminFeedDocID = 'T8dBZmU5meD1LfEgfEM3';
@@ -16,7 +18,7 @@ final _auth = FirebaseAuth.instance;
 class DBController {
   Stream createDaysStream<QuerySnapshot>(int year, int month) {
     return _fireStore
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .where('month', isEqualTo: month)
         .where('year', isEqualTo: year)
         .orderBy('day', descending: false)
@@ -25,7 +27,7 @@ class DBController {
 
   Stream createOneDayStream<QuerySnapshot>(int year, int month, int day) {
     return _fireStore
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .where('month', isEqualTo: month)
         .where('year', isEqualTo: year)
         .where('day', isEqualTo: day)
@@ -34,14 +36,14 @@ class DBController {
 
   addMonth(Map dayMap) async {
     await _fireStore
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .document()
         .setData(Map<String, dynamic>.from(dayMap));
   }
 
   getDocument(String docID) async {
     return await _fireStore
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .document('$docID')
         .get();
   }
@@ -60,7 +62,7 @@ class DBController {
   deleteShift(
       DocumentSnapshot documentSnapshot, String shiftType, Map shift) async {
     await _fireStore
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .document(documentSnapshot.documentID)
         .updateData({
       '$shiftType': FieldValue.arrayRemove([shift])
@@ -78,13 +80,13 @@ class DBController {
   updateShift(DocumentSnapshot documentSnapshot, String shiftType, Map oldShift,
       Map newShift) async {
     await _fireStore
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .document(documentSnapshot.documentID)
         .updateData({
       '$shiftType': FieldValue.arrayRemove([oldShift])
     });
     await _fireStore
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .document(documentSnapshot.documentID)
         .updateData({
       '$shiftType': FieldValue.arrayUnion([newShift])
@@ -94,7 +96,7 @@ class DBController {
   createShift(
       DocumentSnapshot documentSnapshot, String shiftType, Map shift) async {
     await _fireStore
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .document(documentSnapshot.documentID)
         .updateData({
       '$shiftType': FieldValue.arrayUnion([shift])
@@ -106,7 +108,7 @@ class DBController {
     for (int i = 0; i < shifts.length; i++) {
       shifts[i]['type'] = shiftType;
       await _fireStore
-          .collection(kDaysCollection)
+          .collection('$_test$kDaysCollection')
           .document(documentSnapshot.documentID)
           .updateData({
         '$shiftType': FieldValue.arrayUnion([shifts[i]])
@@ -117,13 +119,13 @@ class DBController {
   updateHours(DocumentSnapshot documentSnapshot, String shiftType, Map shiftOld,
       Map shiftNew) async {
     await _fireStore
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .document(documentSnapshot.documentID)
         .updateData({
       '$shiftType': FieldValue.arrayRemove([shiftOld])
     });
     await _fireStore
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .document(documentSnapshot.documentID)
         .updateData({
       '$shiftType': FieldValue.arrayUnion([shiftNew])
@@ -132,27 +134,39 @@ class DBController {
 
   changeShiftHolders(String docID1, String docID2, String shiftType1,
       String shiftType2, Map shift1, Map shift2) async {
-    await _fireStore.collection(kDaysCollection).document(docID1).updateData({
+    await _fireStore
+        .collection('$_test$kDaysCollection')
+        .document(docID1)
+        .updateData({
       '$shiftType1': FieldValue.arrayRemove([shift1])
     });
-    await _fireStore.collection(kDaysCollection).document(docID2).updateData({
+    await _fireStore
+        .collection('$_test$kDaysCollection')
+        .document(docID2)
+        .updateData({
       '$shiftType2': FieldValue.arrayRemove([shift2])
     });
 
     shift1['type'] = shiftType2;
     shift2['type'] = shiftType1;
 
-    await _fireStore.collection(kDaysCollection).document(docID1).updateData({
+    await _fireStore
+        .collection('$_test$kDaysCollection')
+        .document(docID1)
+        .updateData({
       '$shiftType1': FieldValue.arrayUnion([shift2])
     });
-    await _fireStore.collection(kDaysCollection).document(docID2).updateData({
+    await _fireStore
+        .collection('$_test$kDaysCollection')
+        .document(docID2)
+        .updateData({
       '$shiftType2': FieldValue.arrayUnion([shift1])
     });
   }
 
   void updateData(selectedDoc, newValues) {
     Firestore.instance
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .document(selectedDoc)
         .updateData(newValues)
         .catchError((e) {
@@ -162,7 +176,7 @@ class DBController {
 
   void deleteData(docId) {
     Firestore.instance
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .document(docId)
         .delete()
         .catchError((e) {
@@ -172,14 +186,14 @@ class DBController {
 
   void configureToken(String token) {
     _fireStore
-        .collection(kUsersCollection)
+        .collection('$_test$kUsersCollection')
         .document(employee.id)
         .updateData({"androidNotificationToken": token});
   }
 
   void createUser(Map emp, String email) async {
     await _fireStore
-        .collection(kUsersCollection)
+        .collection('$_test$kUsersCollection')
         .document()
         .setData(Map<String, dynamic>.from(emp));
     await changeUserId(email);
@@ -187,12 +201,12 @@ class DBController {
 
   void deleteUser(String email) async {
     final docs = await _fireStore
-        .collection(kUsersCollection)
+        .collection('$_test$kUsersCollection')
         .where('email', isEqualTo: email)
         .getDocuments();
     for (var doc in docs.documents) {
       await _fireStore
-          .collection(kUsersCollection)
+          .collection('$_test$kUsersCollection')
           .document(doc.documentID)
           .delete()
           .catchError((e) {
@@ -203,12 +217,12 @@ class DBController {
 
   void changeUser(String email, Map emp) async {
     final docs = await _fireStore
-        .collection(kUsersCollection)
+        .collection('$_test$kUsersCollection')
         .where('email', isEqualTo: email)
         .getDocuments();
     for (var doc in docs.documents) {
       await _fireStore
-          .collection(kUsersCollection)
+          .collection('$_test$kUsersCollection')
           .document(doc.documentID)
           .updateData(Map<String, dynamic>.from(emp))
           .catchError((e) {
@@ -219,12 +233,12 @@ class DBController {
 
   changeUserId(String email) async {
     final docs = await _fireStore
-        .collection(kUsersCollection)
+        .collection('$_test$kUsersCollection')
         .where('email', isEqualTo: email)
         .getDocuments();
     for (var doc in docs.documents) {
       await _fireStore
-          .collection(kUsersCollection)
+          .collection('$_test$kUsersCollection')
           .document(doc.documentID)
           .updateData({'id': doc.documentID}).catchError((e) {
         print(e);
@@ -234,14 +248,14 @@ class DBController {
 
   void deleteMonth(int month) async {
     final docs = await _fireStore
-        .collection(kDaysCollection)
+        .collection('$_test$kDaysCollection')
         .where('month', isEqualTo: month)
         .getDocuments();
 
     for (var doc in docs.documents) {
       print(doc.data);
       await _fireStore
-          .collection(kDaysCollection)
+          .collection('$_test$kDaysCollection')
           .document(doc.documentID)
           .delete()
           .catchError((e) {
@@ -251,7 +265,8 @@ class DBController {
   }
 
   getUsers(List<Employee> list) async {
-    final users = await _fireStore.collection(kUsersCollection).getDocuments();
+    final users =
+        await _fireStore.collection('$_test$kUsersCollection').getDocuments();
     for (var user in users.documents) {
       list.add(Employee(
         email: user.data['email'],
@@ -266,6 +281,47 @@ class DBController {
         id: user.documentID,
       ));
     }
+    return list;
+  }
+
+  addMonthlyStatsData(List<SupportChartData> dataList) async {
+    for (SupportChartData data in dataList) {
+      await _fireStore.collection('$_test$kDataCollection').document().setData(
+          Map<String, dynamic>.from(data.buildMap(
+              data.year,
+              data.month,
+              data.name,
+              data.initial,
+              data.transactions,
+              data.verifications,
+              data.chats)));
+    }
+  }
+
+//
+  getMonthlyStatsDataForAll(
+      List<SupportChartData> list, int year, int month) async {
+    await _fireStore
+        .collection('$_test$kDataCollection')
+        .where('year', isEqualTo: year)
+        .where('month', isEqualTo: month)
+        .getDocuments()
+        .then((docs) => {
+              docs.documents.forEach(
+                  (doc) => {list.add(SupportChartData.fromDocument(doc))})
+            });
+    return list;
+  }
+
+  getProgressDataForOne(List<SupportChartData> list, String name) async {
+    await _fireStore
+        .collection('$_test$kDataCollection')
+        .where('name', isEqualTo: name)
+        .getDocuments()
+        .then((docs) => {
+              docs.documents.forEach(
+                  (doc) => {list.add(SupportChartData.fromDocument(doc))})
+            });
     return list;
   }
 
