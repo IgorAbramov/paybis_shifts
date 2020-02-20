@@ -64,6 +64,20 @@ class ProgressChart extends StatelessWidget {
       chatsMonthData.add(new StatsForMonth(chartData.month, chartData.chats));
     }
 
+    final List<StatsForMonth> averageMonthData = [];
+    for (SupportChartData chartData in data) {
+      if (chartData.year < dateTime.year && chartData.month >= dateTime.month) {
+        chartData.month = chartData.month - 12;
+      }
+      averageMonthData.add(new StatsForMonth(
+          chartData.month,
+          ((chartData.chats +
+                      chartData.verifications +
+                      chartData.transactions) /
+                  3)
+              .round()));
+    }
+
 //    final List<StatsForMonth> totalMonthData = [];
 //    for (SupportChartData chartData in data) {
 //      if (chartData.year < dateTime.year && chartData.month >= dateTime.month) {
@@ -89,7 +103,7 @@ class ProgressChart extends StatelessWidget {
       ),
       new charts.Series<StatsForMonth, int>(
         id: kVerifications,
-        displayName: kVerifications,
+        displayName: 'Ver',
         domainFn: (StatsForMonth stats, _) => stats.month,
         measureFn: (StatsForMonth stats, _) => stats.productivity,
         data: verificationsMonthData,
@@ -99,15 +113,23 @@ class ProgressChart extends StatelessWidget {
       ),
       new charts.Series<StatsForMonth, int>(
         id: kTransactions,
-        displayName: kTransactions,
+        displayName: "Trans",
         domainFn: (StatsForMonth stats, _) => stats.month,
         measureFn: (StatsForMonth stats, _) => stats.productivity,
         data: transactionsMonthData,
 //        colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault.lighter,
       ),
+      new charts.Series<StatsForMonth, int>(
+        id: 'Avg',
+        displayName: 'Avg',
+        domainFn: (StatsForMonth stats, _) => stats.month,
+        measureFn: (StatsForMonth stats, _) => stats.productivity,
+        data: averageMonthData,
+//        colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault.lighter,
+      ),
 //      new charts.Series<StatsForMonth, int>(
 //        id: 'Total',
-//        displayName: 'Total',
+//        displayName: 'Ttl',
 //        domainFn: (StatsForMonth stats, _) => stats.month,
 //        measureFn: (StatsForMonth stats, _) => stats.productivity,
 //        data: totalMonthData,
