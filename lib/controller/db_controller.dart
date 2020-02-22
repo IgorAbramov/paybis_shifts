@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/chart_data.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
+import 'package:paybis_com_shifts/models/leader_board_data.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 
 /*  This is a class making all operations with the Cloud Firestore.
@@ -197,6 +198,11 @@ class DBController {
         .document()
         .setData(Map<String, dynamic>.from(emp));
     await changeUserId(email);
+    await _fireStore
+        .collection('leaderBoard')
+        .document('${emp['name']}')
+        .setData(Map<String, dynamic>.from(
+            LeaderBoardData().buildMap('${emp['name']}', 0, 0, 0)));
   }
 
   void deleteUser(String email) async {
@@ -313,6 +319,19 @@ class DBController {
     return list;
   }
 
+  getLeaderBoardStatsData(
+      List<LeaderBoardData> list, int forHowManyMonths) async {
+    await _fireStore
+        .collection('leaderBoard')
+        .orderBy('for${forHowManyMonths}months', descending: true)
+        .getDocuments()
+        .then((docs) => {
+              docs.documents.forEach(
+                  (doc) => {list.add(LeaderBoardData.fromDocument(doc))})
+            });
+    return list;
+  }
+
   getProgressDataForOne(List<SupportChartData> list, String name) async {
     await _fireStore
         .collection('$_test$kDataCollection')
@@ -323,6 +342,89 @@ class DBController {
                   (doc) => {list.add(SupportChartData.fromDocument(doc))})
             });
     return list;
+  }
+
+  updateLeaderBoard() async {
+    List<SupportChartData> list = [];
+    List<int> listWithAvg = [];
+    for (Employee emp in listWithEmployees) {
+      if (emp.department == kSupportDepartment) {
+        list.clear();
+        listWithAvg.clear();
+        await getProgressDataForOne(list, emp.name);
+        list.sort(
+            (a, b) => (a.year * 13 + a.month).compareTo(b.year * 13 + b.month));
+        for (int i = 0; i < 12; i++) {
+          listWithAvg.add(((list.last.transactions +
+                      list.last.verifications +
+                      list.last.chats) /
+                  3)
+              .round());
+          list.removeLast();
+        }
+
+        int for3months = 0;
+        if (listWithAvg.length >= 3) {
+          for3months =
+              ((listWithAvg[0] + listWithAvg[1] + listWithAvg[2]) / 3).round();
+        }
+        int for6months = 0;
+        if (listWithAvg.length >= 6) {
+          for6months = ((listWithAvg[0] +
+                      listWithAvg[1] +
+                      listWithAvg[2] +
+                      listWithAvg[3] +
+                      listWithAvg[4] +
+                      listWithAvg[5]) /
+                  6)
+              .round();
+        }
+        int for12months = 0;
+        if (listWithAvg.length >= 12) {
+          for12months = ((listWithAvg[0] +
+                      listWithAvg[1] +
+                      listWithAvg[2] +
+                      listWithAvg[3] +
+                      listWithAvg[4] +
+                      listWithAvg[5] +
+                      listWithAvg[6] +
+                      listWithAvg[7] +
+                      listWithAvg[8] +
+                      listWithAvg[9] +
+                      listWithAvg[10] +
+                      listWithAvg[11]) /
+                  12)
+              .round();
+        }
+        await _fireStore
+            .collection('leaderBoard')
+            .where('name', isEqualTo: emp.name)
+            .getDocuments()
+            .then((docs) => {
+                  docs.documents.forEach((doc) => {
+                        doc.reference.updateData({'for3months': for3months})
+                      })
+                });
+        await _fireStore
+            .collection('leaderBoard')
+            .where('name', isEqualTo: emp.name)
+            .getDocuments()
+            .then((docs) => {
+                  docs.documents.forEach((doc) => {
+                        doc.reference.updateData({'for6months': for6months})
+                      })
+                });
+        await _fireStore
+            .collection('leaderBoard')
+            .where('name', isEqualTo: emp.name)
+            .getDocuments()
+            .then((docs) => {
+                  docs.documents.forEach((doc) => {
+                        doc.reference.updateData({'for12months': for12months})
+                      })
+                });
+      }
+    }
   }
 
   Stream createAdminFeedStream<QuerySnapshot>() {
@@ -354,6 +456,15 @@ class DBController {
   }
 
   addUserFeedItemToNotify(String uid, String title, String message) {
+    feedRef
+        .document(adminFeedDocID)
+        .collection('userFeed')
+        .document(uid)
+        .collection('userFeedItem')
+        .getDocuments()
+        .then((docs) =>
+            docs.documents.forEach((doc) => {doc.reference.delete()}));
+
     feedRef
         .document(adminFeedDocID)
         .collection('userFeed')
@@ -453,13 +564,68 @@ class DBController {
             .snapshots();
   }
 
-  addChangeToRecentChanges(String emp1, String emp2, String date1, String date2,
-      String shiftType1, String shiftType2, String message, bool confirmed) {
+  addShiftExchangeResultToRecentChanges(
+      String emp1,
+      String emp2,
+      String date1,
+      String date2,
+      String shiftType1,
+      String shiftType2,
+      String message,
+      bool confirmed) {
     List emps = [emp1, emp2];
     Map<String, dynamic> change = {
       'emps': emps,
       'text': '$message $emp1 $date1 $shiftType1 with $emp2 $date2 $shiftType2',
       'confirmed': confirmed,
+      'timestamp': DateTime.now()
+    };
+    feedRef
+        .document(adminFeedDocID)
+        .collection(kChangesCollection)
+        .document()
+        .setData(Map<String, dynamic>.from(change));
+  }
+
+  addShiftDragResultToRecentChanges(String emp, String date1, String date2,
+      String shiftType1, String shiftType2, String message) {
+    List emps = [emp];
+    Map<String, dynamic> change = {
+      'emps': emps,
+      'text': '$emp $message from $date1 $shiftType1 to $date2 $shiftType2',
+      'confirmed': true,
+      'timestamp': DateTime.now()
+    };
+    feedRef
+        .document(adminFeedDocID)
+        .collection(kChangesCollection)
+        .document()
+        .setData(Map<String, dynamic>.from(change));
+  }
+
+  addShiftChangeToRecentChanges(String emp, String date, String shiftType,
+      String message, bool confirmed) {
+    List emps = [emp];
+    Map<String, dynamic> change = {
+      'emps': emps,
+      'text': "$emp's $message on $date $shiftType",
+      'confirmed': confirmed,
+      'timestamp': DateTime.now()
+    };
+    feedRef
+        .document(adminFeedDocID)
+        .collection(kChangesCollection)
+        .document()
+        .setData(Map<String, dynamic>.from(change));
+  }
+
+  addShiftUpdateToRecentChanges(
+      String emp1, String emp2, String date, String shiftType, String message) {
+    List emps = [emp1, emp2];
+    Map<String, dynamic> change = {
+      'emps': emps,
+      'text': "$emp1's $message $emp2 on $date $shiftType",
+      'confirmed': true,
       'timestamp': DateTime.now()
     };
     feedRef

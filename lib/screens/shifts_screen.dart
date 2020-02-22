@@ -17,6 +17,7 @@ import 'package:paybis_com_shifts/screens/it_days_off_screen.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/screens/recent_changes_screen.dart';
 import 'package:paybis_com_shifts/screens/support_days_off_screen.dart';
+import 'package:paybis_com_shifts/ui_parts/notification_alert_widget.dart';
 
 import 'admin_calendar_screen.dart';
 import 'feed_screen.dart';
@@ -36,6 +37,8 @@ String shiftDateContainer1ForShiftExchange;
 String shiftDateContainer2ForShiftExchange;
 String shiftTypeContainer1ForShiftExchange;
 String shiftTypeContainer2ForShiftExchange;
+String shiftTypeContainerForDrag;
+String shiftDateContainerForDrag;
 
 int _beginMonthPadding = 0;
 DateTime timestamp = DateTime.now();
@@ -53,6 +56,7 @@ String _markerInitials = '';
 List copiedShift = [];
 List emptyList = [];
 bool dragCompleted = false;
+bool hasNotifications = false;
 Shift shiftOnDragComplete = Shift('', 8.0, '', '');
 DocumentSnapshot dragDocument;
 
@@ -73,6 +77,20 @@ class _ShiftScreenState extends State<ShiftScreen> {
     reasonTextInputController = new TextEditingController();
     scrollController = new ScrollController();
     configurePushNotifications();
+    Stream<QuerySnapshot> hasNotificationStream =
+        (employee.department == kSupportDepartment)
+            ? dbController.createSupportFeedStream()
+            : dbController.createAdminFeedStream();
+    hasNotificationStream.listen((snapshots) {
+      if (snapshots.documents.length > 0) {
+        print(snapshots.toString());
+        hasNotifications = true;
+        setState(() {});
+      } else {
+        hasNotifications = false;
+        setState(() {});
+      }
+    });
 //    if (SchedulerBinding.instance.schedulerPhase ==
 //        SchedulerPhase.persistentCallbacks) {
 //      SchedulerBinding.instance.addPostFrameCallback((_) =>
@@ -145,91 +163,153 @@ class _ShiftScreenState extends State<ShiftScreen> {
               onPressed: goToCalendar),
           (employee.department != kAdmin && employee.department != kSuperAdmin)
               ? (employee.hasCar)
-                  ? PopupMenuButton<String>(
-                      color: Theme.of(context).indicatorColor.withOpacity(0.8),
-                      elevation: 4.0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10.0))),
-                      itemBuilder: (BuildContext context) {
-                        return kEmployeeWithCarChoicesPopupMenu
-                            .map((String choice) {
-                          return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(
-                              choice,
-                              style: TextStyle(
-                                color: Theme.of(context).textSelectionColor,
-                              ),
-                            ),
-                          );
-                        }).toList();
-                      },
-                      onSelected: choicesAction,
+                  ? Stack(
+                      alignment: AlignmentDirectional.center,
+                      children: <Widget>[
+                        NotificationAlertWidget(
+                          color: hasNotifications
+                              ? Theme.of(context).accentColor
+                              : Colors.transparent,
+                        ),
+                        PopupMenuButton<String>(
+                          color:
+                              Theme.of(context).indicatorColor.withOpacity(0.8),
+                          elevation: 4.0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0))),
+                          itemBuilder: (BuildContext context) {
+                            return kEmployeeWithCarChoicesPopupMenu
+                                .map((String choice) {
+                              return PopupMenuItem<String>(
+                                value: choice,
+                                child: Text(
+                                  choice,
+                                  style: TextStyle(
+                                    color: (hasNotifications &&
+                                            choice ==
+                                                kEmployeeChoicesPopupMenu[0])
+                                        ? Theme.of(context).accentColor
+                                        : Theme.of(context).textSelectionColor,
+                                  ),
+                                ),
+                              );
+                            }).toList();
+                          },
+                          onSelected: choicesAction,
+                        ),
+                      ],
                     )
-                  : PopupMenuButton<String>(
-                      color: Theme.of(context).indicatorColor.withOpacity(0.8),
-                      elevation: 4.0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10.0))),
-                      itemBuilder: (BuildContext context) {
-                        return kEmployeeChoicesPopupMenu.map((String choice) {
-                          return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(
-                              choice,
-                              style: TextStyle(
-                                color: Theme.of(context).textSelectionColor,
-                              ),
-                            ),
-                          );
-                        }).toList();
-                      },
-                      onSelected: choicesAction,
+                  : Stack(
+                      alignment: AlignmentDirectional.center,
+                      children: <Widget>[
+                        NotificationAlertWidget(
+                          color: hasNotifications
+                              ? Theme.of(context).accentColor
+                              : Colors.transparent,
+                        ),
+                        PopupMenuButton<String>(
+                          color:
+                              Theme.of(context).indicatorColor.withOpacity(0.8),
+                          elevation: 4.0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0))),
+                          itemBuilder: (BuildContext context) {
+                            return kEmployeeChoicesPopupMenu
+                                .map((String choice) {
+                              return PopupMenuItem<String>(
+                                value: choice,
+                                child: Text(
+                                  choice,
+                                  style: TextStyle(
+                                    color: (hasNotifications &&
+                                            choice ==
+                                                kEmployeeChoicesPopupMenu[0])
+                                        ? Theme.of(context).accentColor
+                                        : Theme.of(context).textSelectionColor,
+                                  ),
+                                ),
+                              );
+                            }).toList();
+                          },
+                          onSelected: choicesAction,
+                        ),
+                      ],
                     )
               : (employee.department == kAdmin)
-                  ? PopupMenuButton<String>(
-                      color: Theme.of(context).indicatorColor.withOpacity(0.8),
-                      elevation: 4.0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10.0))),
-                      itemBuilder: (BuildContext context) {
-                        return kAdminChoicesPopupMenu.map((String choice) {
-                          return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(
-                              choice,
-                              style: TextStyle(
-                                color: Theme.of(context).textSelectionColor,
-                              ),
-                            ),
-                          );
-                        }).toList();
-                      },
-                      onSelected: choicesAction,
+                  ? Stack(
+                      alignment: AlignmentDirectional.center,
+                      children: <Widget>[
+                        NotificationAlertWidget(
+                          color: hasNotifications
+                              ? Theme.of(context).accentColor
+                              : Colors.transparent,
+                        ),
+                        PopupMenuButton<String>(
+                          color:
+                              Theme.of(context).indicatorColor.withOpacity(0.8),
+                          elevation: 4.0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0))),
+                          itemBuilder: (BuildContext context) {
+                            return kAdminChoicesPopupMenu.map((String choice) {
+                              return PopupMenuItem<String>(
+                                value: choice,
+                                child: Text(
+                                  choice,
+                                  style: TextStyle(
+                                    color: (hasNotifications &&
+                                            choice ==
+                                                kEmployeeChoicesPopupMenu[0])
+                                        ? Theme.of(context).accentColor
+                                        : Theme.of(context).textSelectionColor,
+                                  ),
+                                ),
+                              );
+                            }).toList();
+                          },
+                          onSelected: choicesAction,
+                        ),
+                      ],
                     )
-                  : PopupMenuButton<String>(
-                      color: Theme.of(context).indicatorColor.withOpacity(0.8),
-                      elevation: 4.0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10.0))),
-                      itemBuilder: (BuildContext context) {
-                        return kSuperAdminChoicesPopupMenu.map((String choice) {
-                          return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(
-                              choice,
-                              style: TextStyle(
-                                color: Theme.of(context).textSelectionColor,
-                              ),
-                            ),
-                          );
-                        }).toList();
-                      },
-                      onSelected: choicesAction,
+                  : Stack(
+                      alignment: AlignmentDirectional.center,
+                      children: <Widget>[
+                        NotificationAlertWidget(
+                          color: hasNotifications
+                              ? Theme.of(context).accentColor
+                              : Colors.transparent,
+                        ),
+                        PopupMenuButton<String>(
+                          color:
+                              Theme.of(context).indicatorColor.withOpacity(0.8),
+                          elevation: 4.0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0))),
+                          itemBuilder: (BuildContext context) {
+                            return kSuperAdminChoicesPopupMenu
+                                .map((String choice) {
+                              return PopupMenuItem<String>(
+                                value: choice,
+                                child: Text(
+                                  choice,
+                                  style: TextStyle(
+                                    color: (hasNotifications &&
+                                            choice ==
+                                                kEmployeeChoicesPopupMenu[0])
+                                        ? Theme.of(context).accentColor
+                                        : Theme.of(context).textSelectionColor,
+                                  ),
+                                ),
+                              );
+                            }).toList();
+                          },
+                          onSelected: choicesAction,
+                        ),
+                      ],
                     ),
         ],
       ),
@@ -1109,6 +1189,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                     onAccept: (Shift shift) async {
                       shiftOnDragComplete.type = widget.shift.type;
                       dragDocument = await dbController.getDocument(documentID);
+                      shiftDateContainerForDrag =
+                          '${widget.day}.${widget.month}';
                       return dragCompleted = true;
                     },
                     onLeave: (shift) {
@@ -1122,6 +1204,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                               showAdminAlertDialog(
                                   context,
                                   documentID,
+                                  widget.day,
+                                  widget.month,
                                   widget.shift,
                                   "Who's gonna work?",
                                   widget.absentList);
@@ -1138,6 +1222,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                               }
                               Shift newShift = Shift(_markerInitials, 8.0,
                                   position, widget.shift.type);
+
                               await dbController.createShift(
                                   currentDocument,
                                   newShift.type,
@@ -1146,6 +1231,12 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                       newShift.hours,
                                       newShift.position,
                                       newShift.type));
+                              await dbController.addShiftChangeToRecentChanges(
+                                  newShift.holder,
+                                  '${widget.day}.${widget.month}',
+                                  newShift.type,
+                                  'shift created',
+                                  true);
                             }
                           });
                         },
@@ -1194,6 +1285,13 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                               newShift.type,
                               newShift.buildMap(newShift.holder, newShift.hours,
                                   newShift.position, newShift.type));
+                          await dbController.addShiftDragResultToRecentChanges(
+                              newShift.holder,
+                              '${widget.day}.${widget.month}',
+                              shiftDateContainerForDrag,
+                              widget.shift.type,
+                              newShift.type,
+                              "'s shift changed");
                           setState(() {});
                         }
                       },
@@ -1242,54 +1340,69 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                       ),
                       childWhenDragging: Container(),
                       child: MaterialButton(
-                        onPressed: () {
-                          setState(() async {
-                            if (_markerInitials == '') {
-                              showAdminAlertDialog(
-                                  context,
-                                  documentID,
-                                  widget.shift,
-                                  "Who's gonna work?",
-                                  widget.absentList);
-                            } else if (_markerInitials == 'X') {
-                              currentDocument =
-                                  await dbController.getDocument(documentID);
-                              await dbController.deleteShift(
-                                  currentDocument,
-                                  widget.shiftType,
-                                  widget.shift.buildMap(
-                                      widget.shift.holder,
-                                      widget.shift.hours,
-                                      widget.shift.position,
-                                      widget.shift.type));
-                            } else {
-                              currentDocument =
-                                  await dbController.getDocument(documentID);
+                        onPressed: () async {
+                          if (_markerInitials == '') {
+                            showAdminAlertDialog(
+                                context,
+                                documentID,
+                                widget.day,
+                                widget.month,
+                                widget.shift,
+                                "Who's gonna work?",
+                                widget.absentList);
+                          } else if (_markerInitials == 'X') {
+                            currentDocument =
+                                await dbController.getDocument(documentID);
+                            await dbController.addShiftChangeToRecentChanges(
+                                widget.shift.holder,
+                                '${widget.day}.${widget.month}',
+                                widget.shift.type,
+                                'shift deleted',
+                                false);
+                            await dbController.deleteShift(
+                                currentDocument,
+                                widget.shiftType,
+                                widget.shift.buildMap(
+                                    widget.shift.holder,
+                                    widget.shift.hours,
+                                    widget.shift.position,
+                                    widget.shift.type));
+                            setState(() {});
+                          } else {
+                            currentDocument =
+                                await dbController.getDocument(documentID);
 
-                              String position;
-                              for (Employee emp in listWithEmployees) {
-                                if (emp.initial == _markerInitials) {
-                                  position = emp.position;
-                                }
+                            String position;
+                            for (Employee emp in listWithEmployees) {
+                              if (emp.initial == _markerInitials) {
+                                position = emp.position;
                               }
-                              Shift newShift = Shift(_markerInitials, 8.0,
-                                  position, widget.shift.type);
-
-                              await dbController.updateShift(
-                                  currentDocument,
-                                  widget.shift.type,
-                                  widget.shift.buildMap(
-                                      widget.shift.holder,
-                                      widget.shift.hours,
-                                      widget.shift.position,
-                                      widget.shift.type),
-                                  newShift.buildMap(
-                                      newShift.holder,
-                                      newShift.hours,
-                                      newShift.position,
-                                      newShift.type));
                             }
-                          });
+                            Shift newShift = Shift(_markerInitials, 8.0,
+                                position, widget.shift.type);
+
+                            await dbController.addShiftUpdateToRecentChanges(
+                                widget.shift.holder,
+                                newShift.holder,
+                                '${widget.day}.${widget.month}',
+                                widget.shift.type,
+                                'shift was given to');
+
+                            await dbController.updateShift(
+                                currentDocument,
+                                widget.shift.type,
+                                widget.shift.buildMap(
+                                    widget.shift.holder,
+                                    widget.shift.hours,
+                                    widget.shift.position,
+                                    widget.shift.type),
+                                newShift.buildMap(
+                                    newShift.holder,
+                                    newShift.hours,
+                                    newShift.position,
+                                    newShift.type));
+                            setState(() {});
+                          }
                         },
                         color: color,
                         shape: CircleBorder(),
@@ -1532,6 +1645,8 @@ void updateShiftExchangeValuesToNull() {
 showAdminAlertDialog(
   BuildContext context,
   String docID,
+  int day,
+  int month,
   Shift shift,
   String title,
   List absent,
@@ -1650,6 +1765,8 @@ showAdminAlertDialog(
       String choiceOfEmployee = result.toString();
 
       if (choiceOfEmployee == 'none') {
+        await dbController.addShiftChangeToRecentChanges(
+            shift.holder, '$day.$month', shift.type, 'shift deleted', false);
         await dbController.deleteShift(
             currentDocument,
             shift.type,
@@ -1663,18 +1780,23 @@ showAdminAlertDialog(
           }
         }
         Shift newShift = Shift(choiceOfEmployee, 8.0, position, shift.type);
-        if (shift.holder != null) {
+        if (shift.holder == null || shift.holder.compareTo('').isEven) {
+          await dbController.addShiftChangeToRecentChanges(choiceOfEmployee,
+              '$day.$month', shift.type, 'shift created', true);
+          await dbController.createShift(
+              currentDocument,
+              newShift.type,
+              newShift.buildMap(newShift.holder, newShift.hours,
+                  newShift.position, newShift.type));
+        } else {
+          print('Shift holder is: (${shift.holder})');
+          await dbController.addShiftUpdateToRecentChanges(shift.holder,
+              newShift.holder, '$day.$month', shift.type, 'shift was given to');
           await dbController.updateShift(
               currentDocument,
               shift.type,
               shift.buildMap(
                   shift.holder, shift.hours, shift.position, shift.type),
-              newShift.buildMap(newShift.holder, newShift.hours,
-                  newShift.position, newShift.type));
-        } else {
-          await dbController.createShift(
-              currentDocument,
-              newShift.type,
               newShift.buildMap(newShift.holder, newShift.hours,
                   newShift.position, newShift.type));
         }

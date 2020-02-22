@@ -57,7 +57,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text(appVersion),
+                  child: Text('Ver. $appVersion'),
                 ),
                 //TODO add options to change appearance of the shifts screen and theme
               ],
@@ -71,7 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text(appVersion),
+                  child: Text('Ver. $appVersion'),
                 ),
               ],
             ),

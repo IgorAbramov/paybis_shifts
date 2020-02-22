@@ -6,8 +6,6 @@ import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/screens/shifts_screen.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-//TODO show only last 25 changes with the possibility to see more
-
 final feedScaffoldKey = new GlobalKey<ScaffoldState>();
 final feedScreenKey = new GlobalKey<_FeedScreenState>();
 
@@ -251,15 +249,16 @@ class FeedItem extends StatelessWidget {
                                 shift2.buildMap(shift2.holder, shift2.hours,
                                     shift2.position, shift2.type));
                             await dbController.removeChangeRequestFromFeed(id);
-                            await dbController.addChangeToRecentChanges(
-                                emp1,
-                                emp2,
-                                date1,
-                                date2,
-                                shiftType1,
-                                shiftType2,
-                                'Swap confirmed',
-                                true);
+                            await dbController
+                                .addShiftExchangeResultToRecentChanges(
+                                    emp1,
+                                    emp2,
+                                    date1,
+                                    date2,
+                                    shiftType1,
+                                    shiftType2,
+                                    'Swap confirmed',
+                                    true);
                           }
                           if (employee.department == kSupportDepartment &&
                               employee.initial == emp2) {
@@ -294,7 +293,7 @@ class FeedItem extends StatelessWidget {
                 trailing: GestureDetector(
                   onTap: () async {
                     await dbController.removeChangeRequestFromFeed(id);
-                    await dbController.addChangeToRecentChanges(
+                    await dbController.addShiftExchangeResultToRecentChanges(
                         emp1,
                         emp2,
                         date1,

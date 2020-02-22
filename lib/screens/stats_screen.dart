@@ -4,6 +4,8 @@ import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
 import 'package:paybis_com_shifts/screens/bonus_chart_screen.dart';
+import 'package:paybis_com_shifts/screens/leader_board_screen.dart';
+import 'package:paybis_com_shifts/screens/progress_chart_screen.dart';
 
 import 'login_screen.dart';
 import 'shifts_screen.dart';
@@ -64,8 +66,25 @@ class _StatsScreenState extends State<StatsScreen> {
         ? Scaffold(
             appBar: AppBar(
               backgroundColor: Theme.of(context).primaryColorDark,
-              title: Text('Stats for ${getMonthName(dateTime.month)}'),
+              title: FittedBox(
+                  child: Text('Stats for ${getMonthName(dateTime.month)}')),
               actions: <Widget>[
+                IconButton(
+                    icon: Icon(
+                      Icons.star,
+                      color: Theme.of(context).textSelectionColor,
+                    ),
+                    onPressed: goToLeaderBoards),
+                IconButton(
+                    icon: Icon(
+                      Icons.show_chart,
+                      color: Theme.of(context).textSelectionColor,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        Navigator.pushNamed(context, ProgressChartScreen.id);
+                      });
+                    }),
                 IconButton(
                     icon: Icon(
                       Icons.equalizer,
@@ -239,13 +258,31 @@ class _StatsScreenState extends State<StatsScreen> {
               actions: <Widget>[
                 IconButton(
                     icon: Icon(
+                      Icons.star,
+                      color: Theme.of(context).textSelectionColor,
+                    ),
+                    onPressed: goToLeaderBoards),
+                IconButton(
+                    icon: Icon(
+                      Icons.show_chart,
+                      color: Theme.of(context).textSelectionColor,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        Navigator.pushNamed(context, ProgressChartScreen.id);
+                      });
+                    }),
+                IconButton(
+                    icon: Icon(
                       Icons.equalizer,
                       color: Theme.of(context).textSelectionColor,
                     ),
                     onPressed: goToCharts),
               ],
-              title: Text(
-                  'Hi ${employee.name}! Stats for ${getMonthName(dateTime.month)}'),
+              title: FittedBox(
+                child: Text(
+                    'Hi ${employee.name}! Stats for ${getMonthName(dateTime.month)}'),
+              ),
             ),
             body: Padding(
               padding: const EdgeInsets.all(15.0),
@@ -495,6 +532,14 @@ class _StatsScreenState extends State<StatsScreen> {
       Navigator.pushNamed(context, BonusStatsChartScreen.id);
     } else {
       Navigator.pushNamed(context, BonusStatsChartScreen.id);
+    }
+  }
+
+  void goToLeaderBoards() {
+    if (employee.department == kAdmin || employee.department == kSuperAdmin) {
+      Navigator.pushNamed(context, LeaderBoardScreen.id);
+    } else {
+      Navigator.pushNamed(context, LeaderBoardScreen.id);
     }
   }
 }

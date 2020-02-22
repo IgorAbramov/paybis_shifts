@@ -38,10 +38,12 @@ class ProgressChart extends StatelessWidget {
   /// Create series list with multiple series
   static List<charts.Series<StatsForMonth, int>> _createData(
       List<SupportChartData> data) {
+    int difference = 0;
     final List<StatsForMonth> transactionsMonthData = [];
     for (SupportChartData chartData in data) {
-      if (chartData.year < dateTime.year && chartData.month >= dateTime.month) {
-        chartData.month = chartData.month - 12;
+      difference = dateTime.year - chartData.year;
+      if (chartData.year < dateTime.year) {
+        chartData.month = chartData.month - (12 * (difference));
       }
       transactionsMonthData
           .add(new StatsForMonth(chartData.month, chartData.transactions));
@@ -49,8 +51,10 @@ class ProgressChart extends StatelessWidget {
 
     final List<StatsForMonth> verificationsMonthData = [];
     for (SupportChartData chartData in data) {
-      if (chartData.year < dateTime.year && chartData.month >= dateTime.month) {
-        chartData.month = chartData.month - 12;
+      if ((chartData.year < dateTime.year)
+//          ||chartData.year < dateTime.year && chartData.month >= dateTime.month
+          ) {
+        chartData.month = chartData.month - (12 * (difference));
       }
       verificationsMonthData
           .add(new StatsForMonth(chartData.month, chartData.verifications));
@@ -58,16 +62,16 @@ class ProgressChart extends StatelessWidget {
 
     final List<StatsForMonth> chatsMonthData = [];
     for (SupportChartData chartData in data) {
-      if (chartData.year < dateTime.year && chartData.month >= dateTime.month) {
-        chartData.month = chartData.month - 12;
+      if (chartData.year < dateTime.year) {
+        chartData.month = chartData.month - (12 * (difference));
       }
       chatsMonthData.add(new StatsForMonth(chartData.month, chartData.chats));
     }
 
     final List<StatsForMonth> averageMonthData = [];
     for (SupportChartData chartData in data) {
-      if (chartData.year < dateTime.year && chartData.month >= dateTime.month) {
-        chartData.month = chartData.month - 12;
+      if (chartData.year < dateTime.year) {
+        chartData.month = chartData.month - (12 * difference);
       }
       averageMonthData.add(new StatsForMonth(
           chartData.month,

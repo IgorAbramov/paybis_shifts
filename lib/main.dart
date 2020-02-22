@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:paybis_com_shifts/screens/bonus_chart_screen.dart';
 import 'package:paybis_com_shifts/screens/calendar_screen.dart';
 import 'package:paybis_com_shifts/screens/change_user_screen.dart';
+import 'package:paybis_com_shifts/screens/leader_board_screen.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/screens/progress_chart_screen.dart';
 import 'package:paybis_com_shifts/screens/register_user_screen.dart';
@@ -22,7 +23,7 @@ import 'screens/stats_screen.dart';
 import 'screens/support_days_off_screen.dart';
 import 'screens/welcome_screen.dart';
 
-const String appVersion = '6.0.0';
+const String appVersion = '8.0.0';
 
 FirebaseAuth _auth = FirebaseAuth.instance;
 void main() => runApp(PBShifts());
@@ -78,6 +79,7 @@ class PBShifts extends StatelessWidget {
         AdminCalendarScreen.id: (context) => AdminCalendarScreen(),
         BonusStatsChartScreen.id: (context) => BonusStatsChartScreen(),
         ProgressChartScreen.id: (context) => ProgressChartScreen(),
+        LeaderBoardScreen.id: (context) => LeaderBoardScreen(),
       },
       theme: _kPBShiftsTheme,
     );

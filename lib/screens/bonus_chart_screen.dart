@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/chart_data.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
 import 'package:paybis_com_shifts/screens/login_screen.dart';
-import 'package:paybis_com_shifts/screens/progress_chart_screen.dart';
 import 'package:paybis_com_shifts/screens/shifts_screen.dart';
 import 'package:paybis_com_shifts/ui_parts/rounded_button.dart';
 import 'package:paybis_com_shifts/ui_parts/stacked_bar_chart.dart';
@@ -46,20 +46,12 @@ class _BonusStatsChartScreenState extends State<BonusStatsChartScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColorDark,
-        title:
-            FittedBox(child: Text('Stats for ${getMonthName(dateTime.month)}')),
+        title: FittedBox(
+            fit: BoxFit.fill,
+            child: Text(
+              'Stats for ${getMonthName(dateTime.month)}',
+            )),
         actions: <Widget>[
-          IconButton(
-              icon: Icon(
-                Icons.show_chart,
-                color: Theme.of(context).textSelectionColor,
-              ),
-              onPressed: () {
-                setState(() {
-                  _editMode = false;
-                  Navigator.pushNamed(context, ProgressChartScreen.id);
-                });
-              }),
           IconButton(
               icon: Icon(
                 Icons.chevron_left,
@@ -174,13 +166,8 @@ class _BonusStatsChartScreenState extends State<BonusStatsChartScreen> {
                               color: Theme.of(context).primaryColorDark,
                               borderRadius: BorderRadius.circular(15.0),
                               child: MaterialButton(
-                                onPressed: () async {
-                                  await dbController
-                                      .addMonthlyStatsData(_inputChartDataList);
-                                  setState(() {
-                                    _editMode = false;
-                                    Navigator.pop(context);
-                                  });
+                                onPressed: () {
+                                  openUpdateStatsConfirmationAlertBox(context);
                                 },
                                 child: Text(
                                   'Submit data',
@@ -286,4 +273,104 @@ List<Widget> inputBonusStats(BuildContext context) {
     }
   }
   return list;
+}
+
+openUpdateStatsConfirmationAlertBox(BuildContext context) {
+  return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          contentPadding: EdgeInsets.only(top: 10.0),
+          content: Container(
+            width: 300.0,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Center(
+                    child: Text(
+                      'Are you sure?',
+                      style: TextStyle(
+                        fontSize: ScreenUtil().setSp(64),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Divider(
+                  color: Theme.of(context).dividerColor,
+                  height: 4.0,
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                          _editMode = false;
+                          await dbController
+                              .addMonthlyStatsData(_inputChartDataList);
+                          await dbController.updateLeaderBoard();
+                        },
+                        child: InkWell(
+                          child: Container(
+                            padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(32.0),
+                              ),
+                            ),
+                            child: Text(
+                              "Yes",
+                              style: TextStyle(
+                                  color: Theme.of(context).textSelectionColor,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: InkWell(
+                          child: Container(
+                            padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).accentColor,
+                              borderRadius: BorderRadius.only(
+                                  bottomRight: Radius.circular(32.0)),
+                            ),
+                            child: Text(
+                              "Cancel",
+                              style: TextStyle(
+                                  color: Theme.of(context).textSelectionColor,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      });
 }

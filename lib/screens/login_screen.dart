@@ -13,8 +13,6 @@ Employee employee;
 final dbController = DBController();
 List<Employee> listWithEmployees = List<Employee>();
 
-//TODO (In the end) add google auto log in option
-
 class LoginScreen extends StatefulWidget {
   static const String id = 'login_screen';
   @override
