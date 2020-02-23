@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:paybis_com_shifts/models/chart_data.dart';
@@ -109,9 +107,7 @@ class _ProgressChartScreenState extends State<ProgressChartScreen> {
                             alignment: Alignment.center,
                             padding: EdgeInsets.only(bottom: 30.0),
                             color: Theme.of(context).textSelectionColor,
-                            child: Platform.isIOS
-                                ? iOSPickerName()
-                                : androidDropdownName(),
+                            child: androidDropdownName(),
                           ),
                         ),
                         Expanded(

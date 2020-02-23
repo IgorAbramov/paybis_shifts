@@ -12,6 +12,7 @@ import 'shifts_screen.dart';
 
 String _markerInitials = '';
 String _markerInfo = '';
+ScrollController _scrollController;
 
 class SupportDaysOffScreen extends StatefulWidget {
   static const String id = 'support_days_off_screen';
@@ -20,6 +21,21 @@ class SupportDaysOffScreen extends StatefulWidget {
 }
 
 class _SupportDaysOffScreenState extends State<SupportDaysOffScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Future.delayed(Duration(milliseconds: 50), () {
+        if (dateTime.month == DateTime.now().month) {
+          if (_scrollController.hasClients)
+            _scrollController.animateTo((DateTime.now().day * 40).toDouble(),
+                duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+        }
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -356,6 +372,7 @@ class DaysOffStream extends StatelessWidget {
         return Expanded(
           child: ListView(
             reverse: false,
+            controller: _scrollController,
             children: daysWithShifts,
           ),
         );
@@ -526,40 +543,42 @@ class _DayOffRoundButtonState extends State<DayOffRoundButton> {
 
                 //If Emp is NOT chosen
 
-                ? MaterialButton(
-                    onPressed: () {
-                      setState(() async {
-                        if (_markerInitials == '') {
-                          showAdminAlertDialogDaysOff(
-                              context, documentID, widget.type, widget.text);
-                        } else if (_markerInitials == 'none') {
-                        } else {
-                          if (widget.type == 'vacation') {
-                            await dbController.addVacation(
-                                documentID, '$_markerInitials$_markerInfo');
-                          }
-
-                          if (widget.type == 'sickLeave') {
-                            await dbController.addSickLeave(
-                                documentID, '$_markerInitials$_markerInfo');
-                          }
-                        }
-                      });
-                    },
-                    color: Theme.of(context).textSelectionColor,
-                    shape: CircleBorder(),
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 3.0, right: 0.0),
-                      child: Text(
-                        buttonText,
-                        style: TextStyle(
-                          fontSize: size,
-                          color: Theme.of(context).indicatorColor,
+                ? Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).textSelectionColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              Theme.of(context).indicatorColor.withOpacity(0.1),
+                          spreadRadius: 1.0,
                         ),
-                      ),
+                      ],
                     ),
-                    padding: EdgeInsets.all(0.0),
-                    minWidth: 10.0,
+                    child: IconButton(
+                      onPressed: () {
+                        setState(() async {
+                          if (_markerInitials == '') {
+                            showAdminAlertDialogDaysOff(
+                                context, documentID, widget.type, widget.text);
+                          } else if (_markerInitials == 'none') {
+                          } else {
+                            if (widget.type == 'vacation') {
+                              await dbController.addVacation(
+                                  documentID, '$_markerInitials$_markerInfo');
+                            }
+
+                            if (widget.type == 'sickLeave') {
+                              await dbController.addSickLeave(
+                                  documentID, '$_markerInitials$_markerInfo');
+                            }
+                          }
+                        });
+                      },
+                      color: Theme.of(context).indicatorColor,
+                      icon: Icon(Icons.add),
+                      padding: EdgeInsets.all(0.0),
+                    ),
                   )
 
                 //If Emp is chosen

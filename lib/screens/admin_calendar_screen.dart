@@ -585,7 +585,7 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
           child: Text(
             vacations[i],
             style: TextStyle(
-              fontSize: 12.0,
+              fontSize: ScreenUtil().setWidth(30),
               color: unpaid
                   ? Theme.of(context).accentColor
                   : Theme.of(context).textSelectionColor,

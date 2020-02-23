@@ -2,7 +2,6 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/chart_data.dart';
-import 'package:paybis_com_shifts/screens/shifts_screen.dart';
 
 class ProgressChart extends StatelessWidget {
   final List<charts.Series> seriesList;
@@ -41,8 +40,8 @@ class ProgressChart extends StatelessWidget {
     int difference = 0;
     final List<StatsForMonth> transactionsMonthData = [];
     for (SupportChartData chartData in data) {
-      difference = dateTime.year - chartData.year;
-      if (chartData.year < dateTime.year) {
+      difference = DateTime.now().year - chartData.year;
+      if (chartData.year < DateTime.now().year) {
         chartData.month = chartData.month - (12 * (difference));
       }
       transactionsMonthData
@@ -51,7 +50,7 @@ class ProgressChart extends StatelessWidget {
 
     final List<StatsForMonth> verificationsMonthData = [];
     for (SupportChartData chartData in data) {
-      if ((chartData.year < dateTime.year)
+      if ((chartData.year < DateTime.now().year)
 //          ||chartData.year < dateTime.year && chartData.month >= dateTime.month
           ) {
         chartData.month = chartData.month - (12 * (difference));
@@ -62,7 +61,7 @@ class ProgressChart extends StatelessWidget {
 
     final List<StatsForMonth> chatsMonthData = [];
     for (SupportChartData chartData in data) {
-      if (chartData.year < dateTime.year) {
+      if (chartData.year < DateTime.now().year) {
         chartData.month = chartData.month - (12 * (difference));
       }
       chatsMonthData.add(new StatsForMonth(chartData.month, chartData.chats));
@@ -70,7 +69,7 @@ class ProgressChart extends StatelessWidget {
 
     final List<StatsForMonth> averageMonthData = [];
     for (SupportChartData chartData in data) {
-      if (chartData.year < dateTime.year) {
+      if (chartData.year < DateTime.now().year) {
         chartData.month = chartData.month - (12 * difference);
       }
       averageMonthData.add(new StatsForMonth(

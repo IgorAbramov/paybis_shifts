@@ -50,7 +50,7 @@ List<Day> daysWithShiftsForCountThisMonth = List<Day>();
 final shiftsScaffoldKey = new GlobalKey<ScaffoldState>();
 final shiftsScreenKey = new GlobalKey<_ShiftScreenState>();
 TextEditingController reasonTextInputController;
-ScrollController scrollController;
+ScrollController _scrollController;
 FirebaseMessaging firebaseMessaging = FirebaseMessaging();
 String _markerInitials = '';
 List copiedShift = [];
@@ -75,7 +75,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
     super.initState();
 
     reasonTextInputController = new TextEditingController();
-    scrollController = new ScrollController();
+    _scrollController = new ScrollController();
     configurePushNotifications();
     Stream<QuerySnapshot> hasNotificationStream =
         (employee.department == kSupportDepartment)
@@ -83,7 +83,6 @@ class _ShiftScreenState extends State<ShiftScreen> {
             : dbController.createAdminFeedStream();
     hasNotificationStream.listen((snapshots) {
       if (snapshots.documents.length > 0) {
-        print(snapshots.toString());
         hasNotifications = true;
         setState(() {});
       } else {
@@ -91,11 +90,15 @@ class _ShiftScreenState extends State<ShiftScreen> {
         setState(() {});
       }
     });
-//    if (SchedulerBinding.instance.schedulerPhase ==
-//        SchedulerPhase.persistentCallbacks) {
-//      SchedulerBinding.instance.addPostFrameCallback((_) =>
-//          scrollController.jumpTo(scrollController.offset + timestamp.day));
-//    }
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Future.delayed(Duration(milliseconds: 300), () {
+        if (dateTime.month == DateTime.now().month) {
+          if (_scrollController.hasClients)
+            _scrollController.animateTo((DateTime.now().day * 40).toDouble(),
+                duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+        }
+      });
+    });
   }
 
   void rebuild() {
@@ -322,7 +325,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
             columnWidths: {
               0: FlexColumnWidth(0.15),
               1: FlexColumnWidth(1),
-              2: FlexColumnWidth(1),
+              2: FlexColumnWidth(0.8),
               3: FlexColumnWidth(1),
             },
             children: [
@@ -404,7 +407,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                     borderRadius: BorderRadius.circular(15.0),
                     child: MaterialButton(
                       onPressed: () {
-                        scrollController.jumpTo(timestamp.day * 47.0);
+                        _scrollController.jumpTo(timestamp.day * 47.0);
                       },
                       child: Text(
                         getMonthName(dateTime.month),
@@ -501,20 +504,10 @@ class _ShiftScreenState extends State<ShiftScreen> {
       },
       onMessage: (Map<String, dynamic> message) async {
         print("on message: $message\n");
-        print('Employee ${employee.id}');
         final String recipientId = message['data']['recipient'];
         final String body = message['notification']['body'];
-        print('Recipient $recipientId');
-        print('Employee ${employee.id}');
         if (recipientId == employee.id) {
-          print("Notification shown!");
           openNotificationAlertDialog(context, body, 'Change Request');
-//          SnackBar snackbar = SnackBar(
-//              content: Text(
-//            body,
-//            overflow: TextOverflow.ellipsis,
-//          ));
-//          shiftsScaffoldKey.currentState.showSnackBar(snackbar);
         } else
           print("Notification NOT shown");
       },
@@ -647,13 +640,14 @@ class DaysStream extends StatelessWidget {
             daysWithShiftsForCountThisMonth.add(dayWithShifts);
 
           final dayWithShiftsUI = Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             border: TableBorder.all(
               color: Theme.of(context).indicatorColor,
             ),
             columnWidths: {
               0: FlexColumnWidth(0.15),
               1: FlexColumnWidth(1),
-              2: FlexColumnWidth(1),
+              2: FlexColumnWidth(0.8),
               3: FlexColumnWidth(1),
             },
             children: [
@@ -931,7 +925,7 @@ class DaysStream extends StatelessWidget {
         }
         return Expanded(
           child: ListView(
-            controller: scrollController,
+            controller: _scrollController,
             reverse: false,
             children: (daysWithShifts.length != 0)
                 ? daysWithShifts
@@ -1000,7 +994,8 @@ class DaysStream extends StatelessWidget {
 //                    year == DateTime.now().year) ||
 //                (month > DateTime.now().month && year == DateTime.now().year) ||
 //                (year > DateTime.now().year)) &&
-            list.length < 4)
+            ((shifts[0]['type'] != kMorning && list.length < 4) ||
+                (shifts[0]['type'] == kMorning && list.length < 3)))
           list.add(ShiftsRoundButton(
             day: day,
             month: month,
@@ -1064,39 +1059,36 @@ class DateTableCell extends StatelessWidget {
             }
           }
         },
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Container(
-            child: Column(
-              children: <Widget>[
-                Transform.rotate(
-                  angle: pi * 1.5,
-                  child: Text(
-                    '$month',
-                    style: TextStyle(
-                      fontSize: ScreenUtil().setSp(29),
-                      fontWeight: FontWeight.bold,
-                      color: isWeekend
-                          ? Theme.of(context).accentColor
-                          : Theme.of(context).indicatorColor,
-                    ),
+        child: Container(
+          child: Column(
+            children: <Widget>[
+              Transform.rotate(
+                angle: pi * 1.5,
+                child: Text(
+                  '$month',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(28),
+                    fontWeight: FontWeight.bold,
+                    color: isWeekend
+                        ? Theme.of(context).accentColor
+                        : Theme.of(context).indicatorColor,
                   ),
                 ),
-                Transform.rotate(
-                  angle: pi * 1.5,
-                  child: Text(
-                    '$day.',
-                    style: TextStyle(
-                      fontSize: ScreenUtil().setSp(29),
-                      fontWeight: FontWeight.bold,
-                      color: isWeekend
-                          ? Theme.of(context).accentColor
-                          : Theme.of(context).indicatorColor,
-                    ),
+              ),
+              Transform.rotate(
+                angle: pi * 1.5,
+                child: Text(
+                  '$day.',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(28),
+                    fontWeight: FontWeight.bold,
+                    color: isWeekend
+                        ? Theme.of(context).accentColor
+                        : Theme.of(context).indicatorColor,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1134,8 +1126,7 @@ class ShiftsRoundButton extends StatefulWidget {
 
 class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
   String buttonText = '+';
-  double size = 26.0;
-
+  double size = ScreenUtil().setSp(42);
   double bottom = 5.0;
   double right = 1.0;
   String buttonHolder;
@@ -1197,63 +1188,69 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                       return dragCompleted = false;
                     },
                     builder: (context, accepted, rejected) {
-                      return MaterialButton(
-                        onPressed: () {
-                          setState(() async {
-                            if (_markerInitials == '') {
-                              showAdminAlertDialog(
-                                  context,
-                                  documentID,
-                                  widget.day,
-                                  widget.month,
-                                  widget.shift,
-                                  "Who's gonna work?",
-                                  widget.absentList);
-                            } else if (_markerInitials == 'X') {
-                            } else {
-                              currentDocument =
-                                  await dbController.getDocument(documentID);
-
-                              String position;
-                              for (Employee emp in listWithEmployees) {
-                                if (emp.initial == _markerInitials) {
-                                  position = emp.position;
-                                }
-                              }
-                              Shift newShift = Shift(_markerInitials, 8.0,
-                                  position, widget.shift.type);
-
-                              await dbController.createShift(
-                                  currentDocument,
-                                  newShift.type,
-                                  newShift.buildMap(
-                                      newShift.holder,
-                                      newShift.hours,
-                                      newShift.position,
-                                      newShift.type));
-                              await dbController.addShiftChangeToRecentChanges(
-                                  newShift.holder,
-                                  '${widget.day}.${widget.month}',
-                                  newShift.type,
-                                  'shift created',
-                                  true);
-                            }
-                          });
-                        },
-                        color: Theme.of(context).textSelectionColor,
-                        shape: CircleBorder(),
-                        child: Padding(
-                          padding: EdgeInsets.only(bottom: 3.0, right: 0.0),
-                          child: Text(
-                            buttonText,
-                            style: TextStyle(
-                              fontSize: size,
-                              color: Theme.of(context).indicatorColor,
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).textSelectionColor,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context)
+                                  .indicatorColor
+                                  .withOpacity(0.1),
+                              spreadRadius: 1.0,
                             ),
-                          ),
+                          ],
                         ),
-                        padding: EdgeInsets.all(0.0),
-                        minWidth: 10.0,
+                        child: IconButton(
+                          onPressed: () {
+                            setState(() async {
+                              if (_markerInitials == '') {
+                                showAdminAlertDialog(
+                                    context,
+                                    documentID,
+                                    widget.day,
+                                    widget.month,
+                                    widget.shift,
+                                    "Who's gonna work?",
+                                    widget.absentList);
+                              } else if (_markerInitials == 'X') {
+                              } else {
+                                currentDocument =
+                                    await dbController.getDocument(documentID);
+
+                                String position;
+                                for (Employee emp in listWithEmployees) {
+                                  if (emp.initial == _markerInitials) {
+                                    position = emp.position;
+                                  }
+                                }
+                                Shift newShift = Shift(_markerInitials, 8.0,
+                                    position, widget.shift.type);
+
+                                await dbController.createShift(
+                                    currentDocument,
+                                    newShift.type,
+                                    newShift.buildMap(
+                                        newShift.holder,
+                                        newShift.hours,
+                                        newShift.position,
+                                        newShift.type));
+                                await dbController
+                                    .addShiftChangeToRecentChanges(
+                                        newShift.holder,
+                                        '${widget.day}.${widget.month}',
+                                        newShift.type,
+                                        'shift created',
+                                        true);
+                              }
+                            });
+                          },
+                          color: Theme.of(context).indicatorColor,
+//
+                          icon: Icon(Icons.add),
+                          padding: EdgeInsets.all(0.0),
+//                        minWidth: 10.0,
+                        ),
                       );
                     },
                   )
@@ -1261,7 +1258,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                 //If Emp is chosen
 
                 : Tooltip(
-                    message: '${widget.shift.hours} hours',
+                    message:
+                        '${getEmployeeName(widget.text)}\n${widget.shift.hours} hours',
                     child: Draggable(
                       maxSimultaneousDrags: 1,
                       affinity: Axis.horizontal,
@@ -1308,7 +1306,9 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                   Text(
                                     widget.text,
                                     style: TextStyle(
-                                      fontSize: isLong ? 13.0 : 16.0,
+                                      fontSize: isLong
+                                          ? ScreenUtil().setSp(32)
+                                          : ScreenUtil().setSp(42),
                                       color:
                                           Theme.of(context).textSelectionColor,
                                     ),
@@ -1319,7 +1319,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                     child: Text(
                                       (widget.workingHours < 8) ? '-' : '+',
                                       style: TextStyle(
-                                          fontSize: 20.0,
+                                          fontSize: ScreenUtil().setSp(55),
                                           fontWeight: FontWeight.bold,
                                           color: (widget.workingHours < 8)
                                               ? Theme.of(context).accentColor
@@ -1331,7 +1331,9 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                             : Text(
                                 widget.text,
                                 style: TextStyle(
-                                  fontSize: isLong ? 13.0 : 16.0,
+                                  fontSize: isLong
+                                      ? ScreenUtil().setSp(32)
+                                      : ScreenUtil().setSp(42),
                                   color: Theme.of(context).textSelectionColor,
                                 ),
                               ),
@@ -1413,7 +1415,9 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                   Text(
                                     widget.text,
                                     style: TextStyle(
-                                      fontSize: isLong ? 13.0 : 16.0,
+                                      fontSize: isLong
+                                          ? ScreenUtil().setSp(32)
+                                          : ScreenUtil().setSp(42),
                                       color:
                                           Theme.of(context).textSelectionColor,
                                     ),
@@ -1424,7 +1428,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                     child: Text(
                                       (widget.workingHours < 8) ? '-' : '+',
                                       style: TextStyle(
-                                          fontSize: 20.0,
+                                          fontSize: ScreenUtil().setSp(55),
                                           fontWeight: FontWeight.bold,
                                           color: (widget.workingHours < 8)
                                               ? Theme.of(context).accentColor
@@ -1436,7 +1440,9 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                             : Text(
                                 widget.text,
                                 style: TextStyle(
-                                  fontSize: isLong ? 13.0 : 16.0,
+                                  fontSize: isLong
+                                      ? ScreenUtil().setSp(32)
+                                      : ScreenUtil().setSp(42),
                                   color: Theme.of(context).textSelectionColor,
                                 ),
                               ),
@@ -1491,7 +1497,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 
                 //If Emp is chosen
                 : Tooltip(
-                    message: '${widget.shift.hours} hours',
+                    message:
+                        '${getEmployeeName(widget.text)}\n${widget.shift.hours} hours',
                     child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 0.1),
                         child: Material(
@@ -1577,7 +1584,9 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                           Text(
                                             widget.text,
                                             style: TextStyle(
-                                              fontSize: isLong ? 13.0 : 16.0,
+                                              fontSize: isLong
+                                                  ? ScreenUtil().setSp(32)
+                                                  : ScreenUtil().setSp(42),
                                               color: Theme.of(context)
                                                   .textSelectionColor,
                                             ),
@@ -1604,7 +1613,9 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                     : Text(
                                         widget.text,
                                         style: TextStyle(
-                                          fontSize: isLong ? 13.0 : 16.0,
+                                          fontSize: isLong
+                                              ? ScreenUtil().setSp(32)
+                                              : ScreenUtil().setSp(42),
                                           color: Theme.of(context)
                                               .textSelectionColor,
                                         ),
@@ -1883,7 +1894,9 @@ List<Widget> listMyWidgets(BuildContext context, List absent) {
               child: Text(
                 emp.name,
                 style: TextStyle(
-                  fontSize: (emp.name.length <= 7) ? 17.0 : 14.0,
+                  fontSize: (emp.name.length <= 12)
+                      ? ScreenUtil().setSp(40)
+                      : ScreenUtil().setSp(34),
                   color: isAbsent
                       ? Theme.of(context).indicatorColor
                       : Theme.of(context).textSelectionColor,
@@ -2423,4 +2436,13 @@ void nextMonthSelected() {
   } else {
     dateTime = new DateTime(dateTime.year, dateTime.month + 1);
   }
+}
+
+String getEmpName(String initials) {
+  String name = '';
+  for (Employee emp in listWithEmployees) {
+    if (initials == emp.initial) name = emp.name;
+    break;
+  }
+  return name;
 }

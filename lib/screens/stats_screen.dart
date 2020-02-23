@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
@@ -123,83 +124,39 @@ class _StatsScreenState extends State<StatsScreen> {
                         children: (employee.department == kSuperAdmin)
                             ? [
                                 TableCell(
-                                  child: Text(
-                                    'Name',
-                                    style: kButtonStyle,
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  child: TableTitleText(text: 'Name'),
                                 ),
                                 TableCell(
-                                  child: Text(
-                                    'Salary',
-                                    style: kButtonStyle,
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  child: TableTitleText(text: 'Salary'),
                                 ),
                                 TableCell(
-                                  child: Text(
-                                    'Shifts',
-                                    style: kButtonStyle,
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  child: TableTitleText(text: 'Shifts'),
                                 ),
                                 TableCell(
-                                  child: Text(
-                                    'Nights',
-                                    style: kButtonStyle,
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  child: TableTitleText(text: 'Nights'),
                                 ),
                                 TableCell(
-                                  child: Text(
-                                    'Mornings',
-                                    style: kButtonStyle,
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  child: TableTitleText(text: 'Mornings'),
                                 ),
                                 TableCell(
-                                  child: Text(
-                                    'Evenings',
-                                    style: kButtonStyle,
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  child: TableTitleText(text: 'Evenings'),
                                 ),
                               ]
                             : [
                                 TableCell(
-                                  child: Text(
-                                    'Name',
-                                    style: kButtonStyle,
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  child: TableTitleText(text: 'Name'),
                                 ),
                                 TableCell(
-                                  child: Text(
-                                    'Shifts',
-                                    style: kButtonStyle,
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  child: TableTitleText(text: 'Shifts'),
                                 ),
                                 TableCell(
-                                  child: Text(
-                                    'Nights',
-                                    style: kButtonStyle,
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  child: TableTitleText(text: 'Nights'),
                                 ),
                                 TableCell(
-                                  child: Text(
-                                    'Mornings',
-                                    style: kButtonStyle,
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  child: TableTitleText(text: 'Mornings'),
                                 ),
                                 TableCell(
-                                  child: Text(
-                                    'Evenings',
-                                    style: kButtonStyle,
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  child: TableTitleText(text: 'Evenings'),
                                 ),
                               ],
                       ),
@@ -658,60 +615,30 @@ class StatsObject extends StatelessWidget {
                   color: Theme.of(context).primaryColorDark.withOpacity(0.7)),
               children: [
                 TableCell(
-                  child: Text(
-                    name,
-                    style: kButtonStyle,
-                    textAlign: TextAlign.center,
-                  ),
+                  child: TableInfoText(text: '$name'),
                 ),
                 TableCell(
-                  child: Text(
-                    '${salary.toStringAsFixed(2)}',
-                    style: kButtonStyle,
-                    textAlign: TextAlign.center,
-                  ),
+                  child: TableInfoText(text: '${salary.toStringAsFixed(2)}'),
                 ),
                 TableCell(
-                  child: Text(
-                    '$amountOfShifts',
-                    style: kButtonStyle,
-                    textAlign: TextAlign.center,
-                  ),
+                  child: TableInfoText(text: '$amountOfShifts'),
                 ),
                 TableCell(
                   child: Column(children: <Widget>[
-                    Text(
-                      '$amountOfNightShifts',
-                      style: kButtonStyle,
-                    ),
-                    Text(
-                      '($nightHours)',
-                      style: kButtonStyle,
-                    ),
+                    TableInfoText(text: '$amountOfNightShifts'),
+                    TableInfoText(text: '($nightHours)'),
                   ]),
                 ),
                 TableCell(
                   child: Column(children: <Widget>[
-                    Text(
-                      '$amountOfMorningShifts',
-                      style: kButtonStyle,
-                    ),
-                    Text(
-                      '($morningHours)',
-                      style: kButtonStyle,
-                    ),
+                    TableInfoText(text: '$amountOfMorningShifts'),
+                    TableInfoText(text: '($morningHours)'),
                   ]),
                 ),
                 TableCell(
                   child: Column(children: <Widget>[
-                    Text(
-                      '$amountOfEveningShifts',
-                      style: kButtonStyle,
-                    ),
-                    Text(
-                      '($eveningHours)',
-                      style: kButtonStyle,
-                    ),
+                    TableInfoText(text: '$amountOfEveningShifts'),
+                    TableInfoText(text: '($eveningHours)'),
                   ]),
                 ),
               ],
@@ -765,59 +692,73 @@ class StatsObjectWithoutSalary extends StatelessWidget {
                   color: Theme.of(context).primaryColorDark.withOpacity(0.7)),
               children: [
                 TableCell(
-                  child: Text(
-                    name,
-                    style: kButtonStyle,
-                    textAlign: TextAlign.center,
-                  ),
+                  child: TableInfoText(text: '$name'),
                 ),
                 TableCell(
-                  child: Text(
-                    '$amountOfShifts',
-                    style: kButtonStyle,
-                    textAlign: TextAlign.center,
-                  ),
+                  child: TableInfoText(text: '$amountOfShifts'),
                 ),
                 TableCell(
                   child: Column(children: <Widget>[
-                    Text(
-                      '$amountOfNightShifts',
-                      style: kButtonStyle,
-                    ),
-                    Text(
-                      '($nightHours)',
-                      style: kButtonStyle,
-                    ),
+                    TableInfoText(text: '$amountOfNightShifts'),
+                    TableInfoText(text: '($nightHours)'),
                   ]),
                 ),
                 TableCell(
                   child: Column(children: <Widget>[
-                    Text(
-                      '$amountOfMorningShifts',
-                      style: kButtonStyle,
-                    ),
-                    Text(
-                      '($morningHours)',
-                      style: kButtonStyle,
-                    ),
+                    TableInfoText(text: '$amountOfMorningShifts'),
+                    TableInfoText(text: '($morningHours)'),
                   ]),
                 ),
                 TableCell(
                   child: Column(children: <Widget>[
-                    Text(
-                      '$amountOfEveningShifts',
-                      style: kButtonStyle,
-                    ),
-                    Text(
-                      '($eveningHours)',
-                      style: kButtonStyle,
-                    ),
+                    TableInfoText(text: '$amountOfEveningShifts'),
+                    TableInfoText(text: '($eveningHours)'),
                   ]),
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class TableTitleText extends StatelessWidget {
+  final String text;
+
+  TableTitleText({@required this.text});
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Text(
+        text,
+        style: TextStyle(
+            color: textIconColor,
+            fontSize: ScreenUtil().setSp(34),
+            fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
+class TableInfoText extends StatelessWidget {
+  final String text;
+
+  TableInfoText({@required this.text});
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 2.0),
+      child: Text(
+        text,
+        style: TextStyle(
+            color: textIconColor,
+            fontSize: ScreenUtil().setSp(34),
+            fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
       ),
     );
   }

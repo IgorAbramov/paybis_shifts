@@ -1,7 +1,7 @@
 name: paybis_com_shifts
 description: Paybis Shifts for customer support
 
-version: 8.0.0
+version: 9.0.0
 
 environment:
   sdk: ">=2.2.2 <3.0.0"

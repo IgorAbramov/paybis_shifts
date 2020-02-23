@@ -13,12 +13,12 @@ if (flutterRoot == null) {
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
-    flutterVersionCode = '8'
+    flutterVersionCode = '9'
 }
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
-    flutterVersionName = '8.0'
+    flutterVersionName = '9.0'
 }
 
 apply plugin: 'com.android.application'
@@ -41,8 +41,8 @@ android {
         applicationId "com.paybis.shifts"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 8
-        versionName "8.0"
+        versionCode 9
+        versionName "9.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

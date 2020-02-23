@@ -23,6 +23,7 @@ import 'support_days_off_screen.dart';
 
 String _markerInitials = '';
 String _markerTime = '';
+ScrollController _scrollController;
 
 final _auth = FirebaseAuth.instance;
 String _parkingTime = '';
@@ -34,6 +35,21 @@ class ParkingScreen extends StatefulWidget {
 }
 
 class _ParkingScreenState extends State<ParkingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Future.delayed(Duration(milliseconds: 300), () {
+        if (dateTime.month == DateTime.now().month) {
+          if (_scrollController.hasClients)
+            _scrollController.animateTo((DateTime.now().day * 40).toDouble(),
+                duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+        }
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,7 +76,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                         color: Theme.of(context).textSelectionColor,
                       ),
                       onPressed: () {
-                        showAdminMarkerAlertDialogParking(context);
+                        showAdminMarkerAlertDialogParking(context, true);
                       },
                     )
                   : Material(
@@ -133,7 +149,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                         color: Theme.of(context).textSelectionColor,
                       ),
                       onPressed: () {
-                        showAdminMarkerAlertDialogParking(context);
+                        showAdminMarkerAlertDialogParking(context, true);
                       },
                     )
                   : Material(
@@ -317,6 +333,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
 
   showAdminMarkerAlertDialogParking(
     BuildContext context,
+    bool isItAllowed,
   ) {
     final result = showDialog(
       context: context,
@@ -341,7 +358,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
                 Wrap(
                   alignment: WrapAlignment.spaceEvenly,
                   crossAxisAlignment: WrapCrossAlignment.center,
-                  children: listParkingWidgets(context),
+                  children: listParkingWidgets(context, isItAllowed),
                 ),
                 Container(
                   child: FittedBox(
@@ -543,11 +560,11 @@ List<Widget> listParkingInfo(BuildContext context) {
 class ParkingDates extends StatelessWidget {
   final List<String> dates = [
     '7-15',
-    '9-17',
-    '10-18',
-    '10-19',
+//    '9-17',
+//    '10-18',
+//    '10-19',
     '15-23',
-    '23-7',
+//    '23-7',
   ];
   @override
   Widget build(BuildContext context) {
@@ -559,10 +576,11 @@ class ParkingDates extends StatelessWidget {
   }
 }
 
-List<Widget> listParkingWidgets(BuildContext context) {
+List<Widget> listParkingWidgets(BuildContext context, bool isItAllowed) {
   List<Widget> list = List();
   for (Employee emp in listWithEmployees) {
-    if (emp.hasCar) {
+    if ((emp.hasCar && isItAllowed) ||
+        (emp.hasCar && !isItAllowed && emp.department == kSupportDepartment)) {
       list.add(Padding(
         padding: const EdgeInsets.all(2.0),
         child: Material(
@@ -577,7 +595,9 @@ List<Widget> listParkingWidgets(BuildContext context) {
             child: Text(
               emp.name,
               style: TextStyle(
-                fontSize: (emp.name.length <= 7) ? 17.0 : 14.0,
+                fontSize: (emp.name.length <= 10)
+                    ? ScreenUtil().setSp(40)
+                    : ScreenUtil().setSp(28),
                 color: Theme.of(context).textSelectionColor,
               ),
             ),
@@ -708,6 +728,7 @@ class ParkingDaysStream extends StatelessWidget {
         }
         return Expanded(
           child: ListView(
+            controller: _scrollController,
             reverse: false,
             children: daysWithShifts,
           ),
@@ -732,6 +753,8 @@ class ParkingDaysStream extends StatelessWidget {
             documentID: documentID,
             time: (splitted.length == 3) ? '${splitted[1]} ${splitted[2]}' : '',
             type: 'mgmt',
+            isItAllowed: true,
+            canBeRequested: false,
           ));
         }
         if (list.length < 3)
@@ -743,6 +766,8 @@ class ParkingDaysStream extends StatelessWidget {
             documentID: documentID,
             time: '',
             type: 'mgmt',
+            isItAllowed: true,
+            canBeRequested: true,
           ));
         return list;
       }
@@ -755,6 +780,8 @@ class ParkingDaysStream extends StatelessWidget {
         documentID: documentID,
         time: '',
         type: 'mgmt',
+        isItAllowed: true,
+        canBeRequested: true,
       ));
     return list;
   }
@@ -783,9 +810,11 @@ class ParkingDaysStream extends StatelessWidget {
             documentID: documentID,
             time: (splitted.length == 3) ? '${splitted[1]} ${splitted[2]}' : '',
             type: 'itcs',
+            isItAllowed: true,
+            canBeRequested: false,
           ));
         }
-        if (list.length < 6 && weight < 4)
+        if (list.length < 6 && weight < 3.5) {
           list.add(ParkingRoundButton(
             day: day,
             month: month,
@@ -794,7 +823,22 @@ class ParkingDaysStream extends StatelessWidget {
             documentID: documentID,
             time: '',
             type: 'itcs',
+            isItAllowed: true,
+            canBeRequested: true,
           ));
+        } else if (list.length < 6 && weight == 3.5)
+          list.add(ParkingRoundButton(
+            day: day,
+            month: month,
+            year: year,
+            text: '',
+            documentID: documentID,
+            time: '',
+            type: 'itcs',
+            isItAllowed: false,
+            canBeRequested: false,
+          ));
+
         return list;
       }
     } else
@@ -806,6 +850,8 @@ class ParkingDaysStream extends StatelessWidget {
         documentID: documentID,
         time: '',
         type: 'itcs',
+        isItAllowed: true,
+        canBeRequested: true,
       ));
     return list;
   }
@@ -819,6 +865,8 @@ class ParkingRoundButton extends StatefulWidget {
   final String documentID;
   final String time;
   final String type;
+  final bool isItAllowed;
+  final bool canBeRequested;
 
   ParkingRoundButton({
     @required this.day,
@@ -828,6 +876,8 @@ class ParkingRoundButton extends StatefulWidget {
     @required this.documentID,
     @required this.time,
     @required this.type,
+    @required this.isItAllowed,
+    @required this.canBeRequested,
   }) : super();
 
   @override
@@ -891,42 +941,47 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
 
                 //If Emp is NOT chosen
 
-                ? MaterialButton(
-                    onPressed: () {
-                      setState(() async {
-                        if (_markerInitials == '') {
-                          showAdminAlertDialogParking(
-                              context, documentID, widget.type, widget.text);
-                        } else if (_markerInitials == 'none') {
-                        } else {
-                          if (widget.type == 'mgmt') {
-                            await dbController.addParkingMGMT(
-                                documentID, '$_markerInitials $_markerTime');
-                          }
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Container(
+                      height: 32.0,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).textSelectionColor,
+                        borderRadius: BorderRadius.circular(5.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(context)
+                                .indicatorColor
+                                .withOpacity(0.1),
+                            spreadRadius: 1.0,
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          setState(() async {
+                            if (_markerInitials == '') {
+                              showAdminAlertDialogParking(context, documentID,
+                                  widget.type, widget.text, widget.isItAllowed);
+                            } else if (_markerInitials == 'none') {
+                            } else {
+                              if (widget.type == 'mgmt') {
+                                await dbController.addParkingMGMT(documentID,
+                                    '$_markerInitials $_markerTime');
+                              }
 
-                          if (widget.type == 'itcs') {
-                            await dbController.addParkingItCs(
-                                documentID, '$_markerInitials $_markerTime');
-                          }
-                        }
-                      });
-                    },
-                    color: Theme.of(context).textSelectionColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 3.0, right: 0.0),
-                      child: Text(
-                        buttonText,
-                        style: TextStyle(
-                          fontSize: size,
-                          color: Theme.of(context).indicatorColor,
-                        ),
+                              if (widget.type == 'itcs') {
+                                await dbController.addParkingItCs(documentID,
+                                    '$_markerInitials $_markerTime');
+                              }
+                            }
+                          });
+                        },
+                        color: Theme.of(context).indicatorColor,
+                        icon: Icon(Icons.add),
+                        padding: EdgeInsets.all(0.0),
                       ),
                     ),
-                    padding: EdgeInsets.all(0.0),
-                    minWidth: 10.0,
                   )
 
                 //If Emp is chosen
@@ -1007,8 +1062,8 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                 //If Emp is NOT chosen
 
                 ? MaterialButton(
-                    //  onPressed: () {
-                    //  },
+//                      onPressed: () {
+//                      },
 
                     color: Theme.of(context).primaryColor,
                     shape: RoundedRectangleBorder(
@@ -1098,6 +1153,7 @@ showAdminAlertDialogParking(
   String docID,
   String type,
   String title,
+  bool isItAllowed,
 ) {
   final result = showDialog(
     context: context,
@@ -1121,7 +1177,7 @@ showAdminAlertDialogParking(
               Wrap(
                 alignment: WrapAlignment.spaceEvenly,
                 crossAxisAlignment: WrapCrossAlignment.center,
-                children: listParkingWidgets(context),
+                children: listParkingWidgets(context, isItAllowed),
               ),
               Container(
                 child: FittedBox(

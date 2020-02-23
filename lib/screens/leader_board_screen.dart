@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:paybis_com_shifts/models/leader_board_data.dart';
@@ -88,11 +86,14 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> {
       body: Column(
         children: <Widget>[
           Expanded(
-              flex: 1,
-              child:
-                  Platform.isIOS ? iOSPickerMonths() : androidDropdownMonths()),
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: androidDropdownMonths(),
+            ),
+          ),
           Expanded(
-            flex: 8,
+            flex: 6,
             child: ListView(
               children: listLeadersWidgets(context),
             ),
@@ -115,6 +116,7 @@ List<Widget> listLeadersWidgets(BuildContext context) {
           width: double.infinity,
           height: 30.0,
           decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(9.0),
             color: (listWithLeaderBoardData.indexOf(leader) > 2)
                 ? (listWithLeaderBoardData.indexOf(leader) >=
                         (listWithLeaderBoardData.length - 3))

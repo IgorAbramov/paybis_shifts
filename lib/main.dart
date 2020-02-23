@@ -23,7 +23,7 @@ import 'screens/stats_screen.dart';
 import 'screens/support_days_off_screen.dart';
 import 'screens/welcome_screen.dart';
 
-const String appVersion = '8.0.0';
+const String appVersion = '9.0.0';
 
 FirebaseAuth _auth = FirebaseAuth.instance;
 void main() => runApp(PBShifts());
