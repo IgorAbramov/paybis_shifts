@@ -42,10 +42,11 @@ class _ParkingScreenState extends State<ParkingScreen> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       Future.delayed(Duration(milliseconds: 300), () {
         if (dateTime.month == DateTime.now().month) {
-          if (_scrollController.hasClients)
+          if (_scrollController.hasClients){
+            if(DateTime.now().day > 7){
             _scrollController.animateTo((DateTime.now().day * 40).toDouble(),
                 duration: Duration(milliseconds: 300), curve: Curves.easeOut);
-        }
+        }}}
       });
     });
   }

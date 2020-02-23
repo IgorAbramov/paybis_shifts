@@ -93,10 +93,11 @@ class _ShiftScreenState extends State<ShiftScreen> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       Future.delayed(Duration(milliseconds: 300), () {
         if (dateTime.month == DateTime.now().month) {
-          if (_scrollController.hasClients)
-            _scrollController.animateTo((DateTime.now().day * 40).toDouble(),
+          if (_scrollController.hasClients){
+            if(DateTime.now().day > 7){
+            _scrollController.animateTo((DateTime.now().day * 37).toDouble(),
                 duration: Duration(milliseconds: 300), curve: Curves.easeOut);
-        }
+        }}}
       });
     });
   }
