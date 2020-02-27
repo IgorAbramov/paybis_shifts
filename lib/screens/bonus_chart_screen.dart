@@ -98,7 +98,11 @@ class _BonusStatsChartScreenState extends State<BonusStatsChartScreen> {
                           padding: const EdgeInsets.all(28.0),
                           child: Text('No data yet :)'),
                         ))
-                  : StackedBarChart.withData(chartData)
+                  : Padding(
+                      padding: const EdgeInsets.only(
+                          top: 10.0, bottom: 20.0, left: 10.0, right: 5.0),
+                      child: StackedBarChart.withData(chartData),
+                    )
               : Column(
                   children: <Widget>[
                     Table(

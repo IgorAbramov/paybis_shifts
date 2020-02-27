@@ -111,13 +111,19 @@ class _ProgressChartScreenState extends State<ProgressChartScreen> {
                           ),
                         ),
                         Expanded(
-                            flex: 7,
-//                            height: MediaQuery.of(context).size.height-120,
-                            child: ProgressChart.withData(chartData))
+                          flex: 7,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: ProgressChart.withData(chartData),
+                          ),
+                        )
                       ],
                     )
                   //If User is not Admin
-                  : ProgressChart.withData(chartData)
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
+                      child: ProgressChart.withData(chartData),
+                    )
               //If chartData is not Good to go
               : Center(
                   child: Padding(

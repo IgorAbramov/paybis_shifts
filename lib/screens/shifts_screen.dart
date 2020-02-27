@@ -1,6 +1,5 @@
 import 'dart:core';
 import 'dart:io';
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -93,11 +92,13 @@ class _ShiftScreenState extends State<ShiftScreen> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       Future.delayed(Duration(milliseconds: 300), () {
         if (dateTime.month == DateTime.now().month) {
-          if (_scrollController.hasClients){
-            if(DateTime.now().day > 7){
-            _scrollController.animateTo((DateTime.now().day * 37).toDouble(),
-                duration: Duration(milliseconds: 300), curve: Curves.easeOut);
-        }}}
+          if (_scrollController.hasClients) {
+            if (DateTime.now().day > 7) {
+              _scrollController.animateTo((DateTime.now().day * 37).toDouble(),
+                  duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+            }
+          }
+        }
       });
     });
   }
@@ -1060,36 +1061,19 @@ class DateTableCell extends StatelessWidget {
             }
           }
         },
-        child: Container(
-          child: Column(
-            children: <Widget>[
-              Transform.rotate(
-                angle: pi * 1.5,
-                child: Text(
-                  '$month',
-                  style: TextStyle(
-                    fontSize: ScreenUtil().setSp(28),
-                    fontWeight: FontWeight.bold,
-                    color: isWeekend
-                        ? Theme.of(context).accentColor
-                        : Theme.of(context).indicatorColor,
-                  ),
-                ),
+        child: Center(
+          child: RotatedBox(
+            quarterTurns: 3,
+            child: Text(
+              '$day.$month',
+              style: TextStyle(
+                fontSize: ScreenUtil().setSp(29),
+                fontWeight: FontWeight.bold,
+                color: isWeekend
+                    ? Theme.of(context).accentColor
+                    : Theme.of(context).indicatorColor,
               ),
-              Transform.rotate(
-                angle: pi * 1.5,
-                child: Text(
-                  '$day.',
-                  style: TextStyle(
-                    fontSize: ScreenUtil().setSp(28),
-                    fontWeight: FontWeight.bold,
-                    color: isWeekend
-                        ? Theme.of(context).accentColor
-                        : Theme.of(context).indicatorColor,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -1140,7 +1124,8 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
 
   @override
   Widget build(BuildContext context) {
-    Color color = Theme.of(context).primaryColor;
+    Color color = Theme.of(context).primaryColor.withOpacity(0.3);
+    Color textColor = Theme.of(context).indicatorColor;
     bool isLong = false;
     date = '${widget.day}.${widget.month}';
     documentID = widget.documentID;
@@ -1158,6 +1143,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
       //Converting String to Color
       if (emp.initial == widget.text) {
         color = convertColor(emp.empColor);
+        textColor = Theme.of(context).textSelectionColor;
       }
     }
 
@@ -1189,68 +1175,71 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                       return dragCompleted = false;
                     },
                     builder: (context, accepted, rejected) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).textSelectionColor,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Theme.of(context)
-                                  .indicatorColor
-                                  .withOpacity(0.1),
-                              spreadRadius: 1.0,
-                            ),
-                          ],
-                        ),
-                        child: IconButton(
-                          onPressed: () {
-                            setState(() async {
-                              if (_markerInitials == '') {
-                                showAdminAlertDialog(
-                                    context,
-                                    documentID,
-                                    widget.day,
-                                    widget.month,
-                                    widget.shift,
-                                    "Who's gonna work?",
-                                    widget.absentList);
-                              } else if (_markerInitials == 'X') {
-                              } else {
-                                currentDocument =
-                                    await dbController.getDocument(documentID);
+                      return Material(
+                        color: Colors.transparent,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).textSelectionColor,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context)
+                                    .indicatorColor
+                                    .withOpacity(0.1),
+                                spreadRadius: 1.0,
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
+                            onPressed: () {
+                              setState(() async {
+                                if (_markerInitials == '') {
+                                  showAdminAlertDialog(
+                                      context,
+                                      documentID,
+                                      widget.day,
+                                      widget.month,
+                                      widget.shift,
+                                      "Who's gonna work?",
+                                      widget.absentList);
+                                } else if (_markerInitials == 'X') {
+                                } else {
+                                  currentDocument = await dbController
+                                      .getDocument(documentID);
 
-                                String position;
-                                for (Employee emp in listWithEmployees) {
-                                  if (emp.initial == _markerInitials) {
-                                    position = emp.position;
+                                  String position;
+                                  for (Employee emp in listWithEmployees) {
+                                    if (emp.initial == _markerInitials) {
+                                      position = emp.position;
+                                    }
                                   }
-                                }
-                                Shift newShift = Shift(_markerInitials, 8.0,
-                                    position, widget.shift.type);
+                                  Shift newShift = Shift(_markerInitials, 8.0,
+                                      position, widget.shift.type);
 
-                                await dbController.createShift(
-                                    currentDocument,
-                                    newShift.type,
-                                    newShift.buildMap(
-                                        newShift.holder,
-                                        newShift.hours,
-                                        newShift.position,
-                                        newShift.type));
-                                await dbController
-                                    .addShiftChangeToRecentChanges(
-                                        newShift.holder,
-                                        '${widget.day}.${widget.month}',
-                                        newShift.type,
-                                        'shift created',
-                                        true);
-                              }
-                            });
-                          },
-                          color: Theme.of(context).indicatorColor,
+                                  await dbController.createShift(
+                                      currentDocument,
+                                      newShift.type,
+                                      newShift.buildMap(
+                                          newShift.holder,
+                                          newShift.hours,
+                                          newShift.position,
+                                          newShift.type));
+                                  await dbController
+                                      .addShiftChangeToRecentChanges(
+                                          newShift.holder,
+                                          '${widget.day}.${widget.month}',
+                                          newShift.type,
+                                          'shift created',
+                                          true);
+                                }
+                              });
+                            },
+                            color: Theme.of(context).indicatorColor,
 //
-                          icon: Icon(Icons.add),
-                          padding: EdgeInsets.all(0.0),
+                            icon: Icon(Icons.add),
+                            padding: EdgeInsets.all(0.0),
 //                        minWidth: 10.0,
+                          ),
                         ),
                       );
                     },
@@ -1310,8 +1299,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                       fontSize: isLong
                                           ? ScreenUtil().setSp(32)
                                           : ScreenUtil().setSp(42),
-                                      color:
-                                          Theme.of(context).textSelectionColor,
+                                      color: textColor,
                                     ),
                                   ),
                                   Padding(
@@ -1335,7 +1323,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                   fontSize: isLong
                                       ? ScreenUtil().setSp(32)
                                       : ScreenUtil().setSp(42),
-                                  color: Theme.of(context).textSelectionColor,
+                                  color: textColor,
                                 ),
                               ),
                         padding: EdgeInsets.all(0.0),
@@ -1419,8 +1407,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                       fontSize: isLong
                                           ? ScreenUtil().setSp(32)
                                           : ScreenUtil().setSp(42),
-                                      color:
-                                          Theme.of(context).textSelectionColor,
+                                      color: textColor,
                                     ),
                                   ),
                                   Padding(
@@ -1444,7 +1431,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                   fontSize: isLong
                                       ? ScreenUtil().setSp(32)
                                       : ScreenUtil().setSp(42),
-                                  color: Theme.of(context).textSelectionColor,
+                                  color: textColor,
                                 ),
                               ),
                         padding: EdgeInsets.all(0.0),
@@ -1588,8 +1575,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                               fontSize: isLong
                                                   ? ScreenUtil().setSp(32)
                                                   : ScreenUtil().setSp(42),
-                                              color: Theme.of(context)
-                                                  .textSelectionColor,
+                                              color: textColor,
                                             ),
                                           ),
                                           Padding(
@@ -1617,8 +1603,7 @@ class _ShiftsRoundButtonState extends State<ShiftsRoundButton> {
                                           fontSize: isLong
                                               ? ScreenUtil().setSp(32)
                                               : ScreenUtil().setSp(42),
-                                          color: Theme.of(context)
-                                              .textSelectionColor,
+                                          color: textColor,
                                         ),
                                       ),
                               ),
