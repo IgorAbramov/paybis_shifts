@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/controller/db_controller.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
+import 'package:paybis_com_shifts/screens/calendar_screen.dart';
 import 'package:paybis_com_shifts/screens/parking_screen.dart';
 import 'package:paybis_com_shifts/screens/shifts_screen.dart';
 import 'package:paybis_com_shifts/ui_parts/rounded_button.dart';
@@ -193,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
           print(kManagement);
           Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (BuildContext context) {
-            return ParkingScreen();
+            return CalendarScreen();
           }));
         }
         break;
@@ -203,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
           print(kITDepartment);
           Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (BuildContext context) {
-            return ParkingScreen();
+            return CalendarScreen();
           }));
         }
         break;
@@ -223,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
           print(kMarketingDepartment);
           Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (BuildContext context) {
-            return ParkingScreen();
+            return CalendarScreen();
           }));
         }
         break;

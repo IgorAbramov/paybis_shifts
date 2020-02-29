@@ -66,7 +66,10 @@ class _ParkingScreenState extends State<ParkingScreen> {
         backgroundColor: Theme.of(context).primaryColorDark,
         automaticallyImplyLeading: (employee.department == kAdmin ||
                 employee.department == kSuperAdmin ||
-                employee.department == kSupportDepartment)
+                employee.department == kSupportDepartment ||
+                employee.department == kITDepartment ||
+                employee.department == kManagement ||
+                employee.department == kMarketingDepartment)
             ? true
             : false,
         title: Text('PayBis Parking'),
@@ -106,10 +109,7 @@ class _ParkingScreenState extends State<ParkingScreen> {
               : SizedBox(
                   height: 1.0,
                 ),
-          (employee.department == kITDepartment ||
-                  employee.department == kManagement ||
-                  employee.department == kMarketingDepartment ||
-                  employee.department == kITAdmin)
+          (employee.department == kITAdmin)
               ? IconButton(
                   icon: Icon(
                     Icons.today,
@@ -120,7 +120,10 @@ class _ParkingScreenState extends State<ParkingScreen> {
                   height: 1.0,
                 ),
           (employee.department != kAdmin && employee.department != kSuperAdmin)
-              ? (employee.department == kSupportDepartment)
+              ? (employee.department == kSupportDepartment ||
+                      employee.department == kITDepartment ||
+                      employee.department == kMarketingDepartment ||
+                      employee.department == kManagement)
                   ? SizedBox(
                       height: 1.0,
                     )
@@ -584,6 +587,7 @@ List<Widget> listParkingWidgets(BuildContext context, bool isItAllowed) {
   for (Employee emp in listWithEmployees) {
     if ((emp.hasCar && isItAllowed) ||
         (emp.hasCar && !isItAllowed && emp.department == kSupportDepartment)) {
+      print(emp.name);
       list.add(Padding(
         padding: const EdgeInsets.all(2.0),
         child: Material(
@@ -598,9 +602,11 @@ List<Widget> listParkingWidgets(BuildContext context, bool isItAllowed) {
             child: Text(
               emp.name,
               style: TextStyle(
-                fontSize: (emp.name.length <= 10)
-                    ? ScreenUtil().setSp(40)
-                    : ScreenUtil().setSp(28),
+                fontSize: (employee.department != kITAdmin)
+                    ? (emp.name.length <= 10)
+                        ? ScreenUtil().setSp(40)
+                        : ScreenUtil().setSp(28)
+                    : (emp.name.length <= 10) ? 14 : 10,
                 color: Theme.of(context).textSelectionColor,
               ),
             ),
@@ -989,70 +995,75 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
 
                 //If Emp is chosen
 
-                : MaterialButton(
-                    height: 30.0,
-                    onPressed: () {
-                      setState(() async {
-                        if (_markerInitials == '' ||
-                            _markerInitials == 'none') {
-                          if (widget.type == 'mgmt') {
-                            dbController.removeParkingMGMT(
-                                documentID, '${widget.text} ${widget.time}');
-                          }
-                          if (widget.type == 'itcs') {
-                            dbController.removeParkingItCs(
-                                documentID, '${widget.text} ${widget.time}');
-                          }
-                        } else {
-                          if (widget.text == _markerInitials) {
-                          } else {
+                : Tooltip(
+                    message: (widget.time == '')
+                        ? '${getEmployeeName(widget.text)}'
+                        : '${getEmployeeName(widget.text)}\n${widget.time}',
+                    child: MaterialButton(
+                      height: 30.0,
+                      onPressed: () {
+                        setState(() async {
+                          if (_markerInitials == '' ||
+                              _markerInitials == 'none') {
                             if (widget.type == 'mgmt') {
-                              await dbController.addParkingMGMT(
-                                  documentID, '$_markerInitials $_markerTime');
+                              dbController.removeParkingMGMT(
+                                  documentID, '${widget.text} ${widget.time}');
                             }
-
                             if (widget.type == 'itcs') {
-                              await dbController.addParkingItCs(
-                                  documentID, '$_markerInitials $_markerTime');
+                              dbController.removeParkingItCs(
+                                  documentID, '${widget.text} ${widget.time}');
+                            }
+                          } else {
+                            if (widget.text == _markerInitials) {
+                            } else {
+                              if (widget.type == 'mgmt') {
+                                await dbController.addParkingMGMT(documentID,
+                                    '$_markerInitials $_markerTime');
+                              }
+
+                              if (widget.type == 'itcs') {
+                                await dbController.addParkingItCs(documentID,
+                                    '$_markerInitials $_markerTime');
+                              }
                             }
                           }
-                        }
-                      });
-                    },
-                    color: color,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Stack(
-                        alignment: AlignmentDirectional.center,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Text(
-                              widget.text,
-                              style: TextStyle(
-                                fontSize: isLong ? 13.0 : 16.0,
-                                color: Theme.of(context).textSelectionColor,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 22.0),
-                            child: Text(
-                              widget.time,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Theme.of(context).indicatorColor,
-                              ),
-                            ),
-                          ),
-                        ],
+                        });
+                      },
+                      color: color,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
                       ),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Stack(
+                          alignment: AlignmentDirectional.center,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Text(
+                                widget.text,
+                                style: TextStyle(
+                                  fontSize: isLong ? 13.0 : 16.0,
+                                  color: Theme.of(context).textSelectionColor,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 22.0),
+                              child: Text(
+                                widget.time,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Theme.of(context).indicatorColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      padding: EdgeInsets.all(0.0),
+                      minWidth: 30.0,
                     ),
-                    padding: EdgeInsets.all(0.0),
-                    minWidth: 30.0,
                   ),
           )
 
@@ -1087,67 +1098,76 @@ class _ParkingRoundButton extends State<ParkingRoundButton> {
                   )
 
                 //If Emp is chosen
-                : Padding(
-                    padding: EdgeInsets.symmetric(vertical: 1.8),
-                    child: Material(
-                        color: (employee != null)
-                            ? (widget.text == employee.initial)
-                                ? Theme.of(context).indicatorColor
-                                : color.withOpacity(0)
-                            : color.withOpacity(0),
-                        borderRadius: BorderRadius.circular(15.0),
-                        child: MaterialButton(
-                          height: 30.0,
-                          onPressed: () {
-                            if (widget.text == employee.initial) {
-                              openRefuseParkingConfirmationAlertBox(
-                                  context,
-                                  documentID,
-                                  widget.text,
-                                  widget.time,
-                                  'Sacrifice your parking place?',
-                                  widget.type);
-                            }
-                          },
-                          color: color,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: 0.0, right: 0.0),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Stack(
-                                alignment: AlignmentDirectional.center,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 8.0),
-                                    child: Text(
+                : Tooltip(
+                    message: (widget.time == '')
+                        ? '${getEmployeeName(widget.text)}'
+                        : '${getEmployeeName(widget.text)}\n${widget.time}',
+                    child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 1.8),
+                        child: Material(
+                            color: (employee != null)
+                                ? (widget.text == employee.initial)
+                                    ? Theme.of(context).indicatorColor
+                                    : color.withOpacity(0)
+                                : color.withOpacity(0),
+                            borderRadius: BorderRadius.circular(15.0),
+                            child: MaterialButton(
+                              height: 30.0,
+                              onPressed: () {
+                                if (widget.text == employee.initial) {
+                                  openRefuseParkingConfirmationAlertBox(
+                                      context,
+                                      documentID,
                                       widget.text,
-                                      style: TextStyle(
-                                        fontSize: isLong ? 13.0 : 16.0,
-                                        color: Theme.of(context)
-                                            .textSelectionColor,
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 22.0),
-                                    child: Text(
                                       widget.time,
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: Theme.of(context).indicatorColor,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                      'Sacrifice your parking place?',
+                                      widget.type);
+                                }
+                              },
+                              color: color,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5.0),
                               ),
-                            ),
-                          ),
-                          padding: EdgeInsets.all(0.0),
-                          minWidth: 10.0,
-                        ))));
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.only(bottom: 0.0, right: 0.0),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Stack(
+                                    alignment: AlignmentDirectional.center,
+                                    children: <Widget>[
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 8.0),
+                                        child: Text(
+                                          widget.text,
+                                          style: TextStyle(
+                                            fontSize: isLong ? 13.0 : 16.0,
+                                            color: Theme.of(context)
+                                                .textSelectionColor,
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(top: 22.0),
+                                        child: Text(
+                                          widget.time,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Theme.of(context)
+                                                .indicatorColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              padding: EdgeInsets.all(0.0),
+                              minWidth: 10.0,
+                            ))),
+                  ));
   }
 }
 

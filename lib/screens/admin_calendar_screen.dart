@@ -304,7 +304,8 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
                     if (!daysWithShiftsForCountThisMonth
                             .contains(dayWithShifts) &&
                         daysWithShiftsForCountThisMonth.length <
-                            getNumberOfDaysInMonth(dateTime.month))
+                            getNumberOfDaysInMonth(
+                                dateTime.month, dateTime.year))
                       daysWithShiftsForCountThisMonth.add(dayWithShifts);
                   }
                   return Column(
@@ -367,7 +368,8 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
                         shrinkWrap: true,
                         scrollDirection: Axis.vertical,
                         children: List.generate(
-                            getNumberOfDaysInMonth(dateTime.month), (index) {
+                            getNumberOfDaysInMonth(
+                                dateTime.month, dateTime.year), (index) {
                           int dayNumber = index + 1;
                           return Container(
                               margin: const EdgeInsets.all(1.0),
@@ -601,7 +603,7 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
     );
   }
 
-  int getNumberOfDaysInMonth(final int month) {
+  int getNumberOfDaysInMonth(final int month, final int year) {
     int numDays = 28;
 
     // Months are 1, ..., 12
@@ -610,7 +612,11 @@ class AdminCalendarState extends State<AdminCalendarScreen> {
         numDays = 31;
         break;
       case 2:
-        numDays = 28;
+        if ((2020 - year) % 4 == 0) {
+          numDays = 29;
+        } else
+          numDays = 28;
+
         break;
       case 3:
         numDays = 31;

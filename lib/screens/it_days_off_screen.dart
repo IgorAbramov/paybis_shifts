@@ -589,7 +589,9 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
                 //If Emp is chosen
 
                 : Tooltip(
-                    message: (widget.unpaid == '') ? 'Paid' : 'Unpaid',
+                    message: (widget.unpaid == '')
+                        ? '${getEmployeeName(widget.text)}\nPaid'
+                        : '${getEmployeeName(widget.text)}\nUnpaid',
                     child: MaterialButton(
                       onPressed: () {
                         setState(() async {
@@ -674,7 +676,9 @@ class _DayOffRoundButtonState extends State<ITDayOffRoundButton> {
 
                 //If Emp is chosen
                 : Tooltip(
-                    message: (widget.unpaid == '') ? 'Paid' : 'Unpaid',
+                    message: (widget.unpaid == '')
+                        ? '${getEmployeeName(widget.text)}\nPaid'
+                        : '${getEmployeeName(widget.text)}\nUnpaid',
                     child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 1.8),
                         child: Material(

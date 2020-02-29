@@ -1,12 +1,22 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:paybis_com_shifts/constants.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
+import 'package:paybis_com_shifts/screens/parking_screen.dart';
+import 'package:paybis_com_shifts/screens/recent_changes_screen.dart';
+import 'package:paybis_com_shifts/screens/settings_screen.dart';
+import 'package:paybis_com_shifts/screens/stats_screen.dart';
+import 'package:paybis_com_shifts/screens/support_days_off_screen.dart';
 import 'package:paybis_com_shifts/ui_parts/calendar_widgets.dart';
 
+import 'feed_screen.dart';
+import 'it_days_off_screen.dart';
 import 'login_screen.dart';
 import 'shifts_screen.dart';
+
+final _auth = FirebaseAuth.instance;
 
 class CalendarScreen extends StatefulWidget {
   static const String id = 'calendar_screen';
@@ -64,6 +74,20 @@ class CalendarState extends State<CalendarScreen> {
                 getMonthName(dateTime.month) + " " + dateTime.year.toString(),
               )),
           actions: <Widget>[
+            (employee.department == kITDepartment ||
+                    employee.department == kMarketingDepartment ||
+                    employee.department == kManagement)
+                ? IconButton(
+                    icon: Icon(
+                      Icons.directions_car,
+                      color: Theme.of(context).textSelectionColor,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        Navigator.pushNamed(context, ParkingScreen.id);
+                      });
+                    })
+                : SizedBox(),
             IconButton(
                 icon: Icon(
                   Icons.chevron_left,
@@ -86,6 +110,33 @@ class CalendarState extends State<CalendarScreen> {
                     setMonthPadding();
                   });
                 }),
+            (employee.department == kSupportDepartment ||
+                    employee.department == kAdmin ||
+                    employee.department == kSuperAdmin ||
+                    employee.department == kITAdmin)
+                ? SizedBox(
+                    height: 1.0,
+                  )
+                : PopupMenuButton<String>(
+                    color: Theme.of(context).indicatorColor.withOpacity(0.8),
+                    elevation: 4.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                    itemBuilder: (BuildContext context) {
+                      return kItChoicesPopupMenu.map((String choice) {
+                        return PopupMenuItem<String>(
+                          value: choice,
+                          child: Text(
+                            choice,
+                            style: TextStyle(
+                              color: Theme.of(context).textSelectionColor,
+                            ),
+                          ),
+                        );
+                      }).toList();
+                    },
+                    onSelected: choicesAction,
+                  )
           ],
         ),
         body: StreamBuilder(
@@ -147,7 +198,7 @@ class CalendarState extends State<CalendarScreen> {
 
                 if (!daysWithShiftsForCountThisMonth.contains(dayWithShifts) &&
                     daysWithShiftsForCountThisMonth.length <
-                        getNumberOfDaysInMonth(dateTime.month))
+                        getNumberOfDaysInMonth(dateTime.month, dateTime.year))
                   daysWithShiftsForCountThisMonth.add(dayWithShifts);
               }
               return Column(
@@ -205,7 +256,8 @@ class CalendarState extends State<CalendarScreen> {
                     shrinkWrap: true,
                     scrollDirection: Axis.vertical,
                     children: List.generate(
-                        getNumberOfDaysInMonth(dateTime.month), (index) {
+                        getNumberOfDaysInMonth(dateTime.month, dateTime.year),
+                        (index) {
                       int dayNumber = index + 1;
                       return GestureDetector(
                           // Used for handling tap on each day view
@@ -507,11 +559,14 @@ class CalendarState extends State<CalendarScreen> {
                         parkingStatus == 'reserved' &&
                         (((dayNumber - _beginMonthPadding) >=
                                     DateTime.now().day &&
+                                (dayNumber - _beginMonthPadding) >= 0 &&
                                 dateTime.month == DateTime.now().month &&
                                 (dayNumber - _beginMonthPadding) <=
                                     DateTime.now().day + 7) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 7)))
+                            (calendarCheck() &&
+                                dateTime.month == DateTime.now().month + 1 &&
+                                (dayNumber - _beginMonthPadding) < 7 &&
+                                (dayNumber - _beginMonthPadding) > 0)))
                     ? FittedBox(
                         fit: BoxFit.fill,
                         child: ParkingWidget(Colors.lightGreenAccent))
@@ -523,11 +578,14 @@ class CalendarState extends State<CalendarScreen> {
                         parkingStatus == 'free' &&
                         (((dayNumber - _beginMonthPadding) >=
                                     DateTime.now().day &&
+                                (dayNumber - _beginMonthPadding) >= 0 &&
                                 dateTime.month == DateTime.now().month &&
                                 (dayNumber - _beginMonthPadding) <=
                                     DateTime.now().day + 7) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 7)))
+                            (calendarCheck() &&
+                                dateTime.month == DateTime.now().month + 1 &&
+                                (dayNumber - _beginMonthPadding) < 7 &&
+                                (dayNumber - _beginMonthPadding) > 0)))
                     ? FittedBox(
                         fit: BoxFit.fill,
                         child: ParkingWidget(Colors.yellowAccent))
@@ -539,11 +597,14 @@ class CalendarState extends State<CalendarScreen> {
                         parkingStatus == 'busy' &&
                         (((dayNumber - _beginMonthPadding) >=
                                     DateTime.now().day &&
+                                (dayNumber - _beginMonthPadding) >= 0 &&
                                 dateTime.month == DateTime.now().month &&
                                 (dayNumber - _beginMonthPadding) <=
                                     DateTime.now().day + 7) ||
-                            (dateTime.month > DateTime.now().month &&
-                                (dayNumber - _beginMonthPadding) < 7)))
+                            (calendarCheck() &&
+                                dateTime.month == DateTime.now().month + 1 &&
+                                (dayNumber - _beginMonthPadding) < 7 &&
+                                (dayNumber - _beginMonthPadding) > 0)))
                     ? FittedBox(
                         fit: BoxFit.fill, child: ParkingWidget(Colors.red))
                     : SizedBox(
@@ -564,7 +625,21 @@ class CalendarState extends State<CalendarScreen> {
     }
   }
 
-  int getNumberOfDaysInMonth(final int month) {
+  bool calendarCheck() {
+    bool isGoodToShow;
+    DateTime dateTimeToCheck = DateTime(dateTime.year, dateTime.month);
+    DateTime dateTimeGoodToGo =
+        DateTime(DateTime.now().year, DateTime.now().month + 1);
+    DateTime dateTimeNow = DateTime(DateTime.now().year, DateTime.now().month);
+
+    if (dateTimeToCheck == dateTimeGoodToGo || dateTimeToCheck == dateTimeNow) {
+      isGoodToShow = true;
+    } else
+      isGoodToShow = false;
+    return isGoodToShow;
+  }
+
+  int getNumberOfDaysInMonth(final int month, final int year) {
     int numDays = 28;
 
     // Months are 1, ..., 12
@@ -573,7 +648,11 @@ class CalendarState extends State<CalendarScreen> {
         numDays = 31;
         break;
       case 2:
-        numDays = 28;
+        if ((2020 - year) % 4 == 0) {
+          numDays = 29;
+        } else
+          numDays = 28;
+
         break;
       case 3:
         numDays = 31;
@@ -640,6 +719,36 @@ class CalendarState extends State<CalendarScreen> {
         return "December";
       default:
         return "Unknown";
+    }
+  }
+
+  void choicesAction(String choice) {
+    if (choice == kStats) {
+      Navigator.pushNamed(context, StatsScreen.id);
+    }
+    if (choice == kSettings) {
+      Navigator.pushNamed(context, SettingsScreen.id);
+    }
+    if (choice == kItDaysOff) {
+      Navigator.pushNamed(context, ItDaysOffScreen.id);
+    }
+    if (choice == kSupportDaysOff) {
+      Navigator.pushNamed(context, SupportDaysOffScreen.id);
+    }
+    if (choice == kChangeRequests) {
+      Navigator.pushNamed(context, FeedScreen.id);
+    }
+    if (choice == kRecentChanges) {
+      Navigator.pushNamed(context, RecentChangesScreen.id);
+    }
+
+    if (choice == kLogOut) {
+      employee = null;
+      _auth.signOut();
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (BuildContext context) {
+        return LoginScreen();
+      }));
     }
   }
 }

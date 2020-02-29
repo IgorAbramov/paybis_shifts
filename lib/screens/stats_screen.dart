@@ -2,11 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:paybis_com_shifts/constants.dart';
+import 'package:paybis_com_shifts/controller/date_change_notifier.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
 import 'package:paybis_com_shifts/screens/bonus_chart_screen.dart';
 import 'package:paybis_com_shifts/screens/leader_board_screen.dart';
 import 'package:paybis_com_shifts/screens/progress_chart_screen.dart';
+import 'package:provider/provider.dart';
 
 import 'login_screen.dart';
 import 'shifts_screen.dart';
@@ -63,231 +65,235 @@ class _StatsScreenState extends State<StatsScreen> {
     if (employee.department != kSuperAdmin || employee.department != kAdmin)
       getAllPersonalData(employee);
 
-    return (employee.department == kSuperAdmin || employee.department == kAdmin)
-        ? Scaffold(
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).primaryColorDark,
-              title: FittedBox(
-                  child: Text('Stats for ${getMonthName(dateTime.month)}')),
-              actions: <Widget>[
-                IconButton(
-                    icon: Icon(
-                      Icons.star,
-                      color: Theme.of(context).textSelectionColor,
-                    ),
-                    onPressed: goToLeaderBoards),
-                IconButton(
-                    icon: Icon(
-                      Icons.show_chart,
-                      color: Theme.of(context).textSelectionColor,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        Navigator.pushNamed(context, ProgressChartScreen.id);
-                      });
-                    }),
-                IconButton(
-                    icon: Icon(
-                      Icons.equalizer,
-                      color: Theme.of(context).textSelectionColor,
-                    ),
-                    onPressed: goToCharts),
-              ],
-            ),
-            body: Container(
-              child: Column(
-                children: <Widget>[
-                  Table(
-                    border: TableBorder.all(
-                      color: secondaryColor,
-                    ),
-                    columnWidths: (employee.department == kSuperAdmin)
-                        ? {
-                            0: FlexColumnWidth(1),
-                            1: FlexColumnWidth(1),
-                            2: FlexColumnWidth(0.6),
-                            3: FlexColumnWidth(0.8),
-                            4: FlexColumnWidth(0.8),
-                            5: FlexColumnWidth(0.8),
-                          }
-                        : {
-                            0: FlexColumnWidth(1),
-                            1: FlexColumnWidth(0.6),
-                            2: FlexColumnWidth(0.8),
-                            3: FlexColumnWidth(0.8),
-                            4: FlexColumnWidth(0.8),
-                          },
-                    children: [
-                      TableRow(
-                        decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColorDark),
-                        children: (employee.department == kSuperAdmin)
-                            ? [
-                                TableCell(
-                                  child: TableTitleText(text: 'Name'),
-                                ),
-                                TableCell(
-                                  child: TableTitleText(text: 'Salary'),
-                                ),
-                                TableCell(
-                                  child: TableTitleText(text: 'Shifts'),
-                                ),
-                                TableCell(
-                                  child: TableTitleText(text: 'Nights'),
-                                ),
-                                TableCell(
-                                  child: TableTitleText(text: 'Mornings'),
-                                ),
-                                TableCell(
-                                  child: TableTitleText(text: 'Evenings'),
-                                ),
-                              ]
-                            : [
-                                TableCell(
-                                  child: TableTitleText(text: 'Name'),
-                                ),
-                                TableCell(
-                                  child: TableTitleText(text: 'Shifts'),
-                                ),
-                                TableCell(
-                                  child: TableTitleText(text: 'Nights'),
-                                ),
-                                TableCell(
-                                  child: TableTitleText(text: 'Mornings'),
-                                ),
-                                TableCell(
-                                  child: TableTitleText(text: 'Evenings'),
-                                ),
-                              ],
+    return ChangeNotifierProvider<DateChangeNotifier>(
+      create: (_) => DateChangeNotifier(dateTime),
+      child: (employee.department == kSuperAdmin ||
+              employee.department == kAdmin)
+          ? Scaffold(
+              appBar: AppBar(
+                backgroundColor: Theme.of(context).primaryColorDark,
+                title: FittedBox(
+                    child: Text('Stats for ${getMonthName(dateTime.month)}')),
+                actions: <Widget>[
+                  IconButton(
+                      icon: Icon(
+                        Icons.star,
+                        color: Theme.of(context).textSelectionColor,
                       ),
-                    ],
-                  ),
-                  StreamBuilder<QuerySnapshot>(
-                      stream: dbController.createDaysStream(
-                          dateTime.year, dateTime.month),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return circularProgress();
-                        }
-                        final days = snapshot.data.documents;
-
-                        for (var day in days) {
-                          final int dayDay = day.data['day'];
-                          final int dayMonth = day.data['month'];
-                          final int dayYear = day.data['year'];
-                          final bool dayIsHoliday = day.data['isHoliday'];
-                          final List nightShifts = day.data['night'];
-                          final List morningShifts = day.data['morning'];
-                          final List eveningShifts = day.data['evening'];
-                          currentDocument = day;
-                          final String dayDocumentID = day.documentID;
-
-                          final dayWithInfo = Day(
-                              dayDay,
-                              dayMonth,
-                              dayYear,
-                              dayIsHoliday,
-                              nightShifts,
-                              morningShifts,
-                              eveningShifts);
-
-                          if (!daysWithInfo.contains(dayWithInfo) &&
-                              daysWithInfo.length <
-                                  getNumberOfDaysInMonth(
-                                      dateTime.month, dateTime.year))
-                            daysWithInfo.add(dayWithInfo);
-                        }
-                        return Expanded(
-                          child: ListView(
-                            children: (employee.department == kSuperAdmin)
-                                ? listStatsObjects()
-                                : listStatsObjectsWithoutSalary(),
-                          ),
-                        );
+                      onPressed: goToLeaderBoards),
+                  IconButton(
+                      icon: Icon(
+                        Icons.show_chart,
+                        color: Theme.of(context).textSelectionColor,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          Navigator.pushNamed(context, ProgressChartScreen.id);
+                        });
                       }),
+                  IconButton(
+                      icon: Icon(
+                        Icons.equalizer,
+                        color: Theme.of(context).textSelectionColor,
+                      ),
+                      onPressed: goToCharts),
                 ],
               ),
-            ),
-          )
-        : Scaffold(
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).primaryColorDark,
-              actions: <Widget>[
-                IconButton(
-                    icon: Icon(
-                      Icons.star,
-                      color: Theme.of(context).textSelectionColor,
+              body: Container(
+                child: Column(
+                  children: <Widget>[
+                    Table(
+                      border: TableBorder.all(
+                        color: secondaryColor,
+                      ),
+                      columnWidths: (employee.department == kSuperAdmin)
+                          ? {
+                              0: FlexColumnWidth(1),
+                              1: FlexColumnWidth(1),
+                              2: FlexColumnWidth(0.6),
+                              3: FlexColumnWidth(0.8),
+                              4: FlexColumnWidth(0.8),
+                              5: FlexColumnWidth(0.8),
+                            }
+                          : {
+                              0: FlexColumnWidth(1),
+                              1: FlexColumnWidth(0.6),
+                              2: FlexColumnWidth(0.8),
+                              3: FlexColumnWidth(0.8),
+                              4: FlexColumnWidth(0.8),
+                            },
+                      children: [
+                        TableRow(
+                          decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColorDark),
+                          children: (employee.department == kSuperAdmin)
+                              ? [
+                                  TableCell(
+                                    child: TableTitleText(text: 'Name'),
+                                  ),
+                                  TableCell(
+                                    child: TableTitleText(text: 'Salary'),
+                                  ),
+                                  TableCell(
+                                    child: TableTitleText(text: 'Shifts'),
+                                  ),
+                                  TableCell(
+                                    child: TableTitleText(text: 'Nights'),
+                                  ),
+                                  TableCell(
+                                    child: TableTitleText(text: 'Mornings'),
+                                  ),
+                                  TableCell(
+                                    child: TableTitleText(text: 'Evenings'),
+                                  ),
+                                ]
+                              : [
+                                  TableCell(
+                                    child: TableTitleText(text: 'Name'),
+                                  ),
+                                  TableCell(
+                                    child: TableTitleText(text: 'Shifts'),
+                                  ),
+                                  TableCell(
+                                    child: TableTitleText(text: 'Nights'),
+                                  ),
+                                  TableCell(
+                                    child: TableTitleText(text: 'Mornings'),
+                                  ),
+                                  TableCell(
+                                    child: TableTitleText(text: 'Evenings'),
+                                  ),
+                                ],
+                        ),
+                      ],
                     ),
-                    onPressed: goToLeaderBoards),
-                IconButton(
-                    icon: Icon(
-                      Icons.show_chart,
-                      color: Theme.of(context).textSelectionColor,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        Navigator.pushNamed(context, ProgressChartScreen.id);
-                      });
+                    StreamBuilder<QuerySnapshot>(
+                        stream: dbController.createDaysStream(
+                            dateTime.year, dateTime.month),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return circularProgress();
+                          }
+                          final days = snapshot.data.documents;
+
+                          for (var day in days) {
+                            final int dayDay = day.data['day'];
+                            final int dayMonth = day.data['month'];
+                            final int dayYear = day.data['year'];
+                            final bool dayIsHoliday = day.data['isHoliday'];
+                            final List nightShifts = day.data['night'];
+                            final List morningShifts = day.data['morning'];
+                            final List eveningShifts = day.data['evening'];
+                            currentDocument = day;
+                            final String dayDocumentID = day.documentID;
+
+                            final dayWithInfo = Day(
+                                dayDay,
+                                dayMonth,
+                                dayYear,
+                                dayIsHoliday,
+                                nightShifts,
+                                morningShifts,
+                                eveningShifts);
+
+                            if (!daysWithInfo.contains(dayWithInfo) &&
+                                daysWithInfo.length <
+                                    getNumberOfDaysInMonth(
+                                        dateTime.month, dateTime.year))
+                              daysWithInfo.add(dayWithInfo);
+                          }
+                          return Expanded(
+                            child: ListView(
+                              children: (employee.department == kSuperAdmin)
+                                  ? listStatsObjects()
+                                  : listStatsObjectsWithoutSalary(),
+                            ),
+                          );
+                        }),
+                  ],
+                ),
+              ),
+            )
+          : Scaffold(
+              appBar: AppBar(
+                backgroundColor: Theme.of(context).primaryColorDark,
+                actions: <Widget>[
+                  IconButton(
+                      icon: Icon(
+                        Icons.star,
+                        color: Theme.of(context).textSelectionColor,
+                      ),
+                      onPressed: goToLeaderBoards),
+                  IconButton(
+                      icon: Icon(
+                        Icons.show_chart,
+                        color: Theme.of(context).textSelectionColor,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          Navigator.pushNamed(context, ProgressChartScreen.id);
+                        });
+                      }),
+                  IconButton(
+                      icon: Icon(
+                        Icons.equalizer,
+                        color: Theme.of(context).textSelectionColor,
+                      ),
+                      onPressed: goToCharts),
+                ],
+                title: FittedBox(
+                  child: Text(
+                      'Hi ${employee.name}! Stats for ${getMonthName(dateTime.month)}'),
+                ),
+              ),
+              body: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: StreamBuilder<QuerySnapshot>(
+                    stream: dbController.createDaysStream(
+                        dateTime.year, dateTime.month),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return circularProgress();
+                      }
+                      final days = snapshot.data.documents;
+
+                      for (var day in days) {
+                        final int dayDay = day.data['day'];
+                        final int dayMonth = day.data['month'];
+                        final int dayYear = day.data['year'];
+                        final bool dayIsHoliday = day.data['isHoliday'];
+                        final List nightShifts = day.data['night'];
+                        final List morningShifts = day.data['morning'];
+                        final List eveningShifts = day.data['evening'];
+                        currentDocument = day;
+                        final String dayDocumentID = day.documentID;
+
+                        final dayWithInfo = Day(
+                            dayDay,
+                            dayMonth,
+                            dayYear,
+                            dayIsHoliday,
+                            nightShifts,
+                            morningShifts,
+                            eveningShifts);
+
+                        if (daysWithInfo.contains(dayWithInfo) ||
+                            daysWithInfo.length ==
+                                getNumberOfDaysInMonth(
+                                    dateTime.month, dateTime.year)) {
+                          daysWithInfo.clear();
+                        }
+                        if (!daysWithInfo.contains(dayWithInfo) &&
+                            daysWithInfo.length <
+                                getNumberOfDaysInMonth(
+                                    dateTime.month, dateTime.year))
+                          daysWithInfo.add(dayWithInfo);
+                      }
+                      return listStatsForEmp();
                     }),
-                IconButton(
-                    icon: Icon(
-                      Icons.equalizer,
-                      color: Theme.of(context).textSelectionColor,
-                    ),
-                    onPressed: goToCharts),
-              ],
-              title: FittedBox(
-                child: Text(
-                    'Hi ${employee.name}! Stats for ${getMonthName(dateTime.month)}'),
               ),
             ),
-            body: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: StreamBuilder<QuerySnapshot>(
-                  stream: dbController.createDaysStream(
-                      dateTime.year, dateTime.month),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return circularProgress();
-                    }
-                    final days = snapshot.data.documents;
-
-                    for (var day in days) {
-                      final int dayDay = day.data['day'];
-                      final int dayMonth = day.data['month'];
-                      final int dayYear = day.data['year'];
-                      final bool dayIsHoliday = day.data['isHoliday'];
-                      final List nightShifts = day.data['night'];
-                      final List morningShifts = day.data['morning'];
-                      final List eveningShifts = day.data['evening'];
-                      currentDocument = day;
-                      final String dayDocumentID = day.documentID;
-
-                      final dayWithInfo = Day(
-                          dayDay,
-                          dayMonth,
-                          dayYear,
-                          dayIsHoliday,
-                          nightShifts,
-                          morningShifts,
-                          eveningShifts);
-
-                      if (daysWithInfo.contains(dayWithInfo) ||
-                          daysWithInfo.length ==
-                              getNumberOfDaysInMonth(
-                                  dateTime.month, dateTime.year)) {
-                        daysWithInfo.clear();
-                      }
-                      if (!daysWithInfo.contains(dayWithInfo) &&
-                          daysWithInfo.length <
-                              getNumberOfDaysInMonth(
-                                  dateTime.month, dateTime.year))
-                        daysWithInfo.add(dayWithInfo);
-                    }
-                    return listStatsForEmp();
-                  }),
-            ),
-          );
+    );
   }
 
   int index = 2;

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:paybis_com_shifts/constants.dart';
+import 'package:paybis_com_shifts/controller/date_change_notifier.dart';
 import 'package:paybis_com_shifts/models/employee.dart';
 import 'package:paybis_com_shifts/models/progress.dart';
 import 'package:paybis_com_shifts/screens/calendar_screen.dart';
@@ -17,6 +18,7 @@ import 'package:paybis_com_shifts/screens/login_screen.dart';
 import 'package:paybis_com_shifts/screens/recent_changes_screen.dart';
 import 'package:paybis_com_shifts/screens/support_days_off_screen.dart';
 import 'package:paybis_com_shifts/ui_parts/notification_alert_widget.dart';
+import 'package:provider/provider.dart';
 
 import 'admin_calendar_screen.dart';
 import 'feed_screen.dart';
@@ -118,307 +120,320 @@ class _ShiftScreenState extends State<ShiftScreen> {
     double height = MediaQuery.of(context).size.height;
     ScreenUtil.init(context, width: 1080, height: 2220, allowFontScaling: true);
     daysWithShiftsForCountThisMonth.clear();
-    return Scaffold(
-      key: shiftsScaffoldKey,
-      backgroundColor: Theme.of(context).textSelectionColor,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColorDark,
-        automaticallyImplyLeading: false,
-        title: Text('PayBis Schedule'),
-        actions: <Widget>[
-          (employee.department == kAdmin || employee.department == kSuperAdmin)
-              ? (_markerInitials == '')
-                  ? IconButton(
-                      icon: Icon(
-                        Icons.edit,
-                        color: Theme.of(context).textSelectionColor,
-                      ),
-                      onPressed: () {
-                        showAdminMarkerAlertDialog(context);
-                      },
-                    )
-                  : Material(
-                      elevation: 5.0,
-                      color: Theme.of(context).indicatorColor,
-                      borderRadius: BorderRadius.circular(30.0),
-                      child: MaterialButton(
+    return ChangeNotifierProvider<DateChangeNotifier>(
+      create: (_) => DateChangeNotifier(dateTime),
+      child: Scaffold(
+        key: shiftsScaffoldKey,
+        backgroundColor: Theme.of(context).textSelectionColor,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).primaryColorDark,
+          automaticallyImplyLeading: false,
+          title: Text('PayBis Schedule'),
+          actions: <Widget>[
+            (employee.department == kAdmin ||
+                    employee.department == kSuperAdmin)
+                ? (_markerInitials == '')
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.edit,
+                          color: Theme.of(context).textSelectionColor,
+                        ),
                         onPressed: () {
-                          _markerInitials = '';
-                          shiftsScreenKey.currentState.rebuild();
+                          showAdminMarkerAlertDialog(context);
                         },
-                        minWidth: 26.0,
-                        height: 26.0,
-                        child: Text(
-                          _markerInitials,
-                          style: TextStyle(
-                            color: Theme.of(context).textSelectionColor,
-                            fontSize: 16.0,
+                      )
+                    : Material(
+                        elevation: 5.0,
+                        color: Theme.of(context).indicatorColor,
+                        borderRadius: BorderRadius.circular(30.0),
+                        child: MaterialButton(
+                          onPressed: () {
+                            _markerInitials = '';
+                            shiftsScreenKey.currentState.rebuild();
+                          },
+                          minWidth: 26.0,
+                          height: 26.0,
+                          child: Text(
+                            _markerInitials,
+                            style: TextStyle(
+                              color: Theme.of(context).textSelectionColor,
+                              fontSize: 16.0,
+                            ),
                           ),
                         ),
-                      ),
-                    )
-              : SizedBox(
-                  height: 1.0,
+                      )
+                : SizedBox(
+                    height: 1.0,
+                  ),
+            IconButton(
+                icon: Icon(
+                  Icons.today,
+                  color: Theme.of(context).textSelectionColor,
                 ),
-          IconButton(
-              icon: Icon(
-                Icons.today,
-                color: Theme.of(context).textSelectionColor,
-              ),
-              onPressed: goToCalendar),
-          (employee.department != kAdmin && employee.department != kSuperAdmin)
-              ? (employee.hasCar)
-                  ? Stack(
-                      alignment: AlignmentDirectional.center,
-                      children: <Widget>[
-                        NotificationAlertWidget(
-                          color: hasNotifications
-                              ? Theme.of(context).accentColor
-                              : Colors.transparent,
-                        ),
-                        PopupMenuButton<String>(
-                          color:
-                              Theme.of(context).indicatorColor.withOpacity(0.8),
-                          elevation: 4.0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0))),
-                          itemBuilder: (BuildContext context) {
-                            return kEmployeeWithCarChoicesPopupMenu
-                                .map((String choice) {
-                              return PopupMenuItem<String>(
-                                value: choice,
-                                child: Text(
-                                  choice,
-                                  style: TextStyle(
-                                    color: (hasNotifications &&
-                                            choice ==
-                                                kEmployeeChoicesPopupMenu[0])
-                                        ? Theme.of(context).accentColor
-                                        : Theme.of(context).textSelectionColor,
+                onPressed: goToCalendar),
+            (employee.department != kAdmin &&
+                    employee.department != kSuperAdmin)
+                ? (employee.hasCar)
+                    ? Stack(
+                        alignment: AlignmentDirectional.center,
+                        children: <Widget>[
+                          NotificationAlertWidget(
+                            color: hasNotifications
+                                ? Theme.of(context).accentColor
+                                : Colors.transparent,
+                          ),
+                          PopupMenuButton<String>(
+                            color: Theme.of(context)
+                                .indicatorColor
+                                .withOpacity(0.8),
+                            elevation: 4.0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0))),
+                            itemBuilder: (BuildContext context) {
+                              return kEmployeeWithCarChoicesPopupMenu
+                                  .map((String choice) {
+                                return PopupMenuItem<String>(
+                                  value: choice,
+                                  child: Text(
+                                    choice,
+                                    style: TextStyle(
+                                      color: (hasNotifications &&
+                                              choice ==
+                                                  kEmployeeChoicesPopupMenu[0])
+                                          ? Theme.of(context).accentColor
+                                          : Theme.of(context)
+                                              .textSelectionColor,
+                                    ),
                                   ),
-                                ),
-                              );
-                            }).toList();
-                          },
-                          onSelected: choicesAction,
-                        ),
-                      ],
-                    )
-                  : Stack(
-                      alignment: AlignmentDirectional.center,
-                      children: <Widget>[
-                        NotificationAlertWidget(
-                          color: hasNotifications
-                              ? Theme.of(context).accentColor
-                              : Colors.transparent,
-                        ),
-                        PopupMenuButton<String>(
-                          color:
-                              Theme.of(context).indicatorColor.withOpacity(0.8),
-                          elevation: 4.0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0))),
-                          itemBuilder: (BuildContext context) {
-                            return kEmployeeChoicesPopupMenu
-                                .map((String choice) {
-                              return PopupMenuItem<String>(
-                                value: choice,
-                                child: Text(
-                                  choice,
-                                  style: TextStyle(
-                                    color: (hasNotifications &&
-                                            choice ==
-                                                kEmployeeChoicesPopupMenu[0])
-                                        ? Theme.of(context).accentColor
-                                        : Theme.of(context).textSelectionColor,
+                                );
+                              }).toList();
+                            },
+                            onSelected: choicesAction,
+                          ),
+                        ],
+                      )
+                    : Stack(
+                        alignment: AlignmentDirectional.center,
+                        children: <Widget>[
+                          NotificationAlertWidget(
+                            color: hasNotifications
+                                ? Theme.of(context).accentColor
+                                : Colors.transparent,
+                          ),
+                          PopupMenuButton<String>(
+                            color: Theme.of(context)
+                                .indicatorColor
+                                .withOpacity(0.8),
+                            elevation: 4.0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0))),
+                            itemBuilder: (BuildContext context) {
+                              return kEmployeeChoicesPopupMenu
+                                  .map((String choice) {
+                                return PopupMenuItem<String>(
+                                  value: choice,
+                                  child: Text(
+                                    choice,
+                                    style: TextStyle(
+                                      color: (hasNotifications &&
+                                              choice ==
+                                                  kEmployeeChoicesPopupMenu[0])
+                                          ? Theme.of(context).accentColor
+                                          : Theme.of(context)
+                                              .textSelectionColor,
+                                    ),
                                   ),
-                                ),
-                              );
-                            }).toList();
-                          },
-                          onSelected: choicesAction,
-                        ),
-                      ],
-                    )
-              : (employee.department == kAdmin)
-                  ? Stack(
-                      alignment: AlignmentDirectional.center,
-                      children: <Widget>[
-                        NotificationAlertWidget(
-                          color: hasNotifications
-                              ? Theme.of(context).accentColor
-                              : Colors.transparent,
-                        ),
-                        PopupMenuButton<String>(
-                          color:
-                              Theme.of(context).indicatorColor.withOpacity(0.8),
-                          elevation: 4.0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0))),
-                          itemBuilder: (BuildContext context) {
-                            return kAdminChoicesPopupMenu.map((String choice) {
-                              return PopupMenuItem<String>(
-                                value: choice,
-                                child: Text(
-                                  choice,
-                                  style: TextStyle(
-                                    color: (hasNotifications &&
-                                            choice ==
-                                                kEmployeeChoicesPopupMenu[0])
-                                        ? Theme.of(context).accentColor
-                                        : Theme.of(context).textSelectionColor,
+                                );
+                              }).toList();
+                            },
+                            onSelected: choicesAction,
+                          ),
+                        ],
+                      )
+                : (employee.department == kAdmin)
+                    ? Stack(
+                        alignment: AlignmentDirectional.center,
+                        children: <Widget>[
+                          NotificationAlertWidget(
+                            color: hasNotifications
+                                ? Theme.of(context).accentColor
+                                : Colors.transparent,
+                          ),
+                          PopupMenuButton<String>(
+                            color: Theme.of(context)
+                                .indicatorColor
+                                .withOpacity(0.8),
+                            elevation: 4.0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0))),
+                            itemBuilder: (BuildContext context) {
+                              return kAdminChoicesPopupMenu
+                                  .map((String choice) {
+                                return PopupMenuItem<String>(
+                                  value: choice,
+                                  child: Text(
+                                    choice,
+                                    style: TextStyle(
+                                      color: (hasNotifications &&
+                                              choice ==
+                                                  kEmployeeChoicesPopupMenu[0])
+                                          ? Theme.of(context).accentColor
+                                          : Theme.of(context)
+                                              .textSelectionColor,
+                                    ),
                                   ),
-                                ),
-                              );
-                            }).toList();
-                          },
-                          onSelected: choicesAction,
-                        ),
-                      ],
-                    )
-                  : Stack(
-                      alignment: AlignmentDirectional.center,
-                      children: <Widget>[
-                        NotificationAlertWidget(
-                          color: hasNotifications
-                              ? Theme.of(context).accentColor
-                              : Colors.transparent,
-                        ),
-                        PopupMenuButton<String>(
-                          color:
-                              Theme.of(context).indicatorColor.withOpacity(0.8),
-                          elevation: 4.0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0))),
-                          itemBuilder: (BuildContext context) {
-                            return kSuperAdminChoicesPopupMenu
-                                .map((String choice) {
-                              return PopupMenuItem<String>(
-                                value: choice,
-                                child: Text(
-                                  choice,
-                                  style: TextStyle(
-                                    color: (hasNotifications &&
-                                            choice ==
-                                                kEmployeeChoicesPopupMenu[0])
-                                        ? Theme.of(context).accentColor
-                                        : Theme.of(context).textSelectionColor,
+                                );
+                              }).toList();
+                            },
+                            onSelected: choicesAction,
+                          ),
+                        ],
+                      )
+                    : Stack(
+                        alignment: AlignmentDirectional.center,
+                        children: <Widget>[
+                          NotificationAlertWidget(
+                            color: hasNotifications
+                                ? Theme.of(context).accentColor
+                                : Colors.transparent,
+                          ),
+                          PopupMenuButton<String>(
+                            color: Theme.of(context)
+                                .indicatorColor
+                                .withOpacity(0.8),
+                            elevation: 4.0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0))),
+                            itemBuilder: (BuildContext context) {
+                              return kSuperAdminChoicesPopupMenu
+                                  .map((String choice) {
+                                return PopupMenuItem<String>(
+                                  value: choice,
+                                  child: Text(
+                                    choice,
+                                    style: TextStyle(
+                                      color: (hasNotifications &&
+                                              choice ==
+                                                  kEmployeeChoicesPopupMenu[0])
+                                          ? Theme.of(context).accentColor
+                                          : Theme.of(context)
+                                              .textSelectionColor,
+                                    ),
                                   ),
-                                ),
-                              );
-                            }).toList();
-                          },
-                          onSelected: choicesAction,
-                        ),
-                      ],
-                    ),
-        ],
-      ),
-      body: Column(
-        children: <Widget>[
-          Table(
-            border: TableBorder.all(
-              color: secondaryColor,
-            ),
-            columnWidths: {
-              0: FlexColumnWidth(0.15),
-              1: FlexColumnWidth(1),
-              2: FlexColumnWidth(0.8),
-              3: FlexColumnWidth(1),
-            },
-            children: [
-              TableRow(
-                decoration:
-                    BoxDecoration(color: Theme.of(context).primaryColorDark),
-                children: [
-                  TableCell(
-                    child: Text(
-                      'D',
-                      style: kHeaderFontStyle,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  TableCell(
-                    child: Text(
-                      '23:30-7:30',
-                      style: kHeaderFontStyle,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  TableCell(
-                    child: Text(
-                      '7:30-15:30',
-                      style: kHeaderFontStyle,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  TableCell(
-                    child: Text(
-                      '15:30-23:30',
-                      style: kHeaderFontStyle,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              )
-            ],
-          ),
-          DaysStream(
-            year: dateTime.year,
-            month: dateTime.month,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                flex: 7,
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: 16.0, right: 4.0, top: 8.0, bottom: 8.0),
-                  child: Material(
-                    elevation: 5.0,
-                    color: Theme.of(context).primaryColorDark,
-                    borderRadius: BorderRadius.circular(15.0),
-                    child: MaterialButton(
-                      onPressed: () {
-                        setState(() {
-                          previousMonthSelected();
-                        });
-                      },
-                      child: Icon(
-                        Icons.navigate_before,
-                        color: Theme.of(context).textSelectionColor,
+                                );
+                              }).toList();
+                            },
+                            onSelected: choicesAction,
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-                ),
+          ],
+        ),
+        body: Column(
+          children: <Widget>[
+            Table(
+              border: TableBorder.all(
+                color: secondaryColor,
               ),
-
-              Expanded(
-                flex: 9,
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: 4.0, right: 4.0, top: 8.0, bottom: 8.0),
-                  child: Material(
-                    elevation: 5.0,
-                    color: secondaryColor,
-                    borderRadius: BorderRadius.circular(15.0),
-                    child: MaterialButton(
-                      onPressed: () {
-                        _scrollController.jumpTo(timestamp.day * 47.0);
-                      },
+              columnWidths: {
+                0: FlexColumnWidth(0.15),
+                1: FlexColumnWidth(1),
+                2: FlexColumnWidth(0.8),
+                3: FlexColumnWidth(1),
+              },
+              children: [
+                TableRow(
+                  decoration:
+                      BoxDecoration(color: Theme.of(context).primaryColorDark),
+                  children: [
+                    TableCell(
                       child: Text(
-                        getMonthName(dateTime.month),
-                        style: kButtonStyle,
+                        'D',
+                        style: kHeaderFontStyle,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    TableCell(
+                      child: Text(
+                        '23:30-7:30',
+                        style: kHeaderFontStyle,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    TableCell(
+                      child: Text(
+                        '7:30-15:30',
+                        style: kHeaderFontStyle,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    TableCell(
+                      child: Text(
+                        '15:30-23:30',
+                        style: kHeaderFontStyle,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+            DaysStream(
+              year: dateTime.year,
+              month: dateTime.month,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  flex: 7,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        left: 16.0, right: 4.0, top: 8.0, bottom: 8.0),
+                    child: Material(
+                      elevation: 5.0,
+                      color: Theme.of(context).primaryColorDark,
+                      borderRadius: BorderRadius.circular(15.0),
+                      child: MaterialButton(
+                        onPressed: () {
+                          setState(() {
+                            previousMonthSelected();
+                          });
+                        },
+                        child: Icon(
+                          Icons.navigate_before,
+                          color: Theme.of(context).textSelectionColor,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+
+                Expanded(
+                  flex: 9,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        left: 4.0, right: 4.0, top: 8.0, bottom: 8.0),
+                    child: Material(
+                      elevation: 5.0,
+                      color: secondaryColor,
+                      borderRadius: BorderRadius.circular(15.0),
+                      child: MaterialButton(
+                        onPressed: () {
+                          _scrollController.jumpTo(timestamp.day * 47.0);
+                        },
+                        child: Text(
+                          getMonthName(dateTime.month),
+                          style: kButtonStyle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
 //ADD MONTH Button
 //              Expanded(
@@ -445,32 +460,33 @@ class _ShiftScreenState extends State<ShiftScreen> {
 //                  ),
 //                ),
 //              ),
-              Expanded(
-                flex: 7,
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: 4.0, right: 16.0, top: 8.0, bottom: 8.0),
-                  child: Material(
-                    elevation: 5.0,
-                    color: Theme.of(context).primaryColorDark,
-                    borderRadius: BorderRadius.circular(15.0),
-                    child: MaterialButton(
-                      onPressed: () {
-                        setState(() {
-                          nextMonthSelected();
-                        });
-                      },
-                      child: Icon(
-                        Icons.navigate_next,
-                        color: Theme.of(context).textSelectionColor,
+                Expanded(
+                  flex: 7,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        left: 4.0, right: 16.0, top: 8.0, bottom: 8.0),
+                    child: Material(
+                      elevation: 5.0,
+                      color: Theme.of(context).primaryColorDark,
+                      borderRadius: BorderRadius.circular(15.0),
+                      child: MaterialButton(
+                        onPressed: () {
+                          setState(() {
+                            nextMonthSelected();
+                          });
+                        },
+                        child: Icon(
+                          Icons.navigate_next,
+                          color: Theme.of(context).textSelectionColor,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              )
-            ],
-          ),
-        ],
+                )
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1705,6 +1721,11 @@ showAdminAlertDialog(
                           maxLength: 4,
                           decoration: kTextFieldDecoration.copyWith(
                             hintText: '${shift.hours}',
+                            hintStyle: TextStyle(
+                              color: Theme.of(context)
+                                  .textSelectionColor
+                                  .withOpacity(0.4),
+                            ),
                           ),
                           onChanged: (value) {
                             //Do something with the user input.
